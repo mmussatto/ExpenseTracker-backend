@@ -7,11 +7,13 @@ package dev.mmussatto.expensetracker.domain;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.HashSet;
 import java.util.Set;
 
 @Data
+@NoArgsConstructor
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Store {
@@ -25,4 +27,8 @@ public abstract class Store {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "store")
     private Set<Transaction> transactions = new HashSet<>();
+
+    public Store(String name) {
+        this.name = name;
+    }
 }
