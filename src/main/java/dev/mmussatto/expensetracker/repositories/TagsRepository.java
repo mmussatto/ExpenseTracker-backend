@@ -4,8 +4,12 @@
 
 package dev.mmussatto.expensetracker.repositories;
 
-import dev.mmussatto.expensetracker.domain.Tags;
+import dev.mmussatto.expensetracker.domain.Tag;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface TagsRepository extends JpaRepository<Tags, Integer> {
+import java.util.Optional;
+
+public interface TagsRepository extends JpaRepository<Tag, Integer> {
+
+    Optional<Tag> findByName(String name);
 }
