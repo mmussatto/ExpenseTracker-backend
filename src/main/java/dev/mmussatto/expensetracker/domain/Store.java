@@ -8,6 +8,9 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Data
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -19,4 +22,7 @@ public abstract class Store {
 
     @NotNull
     private String name;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "store")
+    private Set<Transaction> transactions = new HashSet<>();
 }

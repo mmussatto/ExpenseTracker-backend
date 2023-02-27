@@ -4,12 +4,12 @@
 
 package dev.mmussatto.expensetracker.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @Entity
@@ -23,6 +23,10 @@ public class Category {
     private String name;
 
     @NotNull
+    @Enumerated(value = EnumType.STRING)
     private Color color;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "category")
+    private Set<Transaction> transactions = new HashSet<>();
 
 }
