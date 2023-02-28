@@ -39,6 +39,16 @@ class CategoryRepositoryTest {
     }
 
     @Test
+    void deleteByName() {
+        Category c1 = new Category("Test 1", Color.BLUE);
+        testEntityManager.persist(c1);
+
+        categoryRepository.deleteByName("Test 1");
+
+        assertFalse(categoryRepository.findByName("Test 1").isPresent());
+    }
+
+    @Test
     void prevent_null() {
         Category category = new Category();
         //testEntityManager.persist(category);
