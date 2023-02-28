@@ -24,20 +24,20 @@ public class DataLoader implements CommandLineRunner {
     private final PaymentMethodRepository paymentMethodRepository;
     private final StoreRepository<OnlineStore> onlineStoreStoreRepository;
     private final StoreRepository<PhysicalStore> physicalStoreStoreRepository;
-    private final TagsRepository tagsRepository;
+    private final TagRepository tagRepository;
     private final TransactionRepository transactionRepository;
 
     public DataLoader(CategoryRepository categoryRepository,
                       PaymentMethodRepository paymentMethodRepository,
                       StoreRepository<OnlineStore> onlineStoreStoreRepository,
                       StoreRepository<PhysicalStore> physicalStoreStoreRepository,
-                      TagsRepository tagsRepository,
+                      TagRepository tagRepository,
                       TransactionRepository transactionRepository) {
         this.categoryRepository = categoryRepository;
         this.paymentMethodRepository = paymentMethodRepository;
         this.onlineStoreStoreRepository = onlineStoreStoreRepository;
         this.physicalStoreStoreRepository = physicalStoreStoreRepository;
-        this.tagsRepository = tagsRepository;
+        this.tagRepository = tagRepository;
         this.transactionRepository = transactionRepository;
     }
 
@@ -96,7 +96,7 @@ public class DataLoader implements CommandLineRunner {
         Tag t2 = new Tag("Happy", Color.GREEN);
         Tag t3 = new Tag("Videogames", Color.BLUE);
 
-        tagsRepository.saveAll(Arrays.asList(t1, t2, t3));
+        tagRepository.saveAll(Arrays.asList(t1, t2, t3));
     }
 
 
@@ -121,18 +121,18 @@ public class DataLoader implements CommandLineRunner {
         PhysicalStore cinemark = physicalStoreStoreRepository.findByName("Cinemark")
                 .orElseThrow(() -> new RuntimeException("Expected Store not found"));
 
-        Tag videogamesTag = tagsRepository.findByName("Videogames")
+        Tag videogamesTag = tagRepository.findByName("Videogames")
                 .orElseThrow(() -> new RuntimeException("Expected Tag not found"));
 
-        Tag happyTag = tagsRepository.findByName("Happy")
+        Tag happyTag = tagRepository.findByName("Happy")
                 .orElseThrow(() -> new RuntimeException("Expected Tag not found"));
 
-        Tag moviesTag = tagsRepository.findByName("Movies")
+        Tag moviesTag = tagRepository.findByName("Movies")
                 .orElseThrow(() -> new RuntimeException("Expected Tag not found"));
 
         Set<Tag> tagSet = Stream.of(videogamesTag, happyTag).collect(Collectors.toSet());
 
-
+        //todo add the transaction to the relations
 
         Transaction t1 = new Transaction(200.00, new Timestamp(new Date().getTime()),
                 "God of War Ragnarok", nubank, gamesCategory, tagSet, playstationStore );
