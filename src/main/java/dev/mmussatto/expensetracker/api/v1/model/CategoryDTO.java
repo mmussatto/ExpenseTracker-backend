@@ -12,7 +12,7 @@ import java.util.Set;
 
 @Data
 public class CategoryDTO {
-    private Integer Id;
+    private Integer id;
     private String name;
     private Color color;
     private Set<Transaction> transactions;
