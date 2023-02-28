@@ -4,15 +4,14 @@
 
 package dev.mmussatto.expensetracker.services;
 
-import dev.mmussatto.expensetracker.api.v1.mappers.CategoryMapper;
-import dev.mmussatto.expensetracker.api.v1.model.CategoryDTO;
+import dev.mmussatto.expensetracker.api.mappers.CategoryMapper;
+import dev.mmussatto.expensetracker.api.model.CategoryDTO;
 import dev.mmussatto.expensetracker.domain.Category;
 import dev.mmussatto.expensetracker.domain.Color;
 import dev.mmussatto.expensetracker.repositories.CategoryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 

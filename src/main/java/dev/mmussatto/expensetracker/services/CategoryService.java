@@ -4,7 +4,7 @@
 
 package dev.mmussatto.expensetracker.services;
 
-import dev.mmussatto.expensetracker.api.v1.model.CategoryDTO;
+import dev.mmussatto.expensetracker.api.model.CategoryDTO;
 
 import java.util.List;
 

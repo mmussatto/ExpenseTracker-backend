@@ -4,11 +4,10 @@
 
 package dev.mmussatto.expensetracker.services;
 
-import dev.mmussatto.expensetracker.api.v1.mappers.CategoryMapper;
-import dev.mmussatto.expensetracker.api.v1.model.CategoryDTO;
+import dev.mmussatto.expensetracker.api.mappers.CategoryMapper;
+import dev.mmussatto.expensetracker.api.model.CategoryDTO;
 import dev.mmussatto.expensetracker.domain.Category;
 import dev.mmussatto.expensetracker.repositories.CategoryRepository;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;

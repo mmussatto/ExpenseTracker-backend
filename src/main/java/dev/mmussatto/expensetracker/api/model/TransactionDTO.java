@@ -2,7 +2,7 @@
  * Created by murilo.mussatto on 28/02/2023
  */
 
-package dev.mmussatto.expensetracker.api.v1.model;
+package dev.mmussatto.expensetracker.api.model;
 
 import dev.mmussatto.expensetracker.domain.Category;
 import dev.mmussatto.expensetracker.domain.PaymentMethod;
