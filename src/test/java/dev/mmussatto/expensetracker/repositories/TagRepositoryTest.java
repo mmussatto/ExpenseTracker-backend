@@ -4,7 +4,6 @@
 
 package dev.mmussatto.expensetracker.repositories;
 
-import dev.mmussatto.expensetracker.domain.Category;
 import dev.mmussatto.expensetracker.domain.Color;
 import dev.mmussatto.expensetracker.domain.Tag;
 import org.junit.jupiter.api.Test;
