@@ -16,5 +16,6 @@ public class CategoryDTO {
     private String name;
     private Color color;
     private Set<Transaction> transactions;
+    private String url;
 
 }

@@ -66,6 +66,7 @@ class CategoryServiceImplTest {
         assertEquals(ID, categoryDTO.getId());
         assertEquals(NAME, categoryDTO.getName());
         assertEquals(COLOR, categoryDTO.getColor());
+        assertEquals("/api/v1/categories/1", categoryDTO.getUrl());
     }
 
     @Test
@@ -80,6 +81,7 @@ class CategoryServiceImplTest {
         assertEquals(ID, categoryDTO.getId());
         assertEquals(NAME, categoryDTO.getName());
         assertEquals(COLOR, categoryDTO.getColor());
+        assertEquals("/api/v1/categories/1", categoryDTO.getUrl());
     }
 
     @Test
@@ -96,7 +98,7 @@ class CategoryServiceImplTest {
         CategoryDTO savedDTO = categoryService.createNewCategory(categoryDTO);
 
         assertEquals(categoryDTO.getName(), savedDTO.getName());
-        //TODO assert categoryDTO url
+        assertEquals("/api/v1/categories/1", savedDTO.getUrl());
     }
 
 

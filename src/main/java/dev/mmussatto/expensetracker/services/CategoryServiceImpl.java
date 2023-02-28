@@ -30,7 +30,7 @@ public class CategoryServiceImpl implements CategoryService {
                 .stream()
                 .map(category -> {
                     CategoryDTO categoryDTO = categoryMapper.categoryToCategoryDTO(category);
-                    //TODO insertDTO category url
+                    categoryDTO.setUrl("/api/v1/categories/" + categoryDTO.getId());
                     return categoryDTO;
                 })
                 .collect(Collectors.toList());
@@ -41,7 +41,7 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryRepository.findById(id)
                 .map(category -> {
                     CategoryDTO categoryDTO = categoryMapper.categoryToCategoryDTO(category);
-                    //TODO insert categoryDTO url
+                    categoryDTO.setUrl("/api/v1/categories/" + categoryDTO.getId());
                     return categoryDTO;
                 })
                 .orElseThrow(RuntimeException::new); //TODO create custom exception
@@ -52,7 +52,7 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryRepository.findByName(name)
                 .map(category -> {
                     CategoryDTO categoryDTO = categoryMapper.categoryToCategoryDTO(category);
-                    //TODO insert categoryDTO url
+                    categoryDTO.setUrl("/api/v1/categories/" + categoryDTO.getId());
                     return categoryDTO;
                 })
                 .orElseThrow(RuntimeException::new); //TODO create custom exception
@@ -85,9 +85,8 @@ public class CategoryServiceImpl implements CategoryService {
     private CategoryDTO saveAndReturnDTO(Category category) {
         Category savedCategory = categoryRepository.save(category);
 
-        CategoryDTO returnDTO = categoryMapper.categoryToCategoryDTO(category);
-
-        //TODO set categoryDTO url
+        CategoryDTO returnDTO = categoryMapper.categoryToCategoryDTO(savedCategory);
+        returnDTO.setUrl("/api/v1/categories/" + returnDTO.getId());
 
         return returnDTO;
     }
