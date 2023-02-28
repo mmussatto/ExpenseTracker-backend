@@ -7,12 +7,14 @@ package dev.mmussatto.expensetracker.domain;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.HashSet;
 import java.util.Set;
 
 @Data
+@EqualsAndHashCode(exclude = {"transactions"})
 @NoArgsConstructor
 @Entity
 public class Tag {

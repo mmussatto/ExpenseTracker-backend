@@ -7,6 +7,7 @@ package dev.mmussatto.expensetracker.domain;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.HashSet;
@@ -14,6 +15,7 @@ import java.util.Set;
 
 @Data
 @NoArgsConstructor
+@EqualsAndHashCode(exclude = {"transactions"})
 @Entity
 public class PaymentMethod {
 
