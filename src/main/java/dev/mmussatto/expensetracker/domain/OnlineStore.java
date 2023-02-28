@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Entity
 public class OnlineStore extends Store {
 
-    String url;
+    private String url;
 
     public OnlineStore(String name, String url) {
         super(name);
