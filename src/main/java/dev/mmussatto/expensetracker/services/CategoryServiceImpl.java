@@ -10,6 +10,7 @@ import dev.mmussatto.expensetracker.domain.Category;
 import dev.mmussatto.expensetracker.repositories.CategoryRepository;
 import dev.mmussatto.expensetracker.services.exceptions.ResourceAlreadyExistsException;
 import dev.mmussatto.expensetracker.services.exceptions.ResourceNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -84,6 +85,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional
     public void deleteCategoryByName(String name) {
         categoryRepository.deleteByName(name);
     }
