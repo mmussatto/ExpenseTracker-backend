@@ -8,11 +8,13 @@ import dev.mmussatto.expensetracker.api.mappers.CategoryMapper;
 import dev.mmussatto.expensetracker.api.model.CategoryDTO;
 import dev.mmussatto.expensetracker.domain.Category;
 import dev.mmussatto.expensetracker.repositories.CategoryRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-//@Service
+@Service
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryMapper categoryMapper;
@@ -29,7 +31,7 @@ public class CategoryServiceImpl implements CategoryService {
                 .stream()
                 .map(category -> {
                     CategoryDTO categoryDTO = categoryMapper.categoryToCategoryDTO(category);
-                    categoryDTO.setUrl("/api/v1/categories/" + categoryDTO.getId());
+                    categoryDTO.setUrl("/api/categories/" + categoryDTO.getId());
                     return categoryDTO;
                 })
                 .collect(Collectors.toList());
@@ -40,10 +42,10 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryRepository.findById(id)
                 .map(category -> {
                     CategoryDTO categoryDTO = categoryMapper.categoryToCategoryDTO(category);
-                    categoryDTO.setUrl("/api/v1/categories/" + categoryDTO.getId());
+                    categoryDTO.setUrl("/api/categories/" + categoryDTO.getId());
                     return categoryDTO;
                 })
-                .orElseThrow(RuntimeException::new); //TODO create custom exception
+                .orElseThrow(ResourceNotFoundException::new);
     }
 
     @Override
@@ -51,10 +53,10 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryRepository.findByName(name)
                 .map(category -> {
                     CategoryDTO categoryDTO = categoryMapper.categoryToCategoryDTO(category);
-                    categoryDTO.setUrl("/api/v1/categories/" + categoryDTO.getId());
+                    categoryDTO.setUrl("/api/categories/" + categoryDTO.getId());
                     return categoryDTO;
                 })
-                .orElseThrow(RuntimeException::new); //TODO create custom exception
+                .orElseThrow(ResourceNotFoundException::new);
     }
 
     @Override
@@ -85,7 +87,7 @@ public class CategoryServiceImpl implements CategoryService {
         Category savedCategory = categoryRepository.save(category);
 
         CategoryDTO returnDTO = categoryMapper.categoryToCategoryDTO(savedCategory);
-        returnDTO.setUrl("/api/v1/categories/" + returnDTO.getId());
+        returnDTO.setUrl("/api/categories/" + returnDTO.getId());
 
         return returnDTO;
     }
