@@ -8,10 +8,11 @@ import dev.mmussatto.expensetracker.api.mappers.CategoryMapper;
 import dev.mmussatto.expensetracker.api.model.CategoryDTO;
 import dev.mmussatto.expensetracker.domain.Category;
 import dev.mmussatto.expensetracker.repositories.CategoryRepository;
+import dev.mmussatto.expensetracker.services.exceptions.ResourceAlreadyExistsException;
+import dev.mmussatto.expensetracker.services.exceptions.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -61,6 +62,11 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDTO createNewCategory(CategoryDTO categoryDTO) {
+         categoryRepository.findByName(categoryDTO.getName()).ifPresent(category -> {
+             throw new ResourceAlreadyExistsException("/api/categories/" + category.getId());
+         });
+
+
         return saveAndReturnDTO(categoryMapper.categoryDTOToCategory(categoryDTO)) ;
     }
 
