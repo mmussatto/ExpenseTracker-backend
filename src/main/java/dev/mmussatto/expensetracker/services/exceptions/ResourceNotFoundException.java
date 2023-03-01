@@ -2,7 +2,7 @@
  * Created by murilo.mussatto on 01/03/2023
  */
 
-package dev.mmussatto.expensetracker.services;
+package dev.mmussatto.expensetracker.services.exceptions;
 
 
 public class ResourceNotFoundException extends RuntimeException{
