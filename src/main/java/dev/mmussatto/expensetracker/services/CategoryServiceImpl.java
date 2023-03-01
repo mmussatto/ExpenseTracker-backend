@@ -79,6 +79,16 @@ public class CategoryServiceImpl implements CategoryService {
         return saveAndReturnDTO(category);
     }
 
+    public CategoryDTO saveCategoryByName (String name, CategoryDTO categoryDTO) {
+        Category savedCategory = categoryRepository.findByName(name).orElseThrow(ResourceNotFoundException::new);
+
+        Category category = categoryMapper.categoryDTOToCategory(categoryDTO);
+        category.setId(savedCategory.getId());
+
+        return saveAndReturnDTO(category);
+
+    }
+
     @Override
     public void deleteCategoryById(Integer id) {
         categoryRepository.deleteById(id);

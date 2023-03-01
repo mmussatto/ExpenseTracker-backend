@@ -20,6 +20,8 @@ public interface CategoryService {
 
     CategoryDTO saveCategoryById (Integer id, CategoryDTO categoryDTO);
 
+    CategoryDTO saveCategoryByName(String name, CategoryDTO categoryDTO);
+
     void deleteCategoryById (Integer id);
 
     void deleteCategoryByName (String name);
