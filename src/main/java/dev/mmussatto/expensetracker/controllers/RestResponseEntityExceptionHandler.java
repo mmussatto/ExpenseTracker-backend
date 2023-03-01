@@ -4,7 +4,8 @@
 
 package dev.mmussatto.expensetracker.controllers;
 
-import dev.mmussatto.expensetracker.services.ResourceNotFoundException;
+import dev.mmussatto.expensetracker.services.exceptions.ResourceAlreadyExistsException;
+import dev.mmussatto.expensetracker.services.exceptions.ResourceNotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,5 +20,10 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     @ExceptionHandler({ResourceNotFoundException.class})
     public ResponseEntity<Object> handleNotFoundException (Exception exception, WebRequest request) {
         return new ResponseEntity<>("Resource Not Found!", new HttpHeaders(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler({ResourceAlreadyExistsException.class})
+    public ResponseEntity<Object> handleAlreadyExistsException (Exception exception, WebRequest request) {
+        return new ResponseEntity<>("Resource Already Exists!\n" + exception.getMessage(), new HttpHeaders(), HttpStatus.CONFLICT);
     }
 }
