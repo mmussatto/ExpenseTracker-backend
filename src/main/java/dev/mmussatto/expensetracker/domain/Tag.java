@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -31,6 +32,7 @@ public class Tag {
     private Color color;
 
     @ManyToMany(mappedBy = "tags")
+    @ToString.Exclude
     private Set<Transaction> transactions = new HashSet<>();
 
     public Tag(String name, Color color) {

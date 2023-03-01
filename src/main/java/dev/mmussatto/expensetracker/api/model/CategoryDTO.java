@@ -4,9 +4,11 @@
 
 package dev.mmussatto.expensetracker.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import dev.mmussatto.expensetracker.domain.Color;
 import dev.mmussatto.expensetracker.domain.Transaction;
 import lombok.Data;
+import lombok.ToString;
 
 import java.util.Set;
 
@@ -15,6 +17,8 @@ public class CategoryDTO {
     private Integer id;
     private String name;
     private Color color;
+    @ToString.Exclude
+    @JsonIgnore
     private Set<Transaction> transactions;
     private String url;
 

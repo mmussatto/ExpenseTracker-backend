@@ -4,8 +4,10 @@
 
 package dev.mmussatto.expensetracker.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import dev.mmussatto.expensetracker.domain.Transaction;
 import lombok.Data;
+import lombok.ToString;
 
 import java.util.Set;
 
@@ -13,5 +15,7 @@ import java.util.Set;
 public abstract class StoreDTO {
     private Integer id;
     private String name;
+    @ToString.Exclude
+    @JsonIgnore
     private Set<Transaction> transactions;
 }
