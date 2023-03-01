@@ -44,6 +44,18 @@ public class CategoryController {
         return categoryService.createNewCategory(categoryDTO);
     }
 
+    @PutMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public CategoryDTO updateCategoryById (@PathVariable final Integer id, @RequestBody CategoryDTO categoryDTO) {
+        return categoryService.saveCategoryById(id, categoryDTO);
+    }
+
+    @PutMapping("/name/{name}")
+    @ResponseStatus(HttpStatus.OK)
+    public CategoryDTO updateCategoryByName (@PathVariable final String name, @RequestBody CategoryDTO categoryDTO) {
+        return categoryService.saveCategoryByName(name, categoryDTO);
+    }
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public void deleteCategoryById (@PathVariable final Integer id) {
