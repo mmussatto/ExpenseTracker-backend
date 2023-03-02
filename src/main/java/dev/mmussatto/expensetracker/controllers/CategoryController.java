@@ -29,16 +29,16 @@ public class CategoryController {
         return new CategoryListDTO(categoryService.getAllCategories());
     }
 
-    @GetMapping("/name/{name}")
-    @ResponseStatus(HttpStatus.OK)
-    public CategoryDTO getCategoryByName (@PathVariable final String name) {
-        return categoryService.getCategoryByName(name);
-    }
-
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public CategoryDTO getCategoryById (@PathVariable Integer id) {
         return categoryService.getCategoryById(id);
+    }
+
+    @GetMapping("/name/{name}")
+    @ResponseStatus(HttpStatus.OK)
+    public CategoryDTO getCategoryByName (@PathVariable final String name) {
+        return categoryService.getCategoryByName(name);
     }
 
     @PostMapping
