@@ -102,7 +102,7 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryRepository.findById(id).map(category -> {
 
             if (Objects.equals(category.getId(), id))
-                throw new RuntimeException("Cannot change id"); //TODO CREATE CUSTOM EXCEPTION
+                throw new ResourceAlreadyExistsException("/api/categories/" + category.getId());
 
 
             if (categoryDTO.getName() != null)
