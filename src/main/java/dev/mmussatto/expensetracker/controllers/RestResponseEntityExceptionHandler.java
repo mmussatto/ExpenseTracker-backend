@@ -4,6 +4,7 @@
 
 package dev.mmussatto.expensetracker.controllers;
 
+import dev.mmussatto.expensetracker.services.exceptions.InvalidIdModificationException;
 import dev.mmussatto.expensetracker.services.exceptions.ResourceAlreadyExistsException;
 import dev.mmussatto.expensetracker.services.exceptions.ResourceNotFoundException;
 import org.springframework.http.HttpHeaders;
@@ -19,11 +20,6 @@ import java.time.LocalDateTime;
 @ControllerAdvice
 public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
 
-//    @ExceptionHandler({ResourceNotFoundException.class})
-//    public ResponseEntity<Object> handleNotFoundException (Exception exception, WebRequest request) {
-//        return new ResponseEntity<>("Resource Not Found!", new HttpHeaders(), HttpStatus.NOT_FOUND);
-//    }
-
     @ExceptionHandler({ResourceNotFoundException.class})
     public ResponseEntity<CustomErrorResponse> handleNotFoundException (Exception exception, WebRequest request) {
         CustomErrorResponse errorResponse = new CustomErrorResponse();
@@ -31,25 +27,33 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         errorResponse.setTimestamp(LocalDateTime.now());
         errorResponse.setStatus(HttpStatus.NOT_FOUND.value());
         errorResponse.setError(HttpStatus.NOT_FOUND.getReasonPhrase());
-        errorResponse.setPath(request.getContextPath());
 
         return new ResponseEntity<>(errorResponse, new HttpHeaders(), HttpStatus.NOT_FOUND);
     }
 
-//    @ExceptionHandler({ResourceAlreadyExistsException.class})
-//    public ResponseEntity<Object> handleAlreadyExistsException (Exception exception, WebRequest request) {
-//        return new ResponseEntity<>("Resource Already Exists!\n" + exception.getMessage(), new HttpHeaders(), HttpStatus.CONFLICT);
-//    }
 
     @ExceptionHandler({ResourceAlreadyExistsException.class})
-    public ResponseEntity<Object> handleAlreadyExistsException (Exception exception, WebRequest request) {
+    public ResponseEntity<Object> handleAlreadyExistsException (ResourceAlreadyExistsException exception, WebRequest request) {
         CustomErrorResponse errorResponse = new CustomErrorResponse();
-        errorResponse.setMessage("Resource already exists!");
+        errorResponse.setMessage(exception.getMessage());
         errorResponse.setTimestamp(LocalDateTime.now());
         errorResponse.setStatus(HttpStatus.CONFLICT.value());
         errorResponse.setError(HttpStatus.CONFLICT.getReasonPhrase());
-        errorResponse.setPath(exception.getMessage());
+        errorResponse.setPath(exception.getPath());
 
         return new ResponseEntity<>(errorResponse, new HttpHeaders(), HttpStatus.CONFLICT);
+    }
+
+
+    @ExceptionHandler(InvalidIdModificationException.class)
+    public ResponseEntity<Object> handleInvalidIdModification(InvalidIdModificationException exception, WebRequest request) {
+        CustomErrorResponse errorResponse = new CustomErrorResponse();
+        errorResponse.setMessage("Id property is immutable. Current id: " + exception.getMessage());
+        errorResponse.setTimestamp(LocalDateTime.now());
+        errorResponse.setStatus(HttpStatus.BAD_REQUEST.value());
+        errorResponse.setError(HttpStatus.BAD_REQUEST.getReasonPhrase());
+        errorResponse.setPath(exception.getPath());
+
+        return new ResponseEntity<>(errorResponse, new HttpHeaders(), HttpStatus.BAD_REQUEST);
     }
 }
