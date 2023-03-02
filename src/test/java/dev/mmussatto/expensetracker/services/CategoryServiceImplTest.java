@@ -9,6 +9,8 @@ import dev.mmussatto.expensetracker.api.model.CategoryDTO;
 import dev.mmussatto.expensetracker.domain.Category;
 import dev.mmussatto.expensetracker.domain.Color;
 import dev.mmussatto.expensetracker.repositories.CategoryRepository;
+import dev.mmussatto.expensetracker.services.exceptions.ResourceAlreadyExistsException;
+import dev.mmussatto.expensetracker.services.exceptions.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -69,6 +71,14 @@ class CategoryServiceImplTest {
     }
 
     @Test
+    void getCategoryById_NotFound() {
+
+        when(categoryRepository.findById(anyInt())).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> categoryService.getCategoryById(ID));
+    }
+
+    @Test
     void getCategoryByName() {
         Category category = new Category(NAME, COLOR);
         category.setId(ID);
@@ -84,6 +94,14 @@ class CategoryServiceImplTest {
     }
 
     @Test
+    void getCategoryByName_NotFound() {
+
+        when(categoryRepository.findByName(anyString())).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> categoryService.getCategoryByName(NAME));
+    }
+
+    @Test
     void createNewCategory() {
 
         CategoryDTO categoryDTO = new CategoryDTO();
@@ -96,10 +114,105 @@ class CategoryServiceImplTest {
 
         CategoryDTO savedDTO = categoryService.createNewCategory(categoryDTO);
 
+        assertEquals(ID, savedDTO.getId());
         assertEquals(categoryDTO.getName(), savedDTO.getName());
+        assertEquals(COLOR, savedDTO.getColor());
         assertEquals("/api/categories/1", savedDTO.getUrl());
     }
 
+    @Test
+    void createNewCategory_AlreadyExists() {
+
+        Category category = new Category(NAME, COLOR);
+        category.setId(1);
+
+        CategoryDTO categoryDTO = new CategoryDTO();
+        categoryDTO.setName(NAME);
+        categoryDTO.setColor(COLOR);
+
+        when(categoryRepository.findByName(anyString())).thenReturn(Optional.of(category));
+
+        assertThrows(ResourceAlreadyExistsException.class, () -> categoryService.createNewCategory(categoryDTO));
+    }
+
+
+    @Test
+    void updateCategoryById() {
+
+        //CategoryDTO passed to updateCategoryById
+        CategoryDTO categoryDTO = new CategoryDTO();
+        categoryDTO.setId(2);
+        categoryDTO.setColor(Color.GREEN);
+        categoryDTO.setName(NAME);
+
+        //Category already in the database
+        Category savedCategory = new Category(NAME, COLOR);
+        savedCategory.setId(ID);
+
+        //Updated Category that will be saved in the database
+        Category updatedCategory = new Category(categoryDTO.getName(), categoryDTO.getColor());
+        updatedCategory.setId(savedCategory.getId());
+
+
+        when(categoryRepository.findById(anyInt())).thenReturn(Optional.of(savedCategory));
+        when(categoryRepository.save(any(Category.class))).thenReturn(updatedCategory);
+
+
+        //CategoryDTO returned after saving updateCategory
+        CategoryDTO savedDTO = categoryService.updateCategoryById(savedCategory.getId(), categoryDTO);
+
+        assertEquals(updatedCategory.getId(), savedDTO.getId());
+        assertEquals(categoryDTO.getName(), savedDTO.getName());
+        assertEquals(categoryDTO.getColor(), savedDTO.getColor());
+        assertEquals("/api/categories/" + updatedCategory.getId(), savedDTO.getUrl());
+    }
+
+    @Test
+    void updateCategoryById_NotFound() {
+
+        when(categoryRepository.findById(anyInt())).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> categoryService.updateCategoryById(ID, new CategoryDTO()));
+    }
+
+
+    @Test
+    void updateCategoryByName() {
+
+        //CategoryDTO passed to updateCategoryByName
+        CategoryDTO categoryDTO = new CategoryDTO();
+        categoryDTO.setId(2);
+        categoryDTO.setName("TestUpdate");
+        categoryDTO.setColor(Color.GREEN);
+
+        //Category already in the database
+        Category savedCategory = new Category(NAME, COLOR);
+        savedCategory.setId(ID);
+
+        //Updated Category that will be saved in the database
+        Category updatedCategory = new Category(categoryDTO.getName(), categoryDTO.getColor());
+        updatedCategory.setId(savedCategory.getId());
+
+        when(categoryRepository.findByName(savedCategory.getName())).thenReturn(Optional.of(savedCategory));
+        when(categoryRepository.save(any(Category.class))).thenReturn(updatedCategory);
+
+        //CategoryDTO returned after saving updateCategory
+        CategoryDTO savedDTO = categoryService.updateCategoryByName(savedCategory.getName(), categoryDTO);
+
+        assertEquals(updatedCategory.getId(), savedDTO.getId());
+        assertEquals(categoryDTO.getName(), savedDTO.getName());
+        assertEquals(categoryDTO.getColor(), savedDTO.getColor());
+        assertEquals("/api/categories/" + updatedCategory.getId(), savedDTO.getUrl());
+
+    }
+
+    @Test
+    void updateCategoryByName_NotFound() {
+
+        when(categoryRepository.findByName(anyString())).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> categoryService.updateCategoryByName(NAME, new CategoryDTO()));
+    }
 
     @Test
     void deleteCategoryById() {
@@ -114,5 +227,9 @@ class CategoryServiceImplTest {
         categoryService.deleteCategoryByName(NAME);
 
         verify(categoryRepository, times(1)).deleteByName(anyString());
+    }
+
+    @Test
+    void patchCategoryById() {
     }
 }
