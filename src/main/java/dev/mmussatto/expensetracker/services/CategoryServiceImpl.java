@@ -8,6 +8,7 @@ import dev.mmussatto.expensetracker.api.mappers.CategoryMapper;
 import dev.mmussatto.expensetracker.api.model.CategoryDTO;
 import dev.mmussatto.expensetracker.domain.Category;
 import dev.mmussatto.expensetracker.repositories.CategoryRepository;
+import dev.mmussatto.expensetracker.services.exceptions.InvalidIdModificationException;
 import dev.mmussatto.expensetracker.services.exceptions.ResourceAlreadyExistsException;
 import dev.mmussatto.expensetracker.services.exceptions.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
@@ -65,12 +66,14 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDTO createNewCategory(CategoryDTO categoryDTO) {
          categoryRepository.findByName(categoryDTO.getName()).ifPresent(category -> {
-             throw new ResourceAlreadyExistsException("/api/categories/" + category.getId());
+             throw new ResourceAlreadyExistsException("Category " + categoryDTO.getName() + " already exists.",
+                     "/api/categories/" + category.getId());
          });
 
          if (categoryDTO.getId() != null) {
              categoryRepository.findById(categoryDTO.getId()).ifPresent((category -> {
-                 throw new ResourceAlreadyExistsException("/api/categories/" + category.getId());
+                 throw new ResourceAlreadyExistsException("Category " + categoryDTO.getId() + " already exists.",
+                         "/api/categories/" + category.getId());
              }));
          }
 
@@ -79,8 +82,13 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDTO updateCategoryById(Integer id, CategoryDTO categoryDTO) {
-        if (!categoryRepository.findById(id).isPresent())
-            throw new ResourceNotFoundException();
+
+        categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Category " + id + " not found!"));
+
+        //Check if Ids are the same
+        if (categoryDTO.getId() != null && !Objects.equals(categoryDTO.getId(), id))
+            throw new InvalidIdModificationException(id.toString(), "/api/categories/" + id);
 
         Category category = categoryMapper.categoryDTOToCategory(categoryDTO);
         category.setId(id);
@@ -89,7 +97,13 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     public CategoryDTO updateCategoryByName(String name, CategoryDTO categoryDTO) {
-        Category savedCategory = categoryRepository.findByName(name).orElseThrow(ResourceNotFoundException::new);
+        Category savedCategory = categoryRepository.findByName(name)
+                .orElseThrow(() -> new ResourceNotFoundException("Category " + name + " not found!"));
+
+        //Check if Ids are the same
+        if (categoryDTO.getId() != null && !Objects.equals(categoryDTO.getId(), savedCategory.getId()))
+            throw new InvalidIdModificationException(savedCategory.getId().toString(),
+                    "/api/categories/" + savedCategory.getId());
 
         Category category = categoryMapper.categoryDTOToCategory(categoryDTO);
         category.setId(savedCategory.getId());
@@ -99,10 +113,12 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     public CategoryDTO patchCategoryById (Integer id, CategoryDTO categoryDTO) {
+
         return categoryRepository.findById(id).map(category -> {
 
-            if (Objects.equals(category.getId(), id))
-                throw new ResourceAlreadyExistsException("/api/categories/" + category.getId());
+            //Check if Ids are the same
+            if (categoryDTO.getId() != null && !Objects.equals(categoryDTO.getId(), id))
+                throw new InvalidIdModificationException(id.toString(), "/api/categories/" + id);
 
 
             if (categoryDTO.getName() != null)
@@ -111,10 +127,8 @@ public class CategoryServiceImpl implements CategoryService {
             if (categoryDTO.getColor() != null)
                 category.setColor(categoryDTO.getColor());
 
-            CategoryDTO returnDTO = categoryMapper.categoryToCategoryDTO(categoryRepository.save(category));
-            returnDTO.setUrl("/api/categories/" + returnDTO.getId());
+            return saveAndReturnDTO(category);
 
-            return returnDTO;
         }).orElseThrow(() -> new ResourceNotFoundException("Category " + id + " not found!"));
     }
 
