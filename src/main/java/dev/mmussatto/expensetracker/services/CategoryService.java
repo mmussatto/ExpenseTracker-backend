@@ -18,9 +18,9 @@ public interface CategoryService {
 
     CategoryDTO createNewCategory (CategoryDTO categoryDTO);
 
-    CategoryDTO updateCategoryById(Integer id, CategoryDTO categoryDTO);
+    CategoryDTO updateCategoryById (Integer id, CategoryDTO categoryDTO);
 
-    CategoryDTO updateCategoryByName(String name, CategoryDTO categoryDTO);
+    CategoryDTO updateCategoryByName (String name, CategoryDTO categoryDTO);
 
     CategoryDTO patchCategoryById (Integer id, CategoryDTO categoryDTO);
 
