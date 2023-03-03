@@ -70,7 +70,7 @@ class CategoryControllerTest {
         categoryDTO.setId(1);
         categoryDTO.setName("Test");
         categoryDTO.setColor(Color.BLUE);
-        categoryDTO.setUrl("/api/categories/1");
+        categoryDTO.setPath("/api/categories/1");
 
 
         when(categoryService.getCategoryById(anyInt())).thenReturn(categoryDTO);
@@ -81,7 +81,7 @@ class CategoryControllerTest {
                 .andExpect(jsonPath("$.id", equalTo(1)))
                 .andExpect(jsonPath("$.name", equalTo("Test")))
                 .andExpect(jsonPath("$.color", equalTo("BLUE")))
-                .andExpect(jsonPath("$.url", equalTo("/api/categories/1")));
+                .andExpect(jsonPath("$.path", equalTo("/api/categories/1")));
     }
 
     @Test
@@ -99,7 +99,7 @@ class CategoryControllerTest {
         categoryDTO.setId(1);
         categoryDTO.setName("Test");
         categoryDTO.setColor(Color.BLUE);
-        categoryDTO.setUrl("/api/categories/1");
+        categoryDTO.setPath("/api/categories/1");
 
 
         when(categoryService.getCategoryByName(anyString())).thenReturn(categoryDTO);
@@ -110,7 +110,7 @@ class CategoryControllerTest {
                 .andExpect(jsonPath("$.id", equalTo(1)))
                 .andExpect(jsonPath("$.name", equalTo("Test")))
                 .andExpect(jsonPath("$.color", equalTo("BLUE")))
-                .andExpect(jsonPath("$.url", equalTo("/api/categories/1")));
+                .andExpect(jsonPath("$.path", equalTo("/api/categories/1")));
 
     }
 
@@ -135,7 +135,7 @@ class CategoryControllerTest {
         returnDTO.setId(1);
         returnDTO.setName(categoryDTO.getName());
         returnDTO.setColor(categoryDTO.getColor());
-        returnDTO.setUrl("/api/categories/1");
+        returnDTO.setPath("/api/categories/1");
 
 
         when(categoryService.createNewCategory(any(CategoryDTO.class))).thenReturn(returnDTO);
@@ -147,7 +147,7 @@ class CategoryControllerTest {
                 .andExpect(jsonPath("$.id", equalTo(1)))
                 .andExpect(jsonPath("$.name", equalTo("Test")))
                 .andExpect(jsonPath("$.color", equalTo("BLUE")))
-                .andExpect(jsonPath("$.url", equalTo("/api/categories/1")));
+                .andExpect(jsonPath("$.path", equalTo("/api/categories/1")));
 
     }
 
@@ -175,7 +175,7 @@ class CategoryControllerTest {
         updatedDTO.setId(1);
         updatedDTO.setName("Updated Test");
         updatedDTO.setColor(Color.GREEN);
-        updatedDTO.setUrl("/api/categories/1");
+        updatedDTO.setPath("/api/categories/1");
 
         when(categoryService.updateCategoryById(anyInt(), any(CategoryDTO.class))).thenReturn(updatedDTO);
 
@@ -186,7 +186,7 @@ class CategoryControllerTest {
                 .andExpect(jsonPath("$.id", equalTo(1)))
                 .andExpect(jsonPath("$.name", equalTo("Updated Test")))
                 .andExpect(jsonPath("$.color", equalTo("GREEN")))
-                .andExpect(jsonPath("$.url", equalTo("/api/categories/1")));
+                .andExpect(jsonPath("$.path", equalTo("/api/categories/1")));
     }
 
     @Test
@@ -196,7 +196,7 @@ class CategoryControllerTest {
         updatedDTO.setId(1);
         updatedDTO.setName("Updated Test");
         updatedDTO.setColor(Color.GREEN);
-        updatedDTO.setUrl("/api/categories/1");
+        updatedDTO.setPath("/api/categories/1");
 
         when(categoryService.updateCategoryById(anyInt(), any(CategoryDTO.class))).thenThrow(ResourceNotFoundException.class);
 
@@ -213,7 +213,7 @@ class CategoryControllerTest {
         updatedDTO.setId(1);
         updatedDTO.setName("Updated Test");
         updatedDTO.setColor(Color.GREEN);
-        updatedDTO.setUrl("/api/categories/1");
+        updatedDTO.setPath("/api/categories/1");
 
         when(categoryService.updateCategoryByName(anyString(), any(CategoryDTO.class))).thenReturn(updatedDTO);
 
@@ -224,7 +224,7 @@ class CategoryControllerTest {
                 .andExpect(jsonPath("$.id", equalTo(1)))
                 .andExpect(jsonPath("$.name", equalTo("Updated Test")))
                 .andExpect(jsonPath("$.color", equalTo("GREEN")))
-                .andExpect(jsonPath("$.url", equalTo("/api/categories/1")));
+                .andExpect(jsonPath("$.path", equalTo("/api/categories/1")));
     }
 
     @Test
@@ -234,7 +234,7 @@ class CategoryControllerTest {
         updatedDTO.setId(1);
         updatedDTO.setName("Updated Test");
         updatedDTO.setColor(Color.GREEN);
-        updatedDTO.setUrl("/api/categories/1");
+        updatedDTO.setPath("/api/categories/1");
 
         when(categoryService.updateCategoryByName(anyString(), any(CategoryDTO.class))).thenThrow(ResourceNotFoundException.class);
 
@@ -251,7 +251,7 @@ class CategoryControllerTest {
         patchedDTO.setId(1);
         patchedDTO.setName("Updated Test");
         patchedDTO.setColor(Color.GREEN);
-        patchedDTO.setUrl("/api/categories/1");
+        patchedDTO.setPath("/api/categories/1");
 
         when(categoryService.patchCategoryById(anyInt(), any(CategoryDTO.class))).thenReturn(patchedDTO);
 
@@ -262,7 +262,7 @@ class CategoryControllerTest {
                 .andExpect(jsonPath("$.id", equalTo(1)))
                 .andExpect(jsonPath("$.name", equalTo("Updated Test")))
                 .andExpect(jsonPath("$.color", equalTo("GREEN")))
-                .andExpect(jsonPath("$.url", equalTo("/api/categories/1")));
+                .andExpect(jsonPath("$.path", equalTo("/api/categories/1")));
     }
 
     @Test
@@ -272,7 +272,7 @@ class CategoryControllerTest {
         patchedDTO.setId(1);
         patchedDTO.setName("Updated Test");
         patchedDTO.setColor(Color.GREEN);
-        patchedDTO.setUrl("/api/categories/1");
+        patchedDTO.setPath("/api/categories/1");
 
         when(categoryService.patchCategoryById(anyInt(), any(CategoryDTO.class))).thenThrow(ResourceNotFoundException.class);
 
@@ -289,7 +289,7 @@ class CategoryControllerTest {
         patchedDTO.setId(1);
         patchedDTO.setName("Updated Test");
         patchedDTO.setColor(Color.GREEN);
-        patchedDTO.setUrl("/api/categories/1");
+        patchedDTO.setPath("/api/categories/1");
 
         when(categoryService.patchCategoryById(anyInt(), any(CategoryDTO.class))).thenThrow(ResourceAlreadyExistsException.class);
 

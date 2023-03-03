@@ -66,7 +66,7 @@ class CategoryServiceImplTest {
         assertEquals(ID, categoryDTO.getId());
         assertEquals(NAME, categoryDTO.getName());
         assertEquals(COLOR, categoryDTO.getColor());
-        assertEquals("/api/categories/1", categoryDTO.getUrl());
+        assertEquals("/api/categories/1", categoryDTO.getPath());
     }
 
     @Test
@@ -89,7 +89,7 @@ class CategoryServiceImplTest {
         assertEquals(ID, categoryDTO.getId());
         assertEquals(NAME, categoryDTO.getName());
         assertEquals(COLOR, categoryDTO.getColor());
-        assertEquals("/api/categories/1", categoryDTO.getUrl());
+        assertEquals("/api/categories/1", categoryDTO.getPath());
     }
 
     @Test
@@ -116,7 +116,7 @@ class CategoryServiceImplTest {
         assertEquals(savedCategory.getId(), savedDTO.getId());
         assertEquals(savedCategory.getName(), savedDTO.getName());
         assertEquals(savedCategory.getColor(), savedDTO.getColor());
-        assertEquals("/api/categories/1", savedDTO.getUrl());
+        assertEquals("/api/categories/1", savedDTO.getPath());
     }
 
     @Test
@@ -180,7 +180,7 @@ class CategoryServiceImplTest {
         assertEquals(originalCategory.getId(), savedDTO.getId());      //same id as before
         assertEquals(categoryDTO.getName(), savedDTO.getName());    //updated name
         assertEquals(categoryDTO.getColor(), savedDTO.getColor());  //updated color
-        assertEquals("/api/categories/" + originalCategory.getId(), savedDTO.getUrl());
+        assertEquals("/api/categories/" + originalCategory.getId(), savedDTO.getPath());
 
 
         //Verify that the updatedCategory was saved
@@ -241,7 +241,7 @@ class CategoryServiceImplTest {
         assertEquals(originalCategory.getId(), savedDTO.getId());   //same id as before
         assertEquals(categoryDTO.getName(), savedDTO.getName());    //updated name
         assertEquals(categoryDTO.getColor(), savedDTO.getColor());  //updated color
-        assertEquals("/api/categories/" + originalCategory.getId(), savedDTO.getUrl());
+        assertEquals("/api/categories/" + originalCategory.getId(), savedDTO.getPath());
 
         //Verify that the updatedCategory was saved
         verify(categoryRepository, times(1)).save(updatedCategory);
@@ -315,7 +315,7 @@ class CategoryServiceImplTest {
         assertEquals(originalCategory.getId(), savedDTO.getId());   //same id as before
         assertEquals(categoryDTO.getName(), savedDTO.getName());    //updated name
         assertEquals(categoryDTO.getColor(), savedDTO.getColor());  //updated color
-        assertEquals("/api/categories/" + originalCategory.getId(), savedDTO.getUrl());
+        assertEquals("/api/categories/" + originalCategory.getId(), savedDTO.getPath());
 
         //Assert that the category was modified inside the function and was saved
         assertNotEquals(originalCategory.getName(), updatedCategory.getName());
@@ -353,7 +353,7 @@ class CategoryServiceImplTest {
         assertEquals(originalCategory.getId(), savedDTO.getId());        //same id as before
         assertEquals(categoryDTO.getName(), savedDTO.getName());         //updated name
         assertEquals(originalCategory.getColor(), savedDTO.getColor());  //same color as before
-        assertEquals("/api/categories/" + originalCategory.getId(), savedDTO.getUrl());
+        assertEquals("/api/categories/" + originalCategory.getId(), savedDTO.getPath());
 
         //Assert that only the name was modified inside the function and was saved
         assertNotEquals(originalCategory.getName(), updatedCategory.getName());
@@ -390,7 +390,7 @@ class CategoryServiceImplTest {
         assertEquals(originalCategory.getId(), savedDTO.getId());       //same id as before
         assertEquals(originalCategory.getName(), savedDTO.getName());   //same name as before
         assertEquals(categoryDTO.getColor(), savedDTO.getColor());      //updated color
-        assertEquals("/api/categories/" + originalCategory.getId(), savedDTO.getUrl());
+        assertEquals("/api/categories/" + originalCategory.getId(), savedDTO.getPath());
 
         //Assert that the category was modified inside the function and was saved
         assertEquals(originalCategory.getName(), updatedCategory.getName());

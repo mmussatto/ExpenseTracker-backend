@@ -23,6 +23,6 @@ public class CategoryDTO {
     @ToString.Exclude
     @JsonIgnore
     private Set<Transaction> transactions;
-    private String url;
+    private String path;
 
 }
