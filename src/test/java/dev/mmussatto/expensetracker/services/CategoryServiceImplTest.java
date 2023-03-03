@@ -45,13 +45,21 @@ class CategoryServiceImplTest {
 
     @Test
     void getAllCategories() {
-        List<Category> categories = Arrays.asList(new Category(), new Category(), new Category());
+
+        Category c1 = new Category();
+        c1.setId(1);
+
+        Category c2 = new Category();
+        c2.setId(2);
+        List<Category> categories = Arrays.asList(c1, c2);
 
         when(categoryRepository.findAll()).thenReturn(categories);
 
-        List<CategoryDTO> categoryDTOS = categoryService.getAllCategories();
+        List<CategoryDTO> returnedList = categoryService.getAllCategories();
 
-        assertEquals(3, categoryDTOS.size());
+        assertEquals(2, returnedList.size());
+        assertEquals("/api/categories/" + c1.getId(),returnedList.get(0).getPath());
+        assertEquals("/api/categories/" + c2.getId(),returnedList.get(1).getPath());
     }
 
     @Test
