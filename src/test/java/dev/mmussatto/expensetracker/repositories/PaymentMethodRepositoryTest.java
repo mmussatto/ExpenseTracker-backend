@@ -6,6 +6,7 @@ package dev.mmussatto.expensetracker.repositories;
 
 import dev.mmussatto.expensetracker.domain.PaymentMethod;
 import dev.mmussatto.expensetracker.domain.PaymentType;
+import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -35,5 +36,23 @@ class PaymentMethodRepositoryTest {
         PaymentMethod test = paymentMethodRepository.findByName("Test 1").get();
 
         assertEquals(t1.getId(), test.getId());
+    }
+
+    @Test
+    void deleteByName() {
+        PaymentMethod t1 = new PaymentMethod("Test 1", PaymentType.CASH);
+        testEntityManager.persist(t1);
+
+        paymentMethodRepository.deleteByName(t1.getName());
+
+        assertFalse(paymentMethodRepository.findByName(t1.getName()).isPresent());
+    }
+
+    @Test
+    void prevent_null() {
+        PaymentMethod paymentMethod = new PaymentMethod();
+        //testEntityManager.persist(category);
+
+        assertThrows(ConstraintViolationException.class, () -> testEntityManager.persist(paymentMethod));
     }
 }
