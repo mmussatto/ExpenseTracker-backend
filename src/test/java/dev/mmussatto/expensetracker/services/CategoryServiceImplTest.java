@@ -160,7 +160,6 @@ class CategoryServiceImplTest {
                 () -> categoryService.createNewCategory(categoryDTO));
     }
 
-
     @Test
     void updateCategoryById() {
 
@@ -222,7 +221,6 @@ class CategoryServiceImplTest {
         assertThrows(InvalidIdModificationException.class,
                 () -> categoryService.updateCategoryById(ID, categoryDTO));
     }
-
 
     @Test
     void updateCategoryByName() {
@@ -334,7 +332,7 @@ class CategoryServiceImplTest {
     }
 
     @Test
-    void patchCategoryById_changeOnlyName() {
+    void patchCategoryById_UpdateOnlyName() {
 
         //CategoryDTO passed to updateCategoryById
         CategoryDTO categoryDTO = new CategoryDTO();
@@ -371,7 +369,7 @@ class CategoryServiceImplTest {
     }
 
     @Test
-    void patchCategoryById_changeOnlyColor() {
+    void patchCategoryById_UpdateOnlyColor() {
 
         //CategoryDTO passed to updateCategoryById
         CategoryDTO categoryDTO = new CategoryDTO();
