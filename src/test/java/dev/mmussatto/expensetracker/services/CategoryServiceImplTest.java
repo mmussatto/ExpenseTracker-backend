@@ -161,29 +161,30 @@ class CategoryServiceImplTest {
         categoryDTO.setName("TestUpdate");
         categoryDTO.setColor(Color.GREEN);
 
-        //Category already in the database
-        Category savedCategory = new Category(NAME, COLOR);
-        savedCategory.setId(ID);
+        //Category previously saved in the database
+        Category originalCategory = new Category(NAME, COLOR);
+        originalCategory.setId(ID);
 
-        //Updated Category that will be saved in the database
+        //Category modified and saved
         Category updatedCategory = new Category(categoryDTO.getName(), categoryDTO.getColor());
-        updatedCategory.setId(savedCategory.getId());
+        updatedCategory.setId(originalCategory.getId());
 
 
-        when(categoryRepository.findById(anyInt())).thenReturn(Optional.of(savedCategory));
-        when(categoryRepository.save(any(Category.class))).thenReturn(updatedCategory);
+        when(categoryRepository.findById(anyInt())).thenReturn(Optional.of(originalCategory));
+        when(categoryRepository.save(updatedCategory)).thenReturn(updatedCategory);
 
 
         //CategoryDTO returned after saving updateCategory
-        CategoryDTO savedDTO = categoryService.updateCategoryById(savedCategory.getId(), categoryDTO);
+        CategoryDTO savedDTO = categoryService.updateCategoryById(originalCategory.getId(), categoryDTO);
 
-        assertEquals(savedCategory.getId(), savedDTO.getId());      //same id as before
+        assertEquals(originalCategory.getId(), savedDTO.getId());      //same id as before
         assertEquals(categoryDTO.getName(), savedDTO.getName());    //updated name
         assertEquals(categoryDTO.getColor(), savedDTO.getColor());  //updated color
-        assertEquals("/api/categories/" + savedCategory.getId(), savedDTO.getUrl());
+        assertEquals("/api/categories/" + originalCategory.getId(), savedDTO.getUrl());
 
-        assertNotEquals(savedCategory.getName(), savedDTO.getName());   //name was updated
-        assertNotEquals(savedCategory.getColor(), savedDTO.getColor()); //color was updated
+
+        //Verify that the updatedCategory was saved
+        verify(categoryRepository, times(1)).save(updatedCategory);
     }
 
     @Test
@@ -218,33 +219,32 @@ class CategoryServiceImplTest {
     @Test
     void updateCategoryByName() {
 
-        //CategoryDTO passed to updateCategoryByName
+        //CategoryDTO passed to updateCategoryById
         CategoryDTO categoryDTO = new CategoryDTO();
         categoryDTO.setName("TestUpdate");
         categoryDTO.setColor(Color.GREEN);
 
-        //Category already in the database
-        Category savedCategory = new Category(NAME, COLOR);
-        savedCategory.setId(ID);
+        //Category previously saved in the database
+        Category originalCategory = new Category(NAME, COLOR);
+        originalCategory.setId(ID);
 
-        //Updated Category that will be saved in the database
+        //Category modified and saved
         Category updatedCategory = new Category(categoryDTO.getName(), categoryDTO.getColor());
-        updatedCategory.setId(savedCategory.getId());
+        updatedCategory.setId(originalCategory.getId());
 
-        when(categoryRepository.findByName(savedCategory.getName())).thenReturn(Optional.of(savedCategory));
-        when(categoryRepository.save(any(Category.class))).thenReturn(updatedCategory);
+        when(categoryRepository.findByName(originalCategory.getName())).thenReturn(Optional.of(originalCategory));
+        when(categoryRepository.save(updatedCategory)).thenReturn(updatedCategory);
 
         //CategoryDTO returned after saving updateCategory
-        CategoryDTO savedDTO = categoryService.updateCategoryByName(savedCategory.getName(), categoryDTO);
+        CategoryDTO savedDTO = categoryService.updateCategoryByName(originalCategory.getName(), categoryDTO);
 
-        assertEquals(savedCategory.getId(), savedDTO.getId());      //same id as before
+        assertEquals(originalCategory.getId(), savedDTO.getId());   //same id as before
         assertEquals(categoryDTO.getName(), savedDTO.getName());    //updated name
         assertEquals(categoryDTO.getColor(), savedDTO.getColor());  //updated color
-        assertEquals("/api/categories/" + updatedCategory.getId(), savedDTO.getUrl());
+        assertEquals("/api/categories/" + originalCategory.getId(), savedDTO.getUrl());
 
-
-        assertNotEquals(savedCategory.getName(), savedDTO.getName());   //name was updated
-        assertNotEquals(savedCategory.getColor(), savedDTO.getColor()); //color was updated
+        //Verify that the updatedCategory was saved
+        verify(categoryRepository, times(1)).save(updatedCategory);
 
     }
 
@@ -282,6 +282,10 @@ class CategoryServiceImplTest {
         The "updatedCategory" is returned when findById() is invoked inside patchCategoryById(). It has its name and
         color modified to match the categoryDTO, and then it is saved in the repository.
         The "savedDTO" is returned from patchCategoryById() with the updated name and color.
+
+        The difference between this test and the update test is that the Optional returned by findById() is the
+        one being modified inside the function. In the update, a new object is created. Because of this, here
+        the updateCategory is the same as the Original and there the updatedCategory is the final state intended.
      */
     @Test
     void patchCategoryById() {
