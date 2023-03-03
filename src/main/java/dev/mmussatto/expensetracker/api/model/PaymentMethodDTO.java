@@ -8,11 +8,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import dev.mmussatto.expensetracker.domain.PaymentType;
 import dev.mmussatto.expensetracker.domain.Transaction;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.util.Set;
 
 @Data
+@NoArgsConstructor
 public class PaymentMethodDTO {
 
     private Integer id;
@@ -21,5 +23,10 @@ public class PaymentMethodDTO {
     @ToString.Exclude
     @JsonIgnore
     private Set<Transaction> transactions;
+    private String path;
 
+    public PaymentMethodDTO(String name, PaymentType type) {
+        this.name = name;
+        this.type = type;
+    }
 }
