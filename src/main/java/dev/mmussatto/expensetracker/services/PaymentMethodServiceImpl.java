@@ -113,14 +113,14 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
                 throw new InvalidIdModificationException(id.toString(), "/api/payment-methods/" + id);
 
             if (paymentMethodDTO.getName() != null)
-                paymentMethod.setName(paymentMethod.getName());
+                paymentMethod.setName(paymentMethodDTO.getName());
 
             if (paymentMethodDTO.getType() != null)
                 paymentMethod.setType(paymentMethodDTO.getType());
 
             return saveAndReturn(paymentMethod);
 
-        }).orElseThrow(() -> new ResourceNotFoundException("Payment Method " + id + "not found!"));
+        }).orElseThrow(() -> new ResourceNotFoundException("Payment Method " + id + " not found!"));
     }
 
     @Override
