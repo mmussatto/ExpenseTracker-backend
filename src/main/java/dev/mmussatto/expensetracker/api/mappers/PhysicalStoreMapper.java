@@ -14,7 +14,7 @@ public interface PhysicalStoreMapper {
 
     PhysicalStoreMapper INSTANCE = Mappers.getMapper(PhysicalStoreMapper.class);
 
-    PhysicalStoreDTO physicalStoreToPhysicalStoreDTO (PhysicalStore physicalStore);
+    PhysicalStoreDTO convertToDTO(PhysicalStore physicalStore);
 
-    PhysicalStore physicalStoreDTOToPhysicalStore (PhysicalStoreDTO physicalStoreDTO);
+    PhysicalStore convertToEntity(PhysicalStoreDTO physicalStoreDTO);
 }

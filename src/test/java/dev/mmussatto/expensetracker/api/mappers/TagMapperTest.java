@@ -33,7 +33,7 @@ class TagMapperTest {
         tag.setId(ID);
         tag.setTransactions(TRANSACTIONS);
 
-        TagDTO tagDTO = tagMapper.tagToTagDTO(tag);
+        TagDTO tagDTO = tagMapper.convertToDTO(tag);
 
         assertEquals(tag.getId(), tagDTO.getId());
         assertEquals(tag.getName(), tagDTO.getName());
@@ -50,7 +50,7 @@ class TagMapperTest {
         tagDTO.setColor(COLOR);
         tagDTO.setTransactions(TRANSACTIONS);
 
-        Tag tag = tagMapper.tagDTOToTag(tagDTO);
+        Tag tag = tagMapper.convertToEntity(tagDTO);
 
         assertEquals(tagDTO.getId(), tag.getId());
         assertEquals(tagDTO.getName(), tag.getName());

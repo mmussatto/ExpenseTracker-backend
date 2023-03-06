@@ -32,7 +32,7 @@ class PaymentMethodMapperTest {
         paymentMethod.setId(ID);
         paymentMethod.setTransactions(TRANSACTIONS);
 
-        PaymentMethodDTO paymentMethodDTO = paymentMethodMapper.paymentMethodToPaymentMethodDTO(paymentMethod);
+        PaymentMethodDTO paymentMethodDTO = paymentMethodMapper.convertToDTO(paymentMethod);
 
         assertEquals(paymentMethod.getId(), paymentMethodDTO.getId());
         assertEquals(paymentMethod.getName(), paymentMethodDTO.getName());
@@ -48,7 +48,7 @@ class PaymentMethodMapperTest {
         paymentMethodDTO.setType(TYPE);
         paymentMethodDTO.setTransactions(TRANSACTIONS);
 
-        PaymentMethod paymentMethod = paymentMethodMapper.paymentMethodDTOToPaymentMethod(paymentMethodDTO);
+        PaymentMethod paymentMethod = paymentMethodMapper.convertToEntity(paymentMethodDTO);
 
         assertEquals(paymentMethodDTO.getId(), paymentMethod.getId());
         assertEquals(paymentMethodDTO.getName(), paymentMethod.getName());

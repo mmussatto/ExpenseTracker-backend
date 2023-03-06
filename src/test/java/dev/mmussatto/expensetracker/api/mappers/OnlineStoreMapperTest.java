@@ -31,7 +31,7 @@ class OnlineStoreMapperTest {
         onlineStore.setId(ID);
         onlineStore.setTransactions(TRANSACTIONS);
 
-        OnlineStoreDTO onlineStoreDTO = onlineStoreMapper.onlineStoreToOnlineStoreDTO(onlineStore);
+        OnlineStoreDTO onlineStoreDTO = onlineStoreMapper.convertToDTO(onlineStore);
 
         assertEquals(onlineStore.getId(), onlineStoreDTO.getId());
         assertEquals(onlineStore.getName(), onlineStoreDTO.getName());
@@ -48,7 +48,7 @@ class OnlineStoreMapperTest {
         onlineStoreDTO.setUrl(URL);
         onlineStoreDTO.setTransactions(TRANSACTIONS);
 
-        OnlineStore onlineStore = onlineStoreMapper.onlineStoreDTOToOnlineStore(onlineStoreDTO);
+        OnlineStore onlineStore = onlineStoreMapper.convertToEntity(onlineStoreDTO);
 
         assertEquals(onlineStoreDTO.getId(), onlineStore.getId());
         assertEquals(onlineStoreDTO.getName(), onlineStore.getName());

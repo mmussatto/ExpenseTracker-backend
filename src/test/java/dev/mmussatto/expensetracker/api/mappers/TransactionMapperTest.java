@@ -66,7 +66,7 @@ class TransactionMapperTest {
         STORE.getTransactions().add(transaction);
         transaction.setStore(STORE);
 
-        TransactionDTO transactionDTO = transactionMapper.transactionToTransactionDTO(transaction);
+        TransactionDTO transactionDTO = transactionMapper.convertToDTO(transaction);
 
 
         assertEquals(transaction.getId(), transactionDTO.getId());
@@ -97,7 +97,7 @@ class TransactionMapperTest {
 
         transactionDTO.setStore(STORE);
 
-        Transaction transaction = transactionMapper.transactionDTOToTransaction(transactionDTO);
+        Transaction transaction = transactionMapper.convertToEntity(transactionDTO);
 
         assertEquals(transactionDTO.getId(), transaction.getId());
         assertEquals(transactionDTO.getAmount(), transaction.getAmount());

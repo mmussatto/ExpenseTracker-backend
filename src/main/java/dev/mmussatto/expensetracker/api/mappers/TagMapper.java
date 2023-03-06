@@ -14,7 +14,7 @@ public interface TagMapper {
 
     TagMapper INSTANCE = Mappers.getMapper(TagMapper.class);
 
-    TagDTO tagToTagDTO (Tag tag);
+    TagDTO convertToDTO(Tag tag);
 
-    Tag tagDTOToTag (TagDTO tagDTO);
+    Tag convertToEntity(TagDTO tagDTO);
 }

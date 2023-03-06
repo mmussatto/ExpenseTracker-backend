@@ -31,7 +31,7 @@ class PhysicalStoreMapperTest {
         physicalStore.setId(ID);
         physicalStore.setTransactions(TRANSACTIONS);
 
-        PhysicalStoreDTO physicalStoreDTO = physicalStoreMapper.physicalStoreToPhysicalStoreDTO(physicalStore);
+        PhysicalStoreDTO physicalStoreDTO = physicalStoreMapper.convertToDTO(physicalStore);
 
         assertEquals(physicalStore.getId(), physicalStoreDTO.getId());
         assertEquals(physicalStore.getName(), physicalStoreDTO.getName());
@@ -48,7 +48,7 @@ class PhysicalStoreMapperTest {
         physicalStoreDTO.setAddress(ADDRESS);
         physicalStoreDTO.setTransactions(TRANSACTIONS);
 
-        PhysicalStore physicalStore = physicalStoreMapper.physicalStoreDTOToPhysicalStore(physicalStoreDTO);
+        PhysicalStore physicalStore = physicalStoreMapper.convertToEntity(physicalStoreDTO);
 
         assertEquals(physicalStoreDTO.getId(), physicalStore.getId());
         assertEquals(physicalStoreDTO.getName(), physicalStore.getName());

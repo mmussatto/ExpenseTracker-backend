@@ -14,7 +14,7 @@ public interface OnlineStoreMapper {
 
     OnlineStoreMapper INSTANCE = Mappers.getMapper(OnlineStoreMapper.class);
 
-    OnlineStoreDTO onlineStoreToOnlineStoreDTO (OnlineStore onlineStore);
+    OnlineStoreDTO convertToDTO(OnlineStore onlineStore);
 
-    OnlineStore onlineStoreDTOToOnlineStore (OnlineStoreDTO onlineStoreDTO);
+    OnlineStore convertToEntity(OnlineStoreDTO onlineStoreDTO);
 }

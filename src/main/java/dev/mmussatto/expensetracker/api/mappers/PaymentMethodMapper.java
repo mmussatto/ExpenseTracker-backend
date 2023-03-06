@@ -14,7 +14,7 @@ public interface PaymentMethodMapper {
 
     PaymentMethodMapper INSTANCE = Mappers.getMapper(PaymentMethodMapper.class);
 
-    PaymentMethodDTO paymentMethodToPaymentMethodDTO (PaymentMethod paymentMethod);
+    PaymentMethodDTO convertToDTO(PaymentMethod paymentMethod);
 
-    PaymentMethod paymentMethodDTOToPaymentMethod (PaymentMethodDTO paymentMethodDTO);
+    PaymentMethod convertToEntity(PaymentMethodDTO paymentMethodDTO);
 }
