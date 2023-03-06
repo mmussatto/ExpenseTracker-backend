@@ -34,7 +34,7 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryRepository.findAll()
                 .stream()
                 .map(category -> {
-                    CategoryDTO categoryDTO = categoryMapper.categoryToCategoryDTO(category);
+                    CategoryDTO categoryDTO = categoryMapper.convertToDTO(category);
                     categoryDTO.setPath("/api/categories/" + categoryDTO.getId());
                     return categoryDTO;
                 })
@@ -45,7 +45,7 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryDTO getCategoryById(Integer id) {
         return categoryRepository.findById(id)
                 .map(category -> {
-                    CategoryDTO categoryDTO = categoryMapper.categoryToCategoryDTO(category);
+                    CategoryDTO categoryDTO = categoryMapper.convertToDTO(category);
                     categoryDTO.setPath("/api/categories/" + categoryDTO.getId());
                     return categoryDTO;
                 })
@@ -56,7 +56,7 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryDTO getCategoryByName(String name) {
         return categoryRepository.findByName(name)
                 .map(category -> {
-                    CategoryDTO categoryDTO = categoryMapper.categoryToCategoryDTO(category);
+                    CategoryDTO categoryDTO = categoryMapper.convertToDTO(category);
                     categoryDTO.setPath("/api/categories/" + categoryDTO.getId());
                     return categoryDTO;
                 })
@@ -77,7 +77,7 @@ public class CategoryServiceImpl implements CategoryService {
              }));
          }
 
-        return saveAndReturnDTO(categoryMapper.categoryDTOToCategory(categoryDTO)) ;
+        return saveAndReturnDTO(categoryMapper.convertToEntity(categoryDTO)) ;
     }
 
     @Override
@@ -90,7 +90,7 @@ public class CategoryServiceImpl implements CategoryService {
         if (categoryDTO.getId() != null && !Objects.equals(categoryDTO.getId(), id))
             throw new InvalidIdModificationException(id.toString(), "/api/categories/" + id);
 
-        Category category = categoryMapper.categoryDTOToCategory(categoryDTO);
+        Category category = categoryMapper.convertToEntity(categoryDTO);
         category.setId(id);
 
         return saveAndReturnDTO(category);
@@ -105,7 +105,7 @@ public class CategoryServiceImpl implements CategoryService {
             throw new InvalidIdModificationException(savedCategory.getId().toString(),
                     "/api/categories/" + savedCategory.getId());
 
-        Category category = categoryMapper.categoryDTOToCategory(categoryDTO);
+        Category category = categoryMapper.convertToEntity(categoryDTO);
         category.setId(savedCategory.getId());
 
         return saveAndReturnDTO(category);
@@ -147,7 +147,7 @@ public class CategoryServiceImpl implements CategoryService {
     private CategoryDTO saveAndReturnDTO(Category category) {
         Category savedCategory = categoryRepository.save(category);
 
-        CategoryDTO returnDTO = categoryMapper.categoryToCategoryDTO(savedCategory);
+        CategoryDTO returnDTO = categoryMapper.convertToDTO(savedCategory);
         returnDTO.setPath("/api/categories/" + returnDTO.getId());
 
         return returnDTO;

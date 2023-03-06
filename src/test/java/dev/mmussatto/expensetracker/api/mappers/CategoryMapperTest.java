@@ -32,7 +32,7 @@ class CategoryMapperTest {
         category.setId(ID);
         category.setTransactions(TRANSACTIONS);
 
-        CategoryDTO categoryDTO = categoryMapper.categoryToCategoryDTO(category);
+        CategoryDTO categoryDTO = categoryMapper.convertToDTO(category);
 
         assertEquals(category.getId(), categoryDTO.getId());
         assertEquals(category.getName(), categoryDTO.getName());
@@ -49,7 +49,7 @@ class CategoryMapperTest {
         categoryDTO.setColor(COLOR);
         categoryDTO.setTransactions(TRANSACTIONS);
 
-        Category category = categoryMapper.categoryDTOToCategory(categoryDTO);
+        Category category = categoryMapper.convertToEntity(categoryDTO);
 
         assertEquals(categoryDTO.getId(), category.getId());
         assertEquals(categoryDTO.getName(), category.getName());
