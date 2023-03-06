@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -22,7 +23,7 @@ public class PaymentMethodDTO {
     private PaymentType type;
     @ToString.Exclude
     @JsonIgnore
-    private Set<Transaction> transactions;
+    private Set<Transaction> transactions = new HashSet<>();
     private String path;
 
     public PaymentMethodDTO(String name, PaymentType type) {
