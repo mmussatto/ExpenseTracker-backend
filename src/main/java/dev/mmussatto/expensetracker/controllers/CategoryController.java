@@ -6,11 +6,14 @@ package dev.mmussatto.expensetracker.controllers;
 
 import dev.mmussatto.expensetracker.api.model.CategoryDTO;
 import dev.mmussatto.expensetracker.api.model.CategoryListDTO;
+import dev.mmussatto.expensetracker.domain.Transaction;
 import dev.mmussatto.expensetracker.services.CategoryService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Set;
 
 @Validated
 @RestController
@@ -23,6 +26,7 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
+    //Categories
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public CategoryListDTO getAllCategories () {
@@ -77,5 +81,12 @@ public class CategoryController {
         categoryService.deleteCategoryByName(name);
     }
 
+
+    //Categories' Transactions
+    @GetMapping("/{id}/transactions")
+    @ResponseStatus(HttpStatus.OK)
+    public Set<Transaction> getCategoryTransactionsById (@PathVariable final Integer id) {
+        return categoryService.getTransactionsById(id);
+    }
 
 }

@@ -7,6 +7,7 @@ package dev.mmussatto.expensetracker.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.mmussatto.expensetracker.api.model.CategoryDTO;
 import dev.mmussatto.expensetracker.domain.Color;
+import dev.mmussatto.expensetracker.domain.Transaction;
 import dev.mmussatto.expensetracker.services.CategoryService;
 import dev.mmussatto.expensetracker.services.exceptions.ResourceAlreadyExistsException;
 import dev.mmussatto.expensetracker.services.exceptions.ResourceNotFoundException;
@@ -317,5 +318,43 @@ class CategoryControllerTest {
                 .andExpect(status().isOk());
 
         verify(categoryService, times(1)).deleteCategoryByName(anyString());
+    }
+
+    @Test
+    void getCategoryTransactionsById() throws Exception {
+
+        Transaction t1 = new Transaction();
+        t1.setId(1);
+        t1.setAmount(53.00);
+        t1.setDescription("Test Transaction 1");
+
+        Transaction t2 = new Transaction();
+        t2.setId(2);
+        t2.setAmount(123.00);
+        t2.setDescription("Test Transaction 2");
+
+
+        CategoryDTO categoryDTO = new CategoryDTO();
+        categoryDTO.setId(1);
+        categoryDTO.getTransactions().addAll(Arrays.asList(t1, t2));
+
+
+        when(categoryService.getTransactionsById(categoryDTO.getId())).thenReturn(categoryDTO.getTransactions());
+
+        mockMvc.perform(get("/api/categories/{id}/transactions", categoryDTO.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)));
+    }
+
+    @Test
+    void getCategoryTransactionsById_NotFound() throws Exception{
+
+        when(categoryService.getTransactionsById(anyInt())).thenThrow(ResourceNotFoundException.class);
+
+        mockMvc.perform(get("/api/categories/{id}/transactions", 1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+
     }
 }
