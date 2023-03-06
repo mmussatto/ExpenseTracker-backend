@@ -16,15 +16,16 @@ import dev.mmussatto.expensetracker.services.exceptions.ResourceNotFoundExceptio
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -82,7 +83,7 @@ class PaymentMethodServiceImplTest {
         assertEquals(paymentMethod.getName(),paymentMethodDTO.getName());
         assertEquals(paymentMethod.getType(),paymentMethodDTO.getType());
         assertEquals(paymentMethod.getTransactions(),paymentMethodDTO.getTransactions());
-        assertEquals("/api/payment-methods/" + ID.toString(),paymentMethodDTO.getPath());
+        assertEquals("/api/payment-methods/" + ID,paymentMethodDTO.getPath());
     }
 
     @Test
@@ -108,7 +109,7 @@ class PaymentMethodServiceImplTest {
         assertEquals(paymentMethod.getName(),paymentMethodDTO.getName());
         assertEquals(paymentMethod.getType(),paymentMethodDTO.getType());
         assertEquals(paymentMethod.getTransactions(),paymentMethodDTO.getTransactions());
-        assertEquals("/api/payment-methods/" + ID.toString(),paymentMethodDTO.getPath());
+        assertEquals("/api/payment-methods/" + ID,paymentMethodDTO.getPath());
     }
 
     @Test
@@ -130,14 +131,22 @@ class PaymentMethodServiceImplTest {
         PaymentMethodDTO paymentMethodDTO = new PaymentMethodDTO(NAME, TYPE);
         paymentMethod.getTransactions().add(TRANSACTION);
 
-        when(paymentMethodRepository.save(eq(paymentMethod))).thenReturn(paymentMethod);
+//        when(paymentMethodRepository.save(PaymentMethodMapper.INSTANCE.convertToEntity(paymentMethodDTO)))
+//                .thenReturn(paymentMethod);
+
+        ArgumentMatcher<PaymentMethod> argumentMatcher = paymentMethodToSave ->
+                Objects.equals(paymentMethodToSave.getName(), paymentMethod.getName())
+                && Objects.equals(paymentMethodToSave.getType(), paymentMethod.getType());
+
+        when(paymentMethodRepository.save(argThat(argumentMatcher)))
+                .thenReturn(paymentMethod);
 
         PaymentMethodDTO returnedDTO = paymentMethodService.createNewPaymentMethod(paymentMethodDTO);
 
         assertEquals(paymentMethod.getId(), returnedDTO.getId());
         assertEquals(paymentMethod.getName(), returnedDTO.getName());
         assertEquals(paymentMethod.getType(), returnedDTO.getType());
-        assertEquals(paymentMethod.getTransactions(),paymentMethodDTO.getTransactions());
+        assertEquals(paymentMethod.getTransactions(),returnedDTO.getTransactions());
         assertEquals("/api/payment-methods/" + paymentMethod.getId(), returnedDTO.getPath());
     }
 
@@ -322,10 +331,10 @@ class PaymentMethodServiceImplTest {
         PaymentMethod updated = new PaymentMethod(original.getName(), original.getType());
         updated.setId(original.getId());
 
-        when(paymentMethodRepository.findByName(original.getName())).thenReturn(Optional.of(updated));
+        when(paymentMethodRepository.findById(original.getId())).thenReturn(Optional.of(updated));
         when(paymentMethodRepository.save(updated)).thenReturn(updated);
 
-        PaymentMethodDTO returnedDTO = paymentMethodService.updatePaymentMethodByName(original.getName(), passedDTO);
+        PaymentMethodDTO returnedDTO = paymentMethodService.patchPaymentMethodById(original.getId(), passedDTO);
 
         assertEquals(original.getId(), returnedDTO.getId());        //same id
         assertEquals(passedDTO.getName(), returnedDTO.getName());   //updated name
@@ -358,10 +367,10 @@ class PaymentMethodServiceImplTest {
         updated.setId(original.getId());
         updated.setTransactions(original.getTransactions());
 
-        when(paymentMethodRepository.findByName(original.getName())).thenReturn(Optional.of(updated));
+        when(paymentMethodRepository.findById(original.getId())).thenReturn(Optional.of(updated));
         when(paymentMethodRepository.save(updated)).thenReturn(updated);
 
-        PaymentMethodDTO returnedDTO = paymentMethodService.updatePaymentMethodByName(original.getName(), passedDTO);
+        PaymentMethodDTO returnedDTO = paymentMethodService.patchPaymentMethodById(original.getId(), passedDTO);
 
         assertEquals(original.getId(), returnedDTO.getId());                        //same id
         assertEquals(passedDTO.getName(), returnedDTO.getName());                   //updated name
@@ -394,10 +403,10 @@ class PaymentMethodServiceImplTest {
         updated.setId(original.getId());
         updated.setTransactions(original.getTransactions());
 
-        when(paymentMethodRepository.findByName(original.getName())).thenReturn(Optional.of(updated));
+        when(paymentMethodRepository.findById(original.getId())).thenReturn(Optional.of(updated));
         when(paymentMethodRepository.save(updated)).thenReturn(updated);
 
-        PaymentMethodDTO returnedDTO = paymentMethodService.updatePaymentMethodByName(original.getName(), passedDTO);
+        PaymentMethodDTO returnedDTO = paymentMethodService.patchPaymentMethodById(original.getId(), passedDTO);
 
         assertEquals(original.getId(), returnedDTO.getId());                        //same id
         assertEquals(original.getName(), returnedDTO.getName());                    //same name
@@ -428,10 +437,10 @@ class PaymentMethodServiceImplTest {
         PaymentMethod updated = new PaymentMethod(original.getName(), original.getType());
         updated.setId(original.getId());
 
-        when(paymentMethodRepository.findByName(original.getName())).thenReturn(Optional.of(updated));
+        when(paymentMethodRepository.findById(original.getId())).thenReturn(Optional.of(updated));
         when(paymentMethodRepository.save(updated)).thenReturn(updated);
 
-        PaymentMethodDTO returnedDTO = paymentMethodService.updatePaymentMethodByName(original.getName(), passedDTO);
+        PaymentMethodDTO returnedDTO = paymentMethodService.patchPaymentMethodById(original.getId(), passedDTO);
 
         assertEquals(original.getId(), returnedDTO.getId());                        //same id
         assertEquals(original.getName(), returnedDTO.getName());                    //same name
@@ -458,7 +467,7 @@ class PaymentMethodServiceImplTest {
         PaymentMethod original = new PaymentMethod(NAME, TYPE);
         original.setId(ID);
 
-        when(paymentMethodRepository.findByName(original.getName())).thenReturn(Optional.empty());
+        when(paymentMethodRepository.findById(original.getId())).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
                 () -> paymentMethodService.patchPaymentMethodById(original.getId(), passedDTO));
@@ -475,7 +484,7 @@ class PaymentMethodServiceImplTest {
         PaymentMethod original = new PaymentMethod(NAME, TYPE);
         original.setId(ID);
 
-        when(paymentMethodRepository.findByName(original.getName())).thenReturn(Optional.of(original));
+        when(paymentMethodRepository.findById(original.getId())).thenReturn(Optional.of(original));
 
         assertThrows(InvalidIdModificationException.class,
                 () -> paymentMethodService.patchPaymentMethodById(original.getId(), passedDTO));
