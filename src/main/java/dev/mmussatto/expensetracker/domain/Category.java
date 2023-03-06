@@ -4,6 +4,7 @@
 
 package dev.mmussatto.expensetracker.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -33,6 +34,7 @@ public class Category {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "category")
     @ToString.Exclude
+    @JsonIgnore
     private Set<Transaction> transactions = new HashSet<>();
 
 
