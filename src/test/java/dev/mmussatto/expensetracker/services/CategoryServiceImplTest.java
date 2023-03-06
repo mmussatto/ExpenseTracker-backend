@@ -328,17 +328,16 @@ class CategoryServiceImplTest {
     void patchCategoryById() {
 
         //CategoryDTO passed to updateCategoryById
-        CategoryDTO categoryDTO = new CategoryDTO();
-        categoryDTO.setName("TestUpdate");
-        categoryDTO.setColor(Color.GREEN);
+        CategoryDTO passedDTO = new CategoryDTO("TestUpdate", Color.GREEN);
+        passedDTO.getTransactions().add(TRANSACTION);
 
         //Category previously saved in the database
         Category originalCategory = new Category(NAME, COLOR);
         originalCategory.setId(ID);
 
         //Category modified by function and saved
-        Category updatedCategory = new Category(NAME, COLOR);
-        updatedCategory.setId(ID);
+        Category updatedCategory = new Category(originalCategory.getName(), originalCategory.getColor());
+        updatedCategory.setId(originalCategory.getId());
 
 
         when(categoryRepository.findById(originalCategory.getId())).thenReturn(Optional.of(updatedCategory));
@@ -346,17 +345,19 @@ class CategoryServiceImplTest {
 
 
         //CategoryDTO returned after saving updateCategory
-        CategoryDTO savedDTO = categoryService.patchCategoryById(originalCategory.getId(), categoryDTO);
+        CategoryDTO savedDTO = categoryService.patchCategoryById(originalCategory.getId(), passedDTO);
 
         //Assert that the savedDTO is as expected
         assertEquals(originalCategory.getId(), savedDTO.getId());   //same id as before
-        assertEquals(categoryDTO.getName(), savedDTO.getName());    //updated name
-        assertEquals(categoryDTO.getColor(), savedDTO.getColor());  //updated color
+        assertEquals(passedDTO.getName(), savedDTO.getName());      //updated name
+        assertEquals(passedDTO.getColor(), savedDTO.getColor());    //updated color
+        assertEquals(passedDTO.getTransactions(), savedDTO.getTransactions());    //updated transactions
         assertEquals("/api/categories/" + originalCategory.getId(), savedDTO.getPath());
 
         //Assert that the category was modified inside the function and was saved
         assertNotEquals(originalCategory.getName(), updatedCategory.getName());
         assertNotEquals(originalCategory.getColor(), updatedCategory.getColor());
+        assertNotEquals(originalCategory.getTransactions(), updatedCategory.getTransactions());
 
         verify(categoryRepository, times(1)).save(updatedCategory);
 
@@ -366,17 +367,19 @@ class CategoryServiceImplTest {
     void patchCategoryById_UpdateOnlyName() {
 
         //CategoryDTO passed to updateCategoryById
-        CategoryDTO categoryDTO = new CategoryDTO();
-        categoryDTO.setName("TestUpdate");
-//        categoryDTO.setColor(Color.GREEN);
+        CategoryDTO passedDTO = new CategoryDTO();
+        passedDTO.setName("TestUpdate");
+
 
         //Category previously saved in the database
         Category originalCategory = new Category(NAME, COLOR);
         originalCategory.setId(ID);
+        originalCategory.getTransactions().add(TRANSACTION);
 
         //Category modified by function and saved
-        Category updatedCategory = new Category(NAME, COLOR);
-        updatedCategory.setId(ID);
+        Category updatedCategory = new Category(originalCategory.getName(), originalCategory.getColor());
+        updatedCategory.setId(originalCategory.getId());
+        updatedCategory.setTransactions(originalCategory.getTransactions());
 
 
         when(categoryRepository.findById(originalCategory.getId())).thenReturn(Optional.of(updatedCategory));
@@ -384,17 +387,19 @@ class CategoryServiceImplTest {
 
 
         //CategoryDTO returned after saving updateCategory
-        CategoryDTO savedDTO = categoryService.patchCategoryById(originalCategory.getId(), categoryDTO);
+        CategoryDTO savedDTO = categoryService.patchCategoryById(originalCategory.getId(), passedDTO);
 
         //Assert that the savedDTO is as expected
         assertEquals(originalCategory.getId(), savedDTO.getId());        //same id as before
-        assertEquals(categoryDTO.getName(), savedDTO.getName());         //updated name
+        assertEquals(passedDTO.getName(), savedDTO.getName());         //updated name
         assertEquals(originalCategory.getColor(), savedDTO.getColor());  //same color as before
+        assertEquals(originalCategory.getTransactions(), savedDTO.getTransactions()); //same transactions
         assertEquals("/api/categories/" + originalCategory.getId(), savedDTO.getPath());
 
         //Assert that only the name was modified inside the function and was saved
         assertNotEquals(originalCategory.getName(), updatedCategory.getName());
         assertEquals(originalCategory.getColor(), updatedCategory.getColor());
+        assertEquals(originalCategory.getTransactions(), updatedCategory.getTransactions());
 
         verify(categoryRepository, times(1)).save(updatedCategory);
     }
@@ -403,17 +408,18 @@ class CategoryServiceImplTest {
     void patchCategoryById_UpdateOnlyColor() {
 
         //CategoryDTO passed to updateCategoryById
-        CategoryDTO categoryDTO = new CategoryDTO();
-//        categoryDTO.setName("TestUpdate");
-        categoryDTO.setColor(Color.GREEN);
+        CategoryDTO passedDTO = new CategoryDTO();
+        passedDTO.setColor(Color.GREEN);
 
         //Category previously saved in the database
         Category originalCategory = new Category(NAME, COLOR);
         originalCategory.setId(ID);
+        originalCategory.getTransactions().add(TRANSACTION);
 
         //Category modified by function and saved
-        Category updatedCategory = new Category(NAME, COLOR);
-        updatedCategory.setId(ID);
+        Category updatedCategory = new Category(originalCategory.getName(), originalCategory.getColor());
+        updatedCategory.setId(originalCategory.getId());
+        updatedCategory.setTransactions(originalCategory.getTransactions());
 
 
         when(categoryRepository.findById(originalCategory.getId())).thenReturn(Optional.of(updatedCategory));
@@ -421,17 +427,57 @@ class CategoryServiceImplTest {
 
 
         //CategoryDTO returned after saving updateCategory
-        CategoryDTO savedDTO = categoryService.patchCategoryById(originalCategory.getId(), categoryDTO);
+        CategoryDTO savedDTO = categoryService.patchCategoryById(originalCategory.getId(), passedDTO);
 
         //Assert that the savedDTO is as expected
         assertEquals(originalCategory.getId(), savedDTO.getId());       //same id as before
         assertEquals(originalCategory.getName(), savedDTO.getName());   //same name as before
-        assertEquals(categoryDTO.getColor(), savedDTO.getColor());      //updated color
+        assertEquals(passedDTO.getColor(), savedDTO.getColor());      //updated color
+        assertEquals(originalCategory.getTransactions(), savedDTO.getTransactions()); //same transactions
         assertEquals("/api/categories/" + originalCategory.getId(), savedDTO.getPath());
 
         //Assert that the category was modified inside the function and was saved
         assertEquals(originalCategory.getName(), updatedCategory.getName());
         assertNotEquals(originalCategory.getColor(), updatedCategory.getColor());
+        assertEquals(originalCategory.getTransactions(), updatedCategory.getTransactions());
+
+        verify(categoryRepository, times(1)).save(updatedCategory);
+    }
+
+    @Test
+    void patchCategoryById_UpdateOnlyTransactions() {
+
+        //CategoryDTO passed to updateCategoryById
+        CategoryDTO passedDTO = new CategoryDTO();
+        passedDTO.getTransactions().add(TRANSACTION);
+
+        //Category previously saved in the database
+        Category originalCategory = new Category(NAME, COLOR);
+        originalCategory.setId(ID);
+
+        //Category modified by function and saved
+        Category updatedCategory = new Category(originalCategory.getName(), originalCategory.getColor());
+        updatedCategory.setId(originalCategory.getId());
+
+
+        when(categoryRepository.findById(originalCategory.getId())).thenReturn(Optional.of(updatedCategory));
+        when(categoryRepository.save(updatedCategory)).thenReturn(updatedCategory);
+
+
+        //CategoryDTO returned after saving updateCategory
+        CategoryDTO savedDTO = categoryService.patchCategoryById(originalCategory.getId(), passedDTO);
+
+        //Assert that the savedDTO is as expected
+        assertEquals(originalCategory.getId(), savedDTO.getId());       //same id as before
+        assertEquals(originalCategory.getName(), savedDTO.getName());   //same name as before
+        assertEquals(originalCategory.getColor(), savedDTO.getColor()); //same color as before
+        assertEquals(passedDTO.getTransactions(), savedDTO.getTransactions()); //updated transactions
+        assertEquals("/api/categories/" + originalCategory.getId(), savedDTO.getPath());
+
+        //Assert that the category was modified inside the function and was saved
+        assertEquals(originalCategory.getName(), updatedCategory.getName());
+        assertEquals(originalCategory.getColor(), updatedCategory.getColor());
+        assertNotEquals(originalCategory.getTransactions(), updatedCategory.getTransactions());
 
         verify(categoryRepository, times(1)).save(updatedCategory);
     }
@@ -450,7 +496,7 @@ class CategoryServiceImplTest {
         when(categoryRepository.findById(originalCategory.getId())).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
-                () -> categoryService.patchCategoryById(ID, new CategoryDTO()));
+                () -> categoryService.patchCategoryById(originalCategory.getId(), passedDTO));
     }
 
     @Test

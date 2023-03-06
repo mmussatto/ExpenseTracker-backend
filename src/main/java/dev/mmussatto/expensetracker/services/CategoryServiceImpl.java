@@ -127,6 +127,9 @@ public class CategoryServiceImpl implements CategoryService {
             if (categoryDTO.getColor() != null)
                 category.setColor(categoryDTO.getColor());
 
+            if (categoryDTO.getTransactions() != null && categoryDTO.getTransactions().size() != 0)
+                category.setTransactions(categoryDTO.getTransactions());
+
             return saveAndReturnDTO(category);
 
         }).orElseThrow(() -> new ResourceNotFoundException("Category " + id + " not found!"));
