@@ -45,7 +45,6 @@ class PaymentMethodServiceImplTest {
     void setUp() {
         paymentMethodService = new PaymentMethodServiceImpl(PaymentMethodMapper.INSTANCE, paymentMethodRepository);
         TRANSACTION.setId(1);
-
     }
 
     @Test
@@ -75,7 +74,7 @@ class PaymentMethodServiceImplTest {
         paymentMethod.setId(ID);
         paymentMethod.getTransactions().add(TRANSACTION);
 
-        when(paymentMethodRepository.findById(ID)).thenReturn(Optional.of(paymentMethod));
+        when(paymentMethodRepository.findById(paymentMethod.getId())).thenReturn(Optional.of(paymentMethod));
 
         PaymentMethodDTO paymentMethodDTO = paymentMethodService.getPaymentMethodById(ID);
 
@@ -83,7 +82,7 @@ class PaymentMethodServiceImplTest {
         assertEquals(paymentMethod.getName(),paymentMethodDTO.getName());
         assertEquals(paymentMethod.getType(),paymentMethodDTO.getType());
         assertEquals(paymentMethod.getTransactions(),paymentMethodDTO.getTransactions());
-        assertEquals("/api/payment-methods/" + ID,paymentMethodDTO.getPath());
+        assertEquals("/api/payment-methods/" + paymentMethod.getId(),paymentMethodDTO.getPath());
     }
 
     @Test
@@ -101,7 +100,7 @@ class PaymentMethodServiceImplTest {
         paymentMethod.setId(ID);
         paymentMethod.getTransactions().add(TRANSACTION);
 
-        when(paymentMethodRepository.findByName(NAME)).thenReturn(Optional.of(paymentMethod));
+        when(paymentMethodRepository.findByName(paymentMethod.getName())).thenReturn(Optional.of(paymentMethod));
 
         PaymentMethodDTO paymentMethodDTO = paymentMethodService.getPaymentMethodByName(NAME);
 
@@ -109,7 +108,7 @@ class PaymentMethodServiceImplTest {
         assertEquals(paymentMethod.getName(),paymentMethodDTO.getName());
         assertEquals(paymentMethod.getType(),paymentMethodDTO.getType());
         assertEquals(paymentMethod.getTransactions(),paymentMethodDTO.getTransactions());
-        assertEquals("/api/payment-methods/" + ID,paymentMethodDTO.getPath());
+        assertEquals("/api/payment-methods/" + paymentMethod.getId(),paymentMethodDTO.getPath());
     }
 
     @Test
@@ -124,22 +123,24 @@ class PaymentMethodServiceImplTest {
     @Test
     void createNewPaymentMethod() {
 
-        PaymentMethod paymentMethod = new PaymentMethod(NAME, TYPE);
-        paymentMethod.setId(ID);
-        paymentMethod.getTransactions().add(TRANSACTION);
-
+        //DTO passed to function
         PaymentMethodDTO paymentMethodDTO = new PaymentMethodDTO(NAME, TYPE);
-        paymentMethod.getTransactions().add(TRANSACTION);
+        paymentMethodDTO.getTransactions().add(TRANSACTION);
 
-//        when(paymentMethodRepository.save(PaymentMethodMapper.INSTANCE.convertToEntity(paymentMethodDTO)))
-//                .thenReturn(paymentMethod);
+        //Saved Entity
+        PaymentMethod paymentMethod = new PaymentMethod(paymentMethodDTO.getName(), paymentMethodDTO.getType());
+        paymentMethod.setId(ID);
+        paymentMethod.setTransactions(paymentMethodDTO.getTransactions());
 
+        //Check if entity is saved correctly
         ArgumentMatcher<PaymentMethod> argumentMatcher = paymentMethodToSave ->
                 Objects.equals(paymentMethodToSave.getName(), paymentMethod.getName())
-                && Objects.equals(paymentMethodToSave.getType(), paymentMethod.getType());
+                && Objects.equals(paymentMethodToSave.getType(), paymentMethod.getType())
+                && Objects.equals(paymentMethodToSave.getTransactions(), paymentMethod.getTransactions());
 
-        when(paymentMethodRepository.save(argThat(argumentMatcher)))
-                .thenReturn(paymentMethod);
+
+        when(paymentMethodRepository.save(argThat(argumentMatcher))).thenReturn(paymentMethod);
+
 
         PaymentMethodDTO returnedDTO = paymentMethodService.createNewPaymentMethod(paymentMethodDTO);
 
@@ -160,6 +161,7 @@ class PaymentMethodServiceImplTest {
         PaymentMethodDTO paymentMethodDTO = new PaymentMethodDTO(NAME, TYPE);
         paymentMethod.getTransactions().add(TRANSACTION);
 
+        //When searching the repository by name, find an item
         when(paymentMethodRepository.findByName(paymentMethodDTO.getName())).thenReturn(Optional.of(paymentMethod));
 
         assertThrows(ResourceAlreadyExistsException.class,
@@ -176,6 +178,7 @@ class PaymentMethodServiceImplTest {
         PaymentMethodDTO paymentMethodDTO = new PaymentMethodDTO(NAME, TYPE);
         paymentMethod.getTransactions().add(TRANSACTION);
 
+        //When searching the repository by id, find an item
         when(paymentMethodRepository.findById(paymentMethodDTO.getId())).thenReturn(Optional.of(paymentMethod));
 
         assertThrows(ResourceAlreadyExistsException.class,
@@ -236,7 +239,7 @@ class PaymentMethodServiceImplTest {
         //DTO passed to updatePaymentMethodById
         PaymentMethodDTO passedDTO = new PaymentMethodDTO("TestUpdate", PaymentType.CASH);
         passedDTO.getTransactions().add(TRANSACTION);
-        passedDTO.setId(15); //invalid id in passed DTO
+        passedDTO.setId(15); //attempting to change id in update
 
         //Original PaymentMethod
         PaymentMethod original = new PaymentMethod(NAME, TYPE);
@@ -252,7 +255,7 @@ class PaymentMethodServiceImplTest {
     @Test
     void updatePaymentMethodByName() {
 
-        //DTO passed to updatePaymentMethodById
+        //DTO passed to updatePaymentMethodByName
         PaymentMethodDTO passedDTO = new PaymentMethodDTO("TestUpdate", PaymentType.CASH);
         passedDTO.getTransactions().add(TRANSACTION);
 
@@ -282,7 +285,7 @@ class PaymentMethodServiceImplTest {
     @Test
     void updatePaymentMethodByName_NotFound() {
 
-        //DTO passed to updatePaymentMethodById
+        //DTO passed to updatePaymentMethodByName
         PaymentMethodDTO passedDTO = new PaymentMethodDTO("TestUpdate", PaymentType.CASH);
         passedDTO.getTransactions().add(TRANSACTION);
 
@@ -300,10 +303,10 @@ class PaymentMethodServiceImplTest {
     @Test
     void updatePaymentMethodByName_InvalidIdModification() {
 
-        //DTO passed to updatePaymentMethodById
+        //DTO passed to updatePaymentMethodByName
         PaymentMethodDTO passedDTO = new PaymentMethodDTO("TestUpdate", PaymentType.CASH);
         passedDTO.getTransactions().add(TRANSACTION);
-        passedDTO.setId(15); //invalid id in passed DTO
+        passedDTO.setId(15); //attempting to change id in update
 
         //Original PaymentMethod
         PaymentMethod original = new PaymentMethod(NAME, TYPE);
@@ -319,7 +322,7 @@ class PaymentMethodServiceImplTest {
     @Test
     void patchPaymentMethodById() {
 
-        //DTO passed to updatePaymentMethodById
+        //DTO passed to patchPaymentMethodById
         PaymentMethodDTO passedDTO = new PaymentMethodDTO("TestUpdate", PaymentType.CASH);
         passedDTO.getTransactions().add(TRANSACTION);
 
@@ -353,7 +356,7 @@ class PaymentMethodServiceImplTest {
     @Test
     void patchPaymentMethodById_UpdateOnlyName() {
 
-        //DTO passed to updatePaymentMethodById
+        //DTO passed to patchPaymentMethodById
         PaymentMethodDTO passedDTO = new PaymentMethodDTO();
         passedDTO.setName("TestUpdate");
 
@@ -389,7 +392,7 @@ class PaymentMethodServiceImplTest {
     @Test
     void patchPaymentMethodById_UpdateOnlyType() {
 
-        //DTO passed to updatePaymentMethodById
+        //DTO passed to patchPaymentMethodById
         PaymentMethodDTO passedDTO = new PaymentMethodDTO();
         passedDTO.setType(PaymentType.CASH);
 
@@ -425,7 +428,7 @@ class PaymentMethodServiceImplTest {
     @Test
     void patchPaymentMethodById_UpdateOnlyTransactions() {
 
-        //DTO passed to updatePaymentMethodById
+        //DTO passed to patchPaymentMethodById
         PaymentMethodDTO passedDTO = new PaymentMethodDTO();
         passedDTO.getTransactions().add(TRANSACTION);
 
@@ -459,7 +462,7 @@ class PaymentMethodServiceImplTest {
     @Test
     void patchPaymentMethodById_NotFound() {
 
-        //DTO passed to updatePaymentMethodById
+        //DTO passed to patchPaymentMethodById
         PaymentMethodDTO passedDTO = new PaymentMethodDTO();
         passedDTO.getTransactions().add(TRANSACTION);
 
@@ -476,9 +479,9 @@ class PaymentMethodServiceImplTest {
     @Test
     void patchPaymentMethodById_InvalidIdModification() {
 
-        //DTO passed to updatePaymentMethodById
+        //DTO passed to patchPaymentMethodById
         PaymentMethodDTO passedDTO = new PaymentMethodDTO();
-        passedDTO.setId(123);   //invalid id modification
+        passedDTO.setId(123);   //attempting to change id in patch
 
         //Original PaymentMethod
         PaymentMethod original = new PaymentMethod(NAME, TYPE);
