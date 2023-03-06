@@ -96,6 +96,7 @@ public class CategoryServiceImpl implements CategoryService {
         return saveAndReturnDTO(category);
     }
 
+    @Override
     public CategoryDTO updateCategoryByName(String name, CategoryDTO categoryDTO) {
         Category savedCategory = categoryRepository.findByName(name)
                 .orElseThrow(() -> new ResourceNotFoundException("Category " + name + " not found!"));
@@ -112,6 +113,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     }
 
+    @Override
     public CategoryDTO patchCategoryById (Integer id, CategoryDTO categoryDTO) {
 
         return categoryRepository.findById(id).map(category -> {
