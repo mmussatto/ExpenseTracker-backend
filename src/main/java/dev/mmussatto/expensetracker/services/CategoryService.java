@@ -5,8 +5,10 @@
 package dev.mmussatto.expensetracker.services;
 
 import dev.mmussatto.expensetracker.api.model.CategoryDTO;
+import dev.mmussatto.expensetracker.domain.Transaction;
 
 import java.util.List;
+import java.util.Set;
 
 public interface CategoryService {
 
@@ -27,4 +29,6 @@ public interface CategoryService {
     void deleteCategoryById (Integer id);
 
     void deleteCategoryByName (String name);
+
+    Set<Transaction> getTransactionsById(Integer id);
 }

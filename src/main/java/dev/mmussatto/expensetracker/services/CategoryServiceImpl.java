@@ -7,6 +7,7 @@ package dev.mmussatto.expensetracker.services;
 import dev.mmussatto.expensetracker.api.mappers.CategoryMapper;
 import dev.mmussatto.expensetracker.api.model.CategoryDTO;
 import dev.mmussatto.expensetracker.domain.Category;
+import dev.mmussatto.expensetracker.domain.Transaction;
 import dev.mmussatto.expensetracker.repositories.CategoryRepository;
 import dev.mmussatto.expensetracker.services.exceptions.InvalidIdModificationException;
 import dev.mmussatto.expensetracker.services.exceptions.ResourceAlreadyExistsException;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -146,6 +148,14 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     public void deleteCategoryByName(String name) {
         categoryRepository.deleteByName(name);
+    }
+
+    @Override
+    public Set<Transaction> getTransactionsById(Integer id) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Category " + id + " not found!"));
+
+        return  category.getTransactions();
     }
 
 

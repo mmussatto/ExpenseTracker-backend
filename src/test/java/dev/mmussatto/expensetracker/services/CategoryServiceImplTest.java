@@ -20,10 +20,7 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -533,5 +530,58 @@ class CategoryServiceImplTest {
         categoryService.deleteCategoryByName(NAME);
 
         verify(categoryRepository, times(1)).deleteByName(anyString());
+    }
+
+    @Test
+    void getTransactionsById() {
+        Transaction t1 = new Transaction();
+        t1.setId(1);
+        t1.setAmount(53.00);
+        t1.setDescription("Test Transaction 1");
+
+        Transaction t2 = new Transaction();
+        t2.setId(2);
+        t2.setAmount(123.00);
+        t2.setDescription("Test Transaction 2");
+
+        Set<Transaction> transactions = new HashSet<>(Arrays.asList(t1, t2));
+
+        Category category = new Category(NAME, COLOR);
+        category.setId(ID);
+        t1.setCategory(category);
+        t2.setCategory(category);
+        category.setTransactions(transactions);
+
+        when(categoryRepository.findById(category.getId())).thenReturn(Optional.of(category));
+
+        Set<Transaction> returnTransactions = categoryService.getTransactionsById(category.getId());
+
+        assertEquals(category.getTransactions().size(), returnTransactions.size());
+        assertEquals(category.getTransactions(), returnTransactions);
+    }
+
+    @Test
+    void getTransactionsById_NotFound() {
+        Transaction t1 = new Transaction();
+        t1.setId(1);
+        t1.setAmount(53.00);
+        t1.setDescription("Test Transaction 1");
+
+        Transaction t2 = new Transaction();
+        t2.setId(2);
+        t2.setAmount(123.00);
+        t2.setDescription("Test Transaction 2");
+
+        Set<Transaction> transactions = new HashSet<>(Arrays.asList(t1, t2));
+
+        Category category = new Category(NAME, COLOR);
+        category.setId(ID);
+        t1.setCategory(category);
+        t2.setCategory(category);
+        category.setTransactions(transactions);
+
+        when(categoryRepository.findById(category.getId())).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> categoryService.getTransactionsById(category.getId()));
     }
 }
