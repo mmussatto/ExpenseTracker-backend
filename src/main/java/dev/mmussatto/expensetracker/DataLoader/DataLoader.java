@@ -148,7 +148,16 @@ public class DataLoader implements CommandLineRunner {
         moviesTag.getTransactions().add(t2);
         cinemark.getTransactions().add(t2);
 
-        transactionRepository.saveAll(Arrays.asList(t1, t2));
+        Transaction t3 = new Transaction(10.76, new Timestamp(new Date().getTime()), "Top Gun: Maverick",
+                debNubank, recreationCategory, Stream.of(moviesTag, happyTag).collect(Collectors.toSet()), cinemark );
+        debNubank.getTransactions().add(t3);
+        recreationCategory.getTransactions().add(t3);
+        moviesTag.getTransactions().add(t3);
+        happyTag.getTransactions().add(t3);
+        cinemark.getTransactions().add(t3);
+
+
+        transactionRepository.saveAll(Arrays.asList(t1, t2, t3));
 
     }
 }
