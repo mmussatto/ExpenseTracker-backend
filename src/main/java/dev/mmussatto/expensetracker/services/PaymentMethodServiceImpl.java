@@ -70,10 +70,12 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
                     "/api/payment-methods/" + paymentMethod.getId());
         });
 
-        paymentMethodRepository.findById(paymentMethodDTO.getId()).ifPresent(paymentMethod -> {
-            throw new ResourceAlreadyExistsException("Payment Method " + paymentMethodDTO.getId() + " already exists.",
-                    "/api/payment-methods/" + paymentMethod.getId());
-        });
+        if (paymentMethodDTO.getId() != null) {
+            paymentMethodRepository.findById(paymentMethodDTO.getId()).ifPresent(paymentMethod -> {
+                throw new ResourceAlreadyExistsException("Payment Method " + paymentMethodDTO.getId() + " already exists.",
+                        "/api/payment-methods/" + paymentMethod.getId());
+            });
+        }
 
         return saveAndReturn(paymentMethodMapper.convertToEntity(paymentMethodDTO));
     }
