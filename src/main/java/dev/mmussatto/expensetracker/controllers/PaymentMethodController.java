@@ -24,58 +24,58 @@ public class PaymentMethodController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public ListDTO<PaymentMethodDTO> getAllPaymentMethods () {
-        return null;
+        return new ListDTO<>(paymentMethodService.getAllPaymentMethods());
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public PaymentMethodDTO getPaymentMethodById (@PathVariable final Integer id) {
-        return null;
+        return paymentMethodService.getPaymentMethodById(id);
     }
 
     @GetMapping("/name/{name}")
     @ResponseStatus(HttpStatus.OK)
     public PaymentMethodDTO getPaymentMethodByName (@PathVariable final String name) {
-        return null;
+        return paymentMethodService.getPaymentMethodByName(name);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public PaymentMethodDTO createNewPaymentMethod (@Valid @RequestBody PaymentMethodDTO paymentMethodDTO) {
-        return  null;
+        return paymentMethodService.createNewPaymentMethod(paymentMethodDTO);
     }
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public PaymentMethodDTO updatePaymentMethodById (@PathVariable final Integer id,
                                                      @Valid @RequestBody PaymentMethodDTO paymentMethodDTO) {
-        return null;
+        return paymentMethodService.updatePaymentMethodById(id, paymentMethodDTO);
     }
 
     @PutMapping("/name/{name}")
     @ResponseStatus(HttpStatus.OK)
     public PaymentMethodDTO updatePaymentMethodByName (@PathVariable final String name,
                                                      @Valid @RequestBody PaymentMethodDTO paymentMethodDTO) {
-        return null;
+        return paymentMethodService.updatePaymentMethodByName(name, paymentMethodDTO);
     }
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public PaymentMethodDTO patchPaymentMethodById (@PathVariable final Integer id,
                                                      @Valid @RequestBody PaymentMethodDTO paymentMethodDTO) {
-        return null;
+        return paymentMethodService.patchPaymentMethodById(id, paymentMethodDTO);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public void deletePaymentMethodById (@PathVariable final Integer id) {
-
+        paymentMethodService.deletePaymentMethodById(id);
     }
 
     @DeleteMapping("/name/{name}")
     @ResponseStatus(HttpStatus.OK)
     public void deletePaymentMethodById (@PathVariable final String name) {
-
+        paymentMethodService.deletePaymentMethodByName(name);
     }
 
 }
