@@ -11,7 +11,6 @@ import dev.mmussatto.expensetracker.domain.Transaction;
 import dev.mmussatto.expensetracker.services.CategoryService;
 import dev.mmussatto.expensetracker.services.exceptions.ResourceAlreadyExistsException;
 import dev.mmussatto.expensetracker.services.exceptions.ResourceNotFoundException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -23,7 +22,9 @@ import java.util.Arrays;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.ArgumentMatchers.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -41,12 +42,11 @@ class CategoryControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @BeforeEach
-    void setUp() {
-    }
+
 
     @Test
-    void getAllCategories() throws Exception{
+    void getAllCategories() throws Exception {
+
         CategoryDTO c1 = new CategoryDTO();
         c1.setId(1);
         c1.setName("C1");
@@ -61,41 +61,46 @@ class CategoryControllerTest {
 
         mockMvc.perform(get("/api/categories").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.numberOfCategories", equalTo(2)))
-                .andExpect(jsonPath("$.categories", hasSize(2)));
+                .andExpect(jsonPath("$.numberOfItems", equalTo(2)))
+                .andExpect(jsonPath("$.items", hasSize(2)));
     }
 
     @Test
-    void getCategoryById() throws Exception{
+    void getCategoryById() throws Exception
+    {
         CategoryDTO categoryDTO = new CategoryDTO();
         categoryDTO.setId(1);
         categoryDTO.setName("Test");
         categoryDTO.setColor(Color.BLUE);
         categoryDTO.setPath("/api/categories/1");
 
-
-        when(categoryService.getCategoryById(anyInt())).thenReturn(categoryDTO);
+        when(categoryService.getCategoryById(categoryDTO.getId())).thenReturn(categoryDTO);
 
         mockMvc.perform(get("/api/categories/{id}", categoryDTO.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", equalTo(1)))
-                .andExpect(jsonPath("$.name", equalTo("Test")))
-                .andExpect(jsonPath("$.color", equalTo("BLUE")))
-                .andExpect(jsonPath("$.path", equalTo("/api/categories/1")));
+                .andExpect(jsonPath("$.id", equalTo(categoryDTO.getId())))
+                .andExpect(jsonPath("$.name", equalTo(categoryDTO.getName())))
+                .andExpect(jsonPath("$.color", equalTo(categoryDTO.getColor().toString())))
+                .andExpect(jsonPath("$.path", equalTo(categoryDTO.getPath())));
     }
 
     @Test
-    void getCategoryById_NotFound() throws Exception{
-        when(categoryService.getCategoryById(anyInt())).thenThrow(ResourceNotFoundException.class);
+    void getCategoryById_NotFound() throws Exception {
 
-        mockMvc.perform(get("/api/categories/{id}", 1)
+        Integer notFoundID = 123;
+
+        when(categoryService.getCategoryById(notFoundID)).thenThrow(ResourceNotFoundException.class);
+
+        mockMvc.perform(get("/api/categories/{id}", notFoundID)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof  ResourceNotFoundException));
     }
 
     @Test
-    void getCategoryByName() throws Exception{
+    void getCategoryByName() throws Exception {
+
         CategoryDTO categoryDTO = new CategoryDTO();
         categoryDTO.setId(1);
         categoryDTO.setName("Test");
@@ -103,31 +108,34 @@ class CategoryControllerTest {
         categoryDTO.setPath("/api/categories/1");
 
 
-        when(categoryService.getCategoryByName(anyString())).thenReturn(categoryDTO);
+        when(categoryService.getCategoryByName(categoryDTO.getName())).thenReturn(categoryDTO);
 
         mockMvc.perform(get("/api/categories/name/{name}", categoryDTO.getName())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", equalTo(1)))
-                .andExpect(jsonPath("$.name", equalTo("Test")))
-                .andExpect(jsonPath("$.color", equalTo("BLUE")))
-                .andExpect(jsonPath("$.path", equalTo("/api/categories/1")));
+                .andExpect(jsonPath("$.id", equalTo(categoryDTO.getId())))
+                .andExpect(jsonPath("$.name", equalTo(categoryDTO.getName())))
+                .andExpect(jsonPath("$.color", equalTo(categoryDTO.getColor().toString())))
+                .andExpect(jsonPath("$.path", equalTo(categoryDTO.getPath())));
 
     }
 
     @Test
-    void getCategoryByName_NotFound() throws Exception{
+    void getCategoryByName_NotFound() throws Exception {
 
-        when(categoryService.getCategoryByName(anyString())).thenThrow(ResourceNotFoundException.class);
+        String notFoundName = "Unsaved Name";
 
-        mockMvc.perform(get("/api/categories/name/{name}", "Test")
+        when(categoryService.getCategoryByName(notFoundName)).thenThrow(ResourceNotFoundException.class);
+
+        mockMvc.perform(get("/api/categories/name/{name}", notFoundName)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
-
+                .andExpect(status().isNotFound())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResourceNotFoundException));
     }
 
     @Test
-    void createNewCategory() throws Exception{
+    void createNewCategory() throws Exception {
+
         CategoryDTO categoryDTO = new CategoryDTO();
         categoryDTO.setName("Test");
         categoryDTO.setColor(Color.BLUE);
@@ -139,16 +147,16 @@ class CategoryControllerTest {
         returnDTO.setPath("/api/categories/1");
 
 
-        when(categoryService.createNewCategory(any(CategoryDTO.class))).thenReturn(returnDTO);
+        when(categoryService.createNewCategory(categoryDTO)).thenReturn(returnDTO);
 
         mockMvc.perform(post("/api/categories")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(categoryDTO)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", equalTo(1)))
-                .andExpect(jsonPath("$.name", equalTo("Test")))
-                .andExpect(jsonPath("$.color", equalTo("BLUE")))
-                .andExpect(jsonPath("$.path", equalTo("/api/categories/1")));
+                .andExpect(jsonPath("$.id", equalTo(returnDTO.getId())))
+                .andExpect(jsonPath("$.name", equalTo(returnDTO.getName())))
+                .andExpect(jsonPath("$.color", equalTo(returnDTO.getColor().toString())))
+                .andExpect(jsonPath("$.path", equalTo(returnDTO.getPath())));
 
     }
 
@@ -160,148 +168,165 @@ class CategoryControllerTest {
         categoryDTO.setName("Test");
         categoryDTO.setColor(Color.BLUE);
 
-        when(categoryService.createNewCategory(any(CategoryDTO.class))).thenThrow(ResourceAlreadyExistsException.class);
+        when(categoryService.createNewCategory(categoryDTO)).thenThrow(ResourceAlreadyExistsException.class);
 
         mockMvc.perform(post("/api/categories")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(categoryDTO)))
-                .andExpect(status().isConflict());
+                .andExpect(status().isConflict())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResourceAlreadyExistsException));
     }
 
     @Test
-    void updateCategoryById() throws Exception{
+    void updateCategoryById() throws Exception {
 
+        CategoryDTO passDTO = new CategoryDTO();
+        passDTO.setName("Updated Test");
+        passDTO.setColor(Color.BLUE);
 
         CategoryDTO updatedDTO = new CategoryDTO();
         updatedDTO.setId(1);
-        updatedDTO.setName("Updated Test");
-        updatedDTO.setColor(Color.GREEN);
-        updatedDTO.setPath("/api/categories/1");
+        updatedDTO.setName(passDTO.getName());
+        updatedDTO.setColor(passDTO.getColor());
+        updatedDTO.setPath("/api/categories/" + updatedDTO.getId());
 
-        when(categoryService.updateCategoryById(anyInt(), any(CategoryDTO.class))).thenReturn(updatedDTO);
+        when(categoryService.updateCategoryById(updatedDTO.getId(), passDTO)).thenReturn(updatedDTO);
 
-        mockMvc.perform(put("/api/categories/{id}", 1)
+        mockMvc.perform(put("/api/categories/{id}", updatedDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(updatedDTO)))
+                    .content(objectMapper.writeValueAsString(passDTO)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", equalTo(1)))
-                .andExpect(jsonPath("$.name", equalTo("Updated Test")))
-                .andExpect(jsonPath("$.color", equalTo("GREEN")))
-                .andExpect(jsonPath("$.path", equalTo("/api/categories/1")));
+                .andExpect(jsonPath("$.id", equalTo(updatedDTO.getId())))
+                .andExpect(jsonPath("$.name", equalTo(updatedDTO.getName())))
+                .andExpect(jsonPath("$.color", equalTo(updatedDTO.getColor().toString())))
+                .andExpect(jsonPath("$.path", equalTo(updatedDTO.getPath())));
     }
 
     @Test
-    void updateCategoryById_NotFound() throws Exception{
+    void updateCategoryById_NotFound() throws Exception {
 
-        CategoryDTO updatedDTO = new CategoryDTO();
-        updatedDTO.setId(1);
-        updatedDTO.setName("Updated Test");
-        updatedDTO.setColor(Color.GREEN);
-        updatedDTO.setPath("/api/categories/1");
+        Integer unsaved_id = 123;
 
-        when(categoryService.updateCategoryById(anyInt(), any(CategoryDTO.class))).thenThrow(ResourceNotFoundException.class);
+        CategoryDTO passDTO = new CategoryDTO();
+        passDTO.setName("Updated Test");
+        passDTO.setColor(Color.BLUE);
 
-        mockMvc.perform(put("/api/categories/{id}", 1)
+        when(categoryService.updateCategoryById(unsaved_id, passDTO)).thenThrow(ResourceNotFoundException.class);
+
+        mockMvc.perform(put("/api/categories/{id}", unsaved_id)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updatedDTO)))
-                .andExpect(status().isNotFound());
+                        .content(objectMapper.writeValueAsString(passDTO)))
+                .andExpect(status().isNotFound())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResourceNotFoundException));
     }
 
     @Test
     void updateCategoryByName() throws Exception{
 
-        CategoryDTO updatedDTO = new CategoryDTO();
-        updatedDTO.setId(1);
-        updatedDTO.setName("Updated Test");
-        updatedDTO.setColor(Color.GREEN);
-        updatedDTO.setPath("/api/categories/1");
-
-        when(categoryService.updateCategoryByName(anyString(), any(CategoryDTO.class))).thenReturn(updatedDTO);
-
-        mockMvc.perform(put("/api/categories/name/{name}", "Test")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updatedDTO)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", equalTo(1)))
-                .andExpect(jsonPath("$.name", equalTo("Updated Test")))
-                .andExpect(jsonPath("$.color", equalTo("GREEN")))
-                .andExpect(jsonPath("$.path", equalTo("/api/categories/1")));
-    }
-
-    @Test
-    void updateCategoryByName_NotFound() throws Exception{
+        CategoryDTO passDTO = new CategoryDTO();
+        passDTO.setName("Updated Test");
+        passDTO.setColor(Color.BLUE);
 
         CategoryDTO updatedDTO = new CategoryDTO();
         updatedDTO.setId(1);
-        updatedDTO.setName("Updated Test");
-        updatedDTO.setColor(Color.GREEN);
-        updatedDTO.setPath("/api/categories/1");
+        updatedDTO.setName(passDTO.getName());
+        updatedDTO.setColor(passDTO.getColor());
+        updatedDTO.setPath("/api/categories/" + updatedDTO.getId());
 
-        when(categoryService.updateCategoryByName(anyString(), any(CategoryDTO.class))).thenThrow(ResourceNotFoundException.class);
+        when(categoryService.updateCategoryByName(updatedDTO.getName(), passDTO)).thenReturn(updatedDTO);
 
-        mockMvc.perform(put("/api/categories/name/{name}", "Test")
+        mockMvc.perform(put("/api/categories/name/{name}", updatedDTO.getName())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updatedDTO)))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void patchCategoryById() throws Exception{
-
-        CategoryDTO patchedDTO = new CategoryDTO();
-        patchedDTO.setId(1);
-        patchedDTO.setName("Updated Test");
-        patchedDTO.setColor(Color.GREEN);
-        patchedDTO.setPath("/api/categories/1");
-
-        when(categoryService.patchCategoryById(anyInt(), any(CategoryDTO.class))).thenReturn(patchedDTO);
-
-        mockMvc.perform(patch("/api/categories/{id}", 1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(patchedDTO)))
+                        .content(objectMapper.writeValueAsString(passDTO)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", equalTo(1)))
-                .andExpect(jsonPath("$.name", equalTo("Updated Test")))
-                .andExpect(jsonPath("$.color", equalTo("GREEN")))
-                .andExpect(jsonPath("$.path", equalTo("/api/categories/1")));
+                .andExpect(jsonPath("$.id", equalTo(updatedDTO.getId())))
+                .andExpect(jsonPath("$.name", equalTo(updatedDTO.getName())))
+                .andExpect(jsonPath("$.color", equalTo(updatedDTO.getColor().toString())))
+                .andExpect(jsonPath("$.path", equalTo(updatedDTO.getPath())));
     }
 
     @Test
-    void patchCategoryById_NotFound() throws Exception{
+    void updateCategoryByName_NotFound() throws Exception {
+
+        String notFoundName = "Unsaved Object";
+
+        CategoryDTO passDTO = new CategoryDTO();
+        passDTO.setName("Updated Test");
+        passDTO.setColor(Color.BLUE);
+
+        when(categoryService.updateCategoryByName(notFoundName, passDTO)).thenThrow(ResourceNotFoundException.class);
+
+        mockMvc.perform(put("/api/categories/name/{name}", notFoundName)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(passDTO)))
+                .andExpect(status().isNotFound())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResourceNotFoundException));
+    }
+
+    @Test
+    void patchCategoryById() throws Exception {
+
+        CategoryDTO passDTO = new CategoryDTO();
+        passDTO.setName("Updated Test");
+        passDTO.setColor(Color.BLUE);
 
         CategoryDTO patchedDTO = new CategoryDTO();
         patchedDTO.setId(1);
-        patchedDTO.setName("Updated Test");
-        patchedDTO.setColor(Color.GREEN);
-        patchedDTO.setPath("/api/categories/1");
+        patchedDTO.setName(passDTO.getName());
+        patchedDTO.setColor(passDTO.getColor());
+        patchedDTO.setPath("/api/categories/" + patchedDTO.getId());
 
-        when(categoryService.patchCategoryById(anyInt(), any(CategoryDTO.class))).thenThrow(ResourceNotFoundException.class);
+        when(categoryService.patchCategoryById(patchedDTO.getId(), passDTO)).thenReturn(patchedDTO);
 
-        mockMvc.perform(patch("/api/categories/{id}", 1)
+        mockMvc.perform(patch("/api/categories/{id}", patchedDTO.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(patchedDTO)))
-                .andExpect(status().isNotFound());
+                        .content(objectMapper.writeValueAsString(passDTO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", equalTo(patchedDTO.getId())))
+                .andExpect(jsonPath("$.name", equalTo(patchedDTO.getName())))
+                .andExpect(jsonPath("$.color", equalTo(patchedDTO.getColor().toString())))
+                .andExpect(jsonPath("$.path", equalTo(patchedDTO.getPath())));
     }
 
     @Test
-    void patchCategoryById_AlreadyExists() throws Exception{
+    void patchCategoryById_NotFound() throws Exception {
 
-        CategoryDTO patchedDTO = new CategoryDTO();
-        patchedDTO.setId(1);
-        patchedDTO.setName("Updated Test");
-        patchedDTO.setColor(Color.GREEN);
-        patchedDTO.setPath("/api/categories/1");
+        Integer notFoundId = 123;
 
-        when(categoryService.patchCategoryById(anyInt(), any(CategoryDTO.class))).thenThrow(ResourceAlreadyExistsException.class);
+        CategoryDTO passDTO = new CategoryDTO();
+        passDTO.setName("Updated Test");
+        passDTO.setColor(Color.BLUE);
 
-        mockMvc.perform(patch("/api/categories/{id}", 1)
+        when(categoryService.patchCategoryById(notFoundId, passDTO)).thenThrow(ResourceNotFoundException.class);
+
+        mockMvc.perform(patch("/api/categories/{id}", notFoundId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(patchedDTO)))
-                .andExpect(status().isConflict());
+                        .content(objectMapper.writeValueAsString(passDTO)))
+                .andExpect(status().isNotFound())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResourceNotFoundException));
+
     }
 
     @Test
-    void deleteCategoryById() throws Exception{
+    void patchCategoryById_AlreadyExists() throws Exception {
+
+        Integer alreadySavedId = 122;
+
+        CategoryDTO passDTO = new CategoryDTO();
+        passDTO.setName("Updated Test");
+        passDTO.setColor(Color.BLUE);
+
+        when(categoryService.patchCategoryById(alreadySavedId, passDTO)).thenThrow(ResourceAlreadyExistsException.class);
+
+        mockMvc.perform(patch("/api/categories/{id}", alreadySavedId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(passDTO)))
+                .andExpect(status().isConflict())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResourceAlreadyExistsException));
+    }
+
+    @Test
+    void deleteCategoryById() throws Exception {
 
         mockMvc.perform(delete("/api/categories/1")
                     .contentType(MediaType.APPLICATION_JSON))
@@ -311,7 +336,7 @@ class CategoryControllerTest {
     }
 
     @Test
-    void testDeleteCategoryById() throws Exception{
+    void testDeleteCategoryById() throws Exception {
 
         mockMvc.perform(delete("/api/categories/name/Test")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -348,13 +373,17 @@ class CategoryControllerTest {
     }
 
     @Test
-    void getCategoryTransactionsById_NotFound() throws Exception{
+    void getCategoryTransactionsById_NotFound() throws Exception {
+
+        Integer notFoundID = 123;
 
         when(categoryService.getTransactionsById(anyInt())).thenThrow(ResourceNotFoundException.class);
 
-        mockMvc.perform(get("/api/categories/{id}/transactions", 1)
+        mockMvc.perform(get("/api/categories/{id}/transactions", notFoundID)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResourceNotFoundException));
+
 
     }
 }
