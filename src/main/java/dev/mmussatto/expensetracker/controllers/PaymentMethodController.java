@@ -62,7 +62,7 @@ public class PaymentMethodController {
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public PaymentMethodDTO patchPaymentMethodById (@PathVariable final Integer id,
-                                                     @Valid @RequestBody PaymentMethodDTO paymentMethodDTO) {
+                                                    @RequestBody PaymentMethodDTO paymentMethodDTO) {
         return paymentMethodService.patchPaymentMethodById(id, paymentMethodDTO);
     }
 
