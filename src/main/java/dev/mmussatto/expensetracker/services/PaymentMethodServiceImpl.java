@@ -118,6 +118,9 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
             if (paymentMethodDTO.getType() != null)
                 paymentMethod.setType(paymentMethodDTO.getType());
 
+            if (paymentMethodDTO.getTransactions() != null && paymentMethodDTO.getTransactions().size() != 0)
+                paymentMethod.setTransactions(paymentMethodDTO.getTransactions());
+
             return saveAndReturn(paymentMethod);
 
         }).orElseThrow(() -> new ResourceNotFoundException("Payment Method " + id + " not found!"));
