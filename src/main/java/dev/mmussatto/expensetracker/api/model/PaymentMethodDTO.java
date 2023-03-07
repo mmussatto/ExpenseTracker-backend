@@ -7,6 +7,7 @@ package dev.mmussatto.expensetracker.api.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import dev.mmussatto.expensetracker.domain.PaymentType;
 import dev.mmussatto.expensetracker.domain.Transaction;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -19,7 +20,9 @@ import java.util.Set;
 public class PaymentMethodDTO {
 
     private Integer id;
+    @NotNull
     private String name;
+    @NotNull
     private PaymentType type;
     @ToString.Exclude
     @JsonIgnore
