@@ -11,11 +11,13 @@ import dev.mmussatto.expensetracker.repositories.PaymentMethodRepository;
 import dev.mmussatto.expensetracker.services.exceptions.InvalidIdModificationException;
 import dev.mmussatto.expensetracker.services.exceptions.ResourceAlreadyExistsException;
 import dev.mmussatto.expensetracker.services.exceptions.ResourceNotFoundException;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Service
 public class PaymentMethodServiceImpl implements PaymentMethodService {
 
     private final PaymentMethodMapper paymentMethodMapper;
