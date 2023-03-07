@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({ResourceNotFoundException.class})
-    public ResponseEntity<CustomErrorResponse> handleNotFoundException (Exception exception, WebRequest request) {
+    public ResponseEntity<Object> handleNotFoundException (Exception exception, WebRequest request) {
         CustomErrorResponse errorResponse = new CustomErrorResponse();
         errorResponse.setMessage(exception.getMessage());
         errorResponse.setTimestamp(LocalDateTime.now());
