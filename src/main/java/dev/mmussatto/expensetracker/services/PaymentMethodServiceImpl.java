@@ -49,7 +49,7 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
                     paymentMethodDTO.setPath("/api/payment-methods/" + paymentMethodDTO.getId());
                     return paymentMethodDTO;
                 })
-                .orElseThrow(() -> new ResourceNotFoundException("Payment Method " + id + "not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Payment Method " + id + " not found!"));
     }
 
     @Override
@@ -60,7 +60,7 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
                     paymentMethodDTO.setPath("/api/payment-methods/" + paymentMethodDTO.getId());
                     return paymentMethodDTO;
                 })
-                .orElseThrow(() -> new ResourceNotFoundException("Payment Method " + name + "not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Payment Method " + name + " not found!"));
     }
 
     @Override
@@ -81,7 +81,7 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
     @Override
     public PaymentMethodDTO updatePaymentMethodById(Integer id, PaymentMethodDTO paymentMethodDTO) {
         paymentMethodRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Payment Method " + id + "not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Payment Method " + id + " not found!"));
 
         if (paymentMethodDTO.getId() != null && !Objects.equals(paymentMethodDTO.getId(), id))
             throw new InvalidIdModificationException(id.toString(), "/api/payment-methods/" + id);
@@ -95,7 +95,7 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
     @Override
     public PaymentMethodDTO updatePaymentMethodByName(String name, PaymentMethodDTO paymentMethodDTO) {
         PaymentMethod savedPaymentMethod = paymentMethodRepository.findByName(name)
-                .orElseThrow(() -> new ResourceNotFoundException("Payment Method " + name + "not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Payment Method " + name + " not found!"));
 
         if (paymentMethodDTO.getId() != null && !Objects.equals(paymentMethodDTO.getId(), savedPaymentMethod.getId()))
             throw new InvalidIdModificationException(savedPaymentMethod.getId().toString(),
