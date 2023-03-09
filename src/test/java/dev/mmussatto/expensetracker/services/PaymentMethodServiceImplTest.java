@@ -176,6 +176,7 @@ class PaymentMethodServiceImplTest {
         paymentMethod.getTransactions().add(TRANSACTION);
 
         PaymentMethodDTO paymentMethodDTO = new PaymentMethodDTO(NAME, TYPE);
+        paymentMethodDTO.setId(ID);
         paymentMethod.getTransactions().add(TRANSACTION);
 
         //When searching the repository by id, find an item
