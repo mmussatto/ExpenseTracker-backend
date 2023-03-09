@@ -66,17 +66,17 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDTO createNewCategory(CategoryDTO categoryDTO) {
+
+        //Check is name is already in use
          categoryRepository.findByName(categoryDTO.getName()).ifPresent(category -> {
              throw new ResourceAlreadyExistsException("Category " + categoryDTO.getName() + " already exists.",
                      "/api/categories/" + category.getId());
          });
 
-         if (categoryDTO.getId() != null) {
-             categoryRepository.findById(categoryDTO.getId()).ifPresent((category -> {
-                 throw new ResourceAlreadyExistsException("Category " + categoryDTO.getId() + " already exists.",
-                         "/api/categories/" + category.getId());
-             }));
-         }
+        //validation in the controller should prevent this exception
+         if (categoryDTO.getId() != null)
+             throw new RuntimeException("Id should be null.");
+
 
         return saveAndReturnDTO(categoryMapper.convertToEntity(categoryDTO)) ;
     }
@@ -88,8 +88,17 @@ public class CategoryServiceImpl implements CategoryService {
                 .orElseThrow(() -> new ResourceNotFoundException("Category " + id + " not found!"));
 
         //Check if Ids are the same
-        if (categoryDTO.getId() != null && !Objects.equals(categoryDTO.getId(), id))
-            throw new InvalidIdModificationException(id.toString(), "/api/categories/" + id);
+//        if (categoryDTO.getId() != null && !Objects.equals(categoryDTO.getId(), id))
+//            throw new InvalidIdModificationException(id.toString(), "/api/categories/" + id);
+
+        if (categoryDTO.getId() != null)
+            throw new RuntimeException("Id should be null.");
+
+        //Check if name is already in use
+        categoryRepository.findByName(categoryDTO.getName()).ifPresent(nameAlreadyInUse -> {
+            throw new ResourceAlreadyExistsException("Category " + categoryDTO.getName() + " already exists.",
+                    "/api/categories/" + nameAlreadyInUse.getId());
+        });
 
         Category category = categoryMapper.convertToEntity(categoryDTO);
         category.setId(id);
@@ -103,12 +112,20 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryRepository.findById(id).map(category -> {
 
             //Check if Ids are the same
-            if (categoryDTO.getId() != null && !Objects.equals(categoryDTO.getId(), id))
-                throw new InvalidIdModificationException(id.toString(), "/api/categories/" + id);
+//            if (categoryDTO.getId() != null && !Objects.equals(categoryDTO.getId(), id))
+//                throw new InvalidIdModificationException(id.toString(), "/api/categories/" + id);
+            if (categoryDTO.getId() != null)
+                throw new RuntimeException("Id should be null.");
 
+            if (categoryDTO.getName() != null) {
+                //Check if name is already in use
+                categoryRepository.findByName(categoryDTO.getName()).ifPresent(nameAlreadyInUse -> {
+                    throw new ResourceAlreadyExistsException("Category " + categoryDTO.getName() + " already exists.",
+                            "/api/categories/" + nameAlreadyInUse.getId());
+                });
 
-            if (categoryDTO.getName() != null)
                 category.setName(categoryDTO.getName());
+            }
 
             if (categoryDTO.getColor() != null)
                 category.setColor(categoryDTO.getColor());
