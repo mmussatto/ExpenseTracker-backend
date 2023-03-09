@@ -72,7 +72,7 @@ class PaymentMethodControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", equalTo(dto.getId())))
                 .andExpect(jsonPath("$.name", equalTo(dto.getName())))
-                .andExpect(jsonPath("$.type", equalTo(dto.getType())))
+                .andExpect(jsonPath("$.type", equalTo(dto.getType().toString())))
                 .andExpect(jsonPath("$.path", equalTo(dto.getPath())));
     }
 
@@ -103,7 +103,7 @@ class PaymentMethodControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", equalTo(dto.getId())))
                 .andExpect(jsonPath("$.name", equalTo(dto.getName())))
-                .andExpect(jsonPath("$.type", equalTo(dto.getType())))
+                .andExpect(jsonPath("$.type", equalTo(dto.getType().toString())))
                 .andExpect(jsonPath("$.path", equalTo(dto.getPath())));
     }
 
@@ -137,7 +137,7 @@ class PaymentMethodControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", equalTo(returnDTO.getId())))
                 .andExpect(jsonPath("$.name", equalTo(returnDTO.getName())))
-                .andExpect(jsonPath("$.type", equalTo(returnDTO.getType())))
+                .andExpect(jsonPath("$.type", equalTo(returnDTO.getType().toString())))
                 .andExpect(jsonPath("$.path", equalTo(returnDTO.getPath())));
     }
 
@@ -169,10 +169,10 @@ class PaymentMethodControllerTest {
         mockMvc.perform(put("/api/payment-methods/{id}", returnDTO.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(passDTO)))
-                .andExpect(status().isCreated())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", equalTo(returnDTO.getId())))
                 .andExpect(jsonPath("$.name", equalTo(returnDTO.getName())))
-                .andExpect(jsonPath("$.type", equalTo(returnDTO.getType())))
+                .andExpect(jsonPath("$.type", equalTo(returnDTO.getType().toString())))
                 .andExpect(jsonPath("$.path", equalTo(returnDTO.getPath())));
     }
 
@@ -203,13 +203,13 @@ class PaymentMethodControllerTest {
 
         when(paymentMethodService.patchPaymentMethodById(returnDTO.getId(), passDTO)).thenReturn(returnDTO);
 
-        mockMvc.perform(patch("/api/payment-methods/{id}", passDTO.getId())
+        mockMvc.perform(patch("/api/payment-methods/{id}", returnDTO.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(passDTO)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", equalTo(returnDTO.getId())))
                 .andExpect(jsonPath("$.name", equalTo(returnDTO.getName())))
-                .andExpect(jsonPath("$.type", equalTo(returnDTO.getType())))
+                .andExpect(jsonPath("$.type", equalTo(returnDTO.getType().toString())))
                 .andExpect(jsonPath("$.path", equalTo(returnDTO.getPath())));
     }
 
