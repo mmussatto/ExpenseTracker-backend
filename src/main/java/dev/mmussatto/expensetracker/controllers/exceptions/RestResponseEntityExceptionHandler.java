@@ -72,4 +72,26 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
 
         return new ResponseEntity<>(responseBody, new HttpHeaders(), HttpStatus.BAD_REQUEST);
     }
+
+
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+
+        Map<String, Object> responseBody = new LinkedHashMap<>();
+        responseBody.put("timestamp", LocalDateTime.now()
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss")));
+        responseBody.put("status", status.value());
+        responseBody.put("error", HttpStatus.valueOf(status.value()).getReasonPhrase());
+        responseBody.put("path", ((ServletWebRequest) request).getRequest().getRequestURI());
+
+        List<String> errors = ex.getBindingResult().getFieldErrors()
+                .stream()
+                .map(x -> x.getDefaultMessage())
+                .collect(Collectors.toList());
+
+        responseBody.put("messages", errors);
+
+        return new ResponseEntity<>(responseBody, headers, status);
+    }
+
 }
