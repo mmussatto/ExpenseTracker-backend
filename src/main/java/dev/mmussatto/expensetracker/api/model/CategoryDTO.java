@@ -7,7 +7,9 @@ package dev.mmussatto.expensetracker.api.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import dev.mmussatto.expensetracker.domain.Color;
 import dev.mmussatto.expensetracker.domain.Transaction;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Null;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -18,14 +20,20 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 public class CategoryDTO {
+
+    @Null(message = "id field must be null")
     private Integer id;
-    @NotNull
+
+    @NotBlank(message = "name must not be blank")
     private String name;
-    @NotNull
+
+    @NotNull(message = "color must not be null")
     private Color color;
+
     @ToString.Exclude
     @JsonIgnore
     private Set<Transaction> transactions = new HashSet<>();
+
     private String path;
 
     public CategoryDTO(String name, Color color) {

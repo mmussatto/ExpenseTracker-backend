@@ -7,7 +7,8 @@ package dev.mmussatto.expensetracker.api.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import dev.mmussatto.expensetracker.domain.PaymentType;
 import dev.mmussatto.expensetracker.domain.Transaction;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Null;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -19,14 +20,19 @@ import java.util.Set;
 @NoArgsConstructor
 public class PaymentMethodDTO {
 
+    @Null(message = "id field must be null")
     private Integer id;
-    @NotNull
+
+    @NotBlank(message = "name must not be blank")
     private String name;
-    @NotNull
+
+    @NotBlank(message = "type must not be null")
     private PaymentType type;
+
     @ToString.Exclude
     @JsonIgnore
     private Set<Transaction> transactions = new HashSet<>();
+
     private String path;
 
     public PaymentMethodDTO(String name, PaymentType type) {
