@@ -20,11 +20,8 @@ public interface PaymentMethodService {
 
     PaymentMethodDTO updatePaymentMethodById (Integer id, PaymentMethodDTO paymentMethodDTO);
 
-    PaymentMethodDTO updatePaymentMethodByName (String name, PaymentMethodDTO paymentMethodDTO);
-
     PaymentMethodDTO patchPaymentMethodById (Integer id, PaymentMethodDTO paymentMethodDTO);
 
     void deletePaymentMethodById (Integer id);
 
-    void deletePaymentMethodByName (String name);
 }

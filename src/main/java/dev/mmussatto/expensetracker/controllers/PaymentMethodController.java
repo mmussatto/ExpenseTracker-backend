@@ -52,12 +52,6 @@ public class PaymentMethodController {
         return paymentMethodService.updatePaymentMethodById(id, paymentMethodDTO);
     }
 
-    @PutMapping("/name/{name}")
-    @ResponseStatus(HttpStatus.OK)
-    public PaymentMethodDTO updatePaymentMethodByName (@PathVariable final String name,
-                                                     @Valid @RequestBody PaymentMethodDTO paymentMethodDTO) {
-        return paymentMethodService.updatePaymentMethodByName(name, paymentMethodDTO);
-    }
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
@@ -72,10 +66,5 @@ public class PaymentMethodController {
         paymentMethodService.deletePaymentMethodById(id);
     }
 
-    @DeleteMapping("/name/{name}")
-    @ResponseStatus(HttpStatus.OK)
-    public void deletePaymentMethodById (@PathVariable final String name) {
-        paymentMethodService.deletePaymentMethodByName(name);
-    }
 
 }

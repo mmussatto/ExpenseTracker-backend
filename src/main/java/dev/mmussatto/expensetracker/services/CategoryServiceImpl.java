@@ -12,7 +12,6 @@ import dev.mmussatto.expensetracker.repositories.CategoryRepository;
 import dev.mmussatto.expensetracker.services.exceptions.InvalidIdModificationException;
 import dev.mmussatto.expensetracker.services.exceptions.ResourceAlreadyExistsException;
 import dev.mmussatto.expensetracker.services.exceptions.ResourceNotFoundException;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -99,23 +98,6 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryDTO updateCategoryByName(String name, CategoryDTO categoryDTO) {
-        Category savedCategory = categoryRepository.findByName(name)
-                .orElseThrow(() -> new ResourceNotFoundException("Category " + name + " not found!"));
-
-        //Check if Ids are the same
-        if (categoryDTO.getId() != null && !Objects.equals(categoryDTO.getId(), savedCategory.getId()))
-            throw new InvalidIdModificationException(savedCategory.getId().toString(),
-                    "/api/categories/" + savedCategory.getId());
-
-        Category category = categoryMapper.convertToEntity(categoryDTO);
-        category.setId(savedCategory.getId());
-
-        return saveAndReturnDTO(category);
-
-    }
-
-    @Override
     public CategoryDTO patchCategoryById (Integer id, CategoryDTO categoryDTO) {
 
         return categoryRepository.findById(id).map(category -> {
@@ -142,12 +124,6 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public void deleteCategoryById(Integer id) {
         categoryRepository.deleteById(id);
-    }
-
-    @Override
-    @Transactional
-    public void deleteCategoryByName(String name) {
-        categoryRepository.deleteByName(name);
     }
 
     @Override

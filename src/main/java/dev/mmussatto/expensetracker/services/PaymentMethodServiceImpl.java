@@ -95,21 +95,6 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
     }
 
     @Override
-    public PaymentMethodDTO updatePaymentMethodByName(String name, PaymentMethodDTO paymentMethodDTO) {
-        PaymentMethod savedPaymentMethod = paymentMethodRepository.findByName(name)
-                .orElseThrow(() -> new ResourceNotFoundException("Payment Method " + name + " not found!"));
-
-        if (paymentMethodDTO.getId() != null && !Objects.equals(paymentMethodDTO.getId(), savedPaymentMethod.getId()))
-            throw new InvalidIdModificationException(savedPaymentMethod.getId().toString(),
-                    "/api/payment-methods/" + savedPaymentMethod.getId());
-
-        PaymentMethod paymentMethod = paymentMethodMapper.convertToEntity(paymentMethodDTO);
-        paymentMethod.setId(savedPaymentMethod.getId());
-
-        return saveAndReturn(paymentMethod);
-    }
-
-    @Override
     public PaymentMethodDTO patchPaymentMethodById(Integer id, PaymentMethodDTO paymentMethodDTO) {
         return paymentMethodRepository.findById(id).map(paymentMethod -> {
 
@@ -133,11 +118,6 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
     @Override
     public void deletePaymentMethodById(Integer id) {
         paymentMethodRepository.deleteById(id);
-    }
-
-    @Override
-    public void deletePaymentMethodByName(String name) {
-        paymentMethodRepository.deleteByName(name);
     }
 
     private PaymentMethodDTO saveAndReturn(PaymentMethod paymentMethod) {

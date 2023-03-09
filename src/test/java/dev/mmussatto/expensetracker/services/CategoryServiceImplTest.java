@@ -23,7 +23,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -253,75 +254,6 @@ class CategoryServiceImplTest {
     }
 
     @Test
-    void updateCategoryByName() {
-
-        //CategoryDTO passed to updateCategoryByName
-        CategoryDTO passedDTO = new CategoryDTO("TestUpdate", Color.GREEN);
-        passedDTO.getTransactions().add(TRANSACTION);
-
-        //Category previously saved in the database
-        Category originalCategory = new Category(NAME, COLOR);
-        originalCategory.setId(ID);
-
-        //Category modified and saved
-        Category updatedCategory = new Category(passedDTO.getName(), passedDTO.getColor());
-        updatedCategory.setId(originalCategory.getId());
-        updatedCategory.setTransactions(passedDTO.getTransactions());
-
-        when(categoryRepository.findByName(originalCategory.getName())).thenReturn(Optional.of(originalCategory));
-        when(categoryRepository.save(updatedCategory)).thenReturn(updatedCategory);
-
-        //CategoryDTO returned after saving updateCategory
-        CategoryDTO savedDTO = categoryService.updateCategoryByName(originalCategory.getName(), passedDTO);
-
-        assertEquals(originalCategory.getId(), savedDTO.getId());   //same id as before
-        assertEquals(passedDTO.getName(), savedDTO.getName());      //updated name
-        assertEquals(passedDTO.getColor(), savedDTO.getColor());    //updated color
-        assertEquals(passedDTO.getTransactions(), savedDTO.getTransactions());  //updated transactions
-        assertEquals("/api/categories/" + originalCategory.getId(), savedDTO.getPath());
-
-        //Verify that the updatedCategory was saved
-        verify(categoryRepository, times(1)).save(updatedCategory);
-
-    }
-
-    @Test
-    void updateCategoryByName_NotFound() {
-
-        //CategoryDTO passed to updateCategoryByName
-        CategoryDTO passedDTO = new CategoryDTO("TestUpdate", Color.GREEN);
-        passedDTO.getTransactions().add(TRANSACTION);
-
-        //Category previously saved in the database
-        Category originalCategory = new Category(NAME, COLOR);
-        originalCategory.setId(ID);
-
-        when(categoryRepository.findByName(originalCategory.getName())).thenReturn(Optional.empty());
-
-        assertThrows(ResourceNotFoundException.class,
-                () -> categoryService.updateCategoryByName(originalCategory.getName(), passedDTO));
-    }
-
-    @Test
-    void updateCategoryByName_InvalidIdModification() {
-
-        //CategoryDTO passed to updateCategoryByName
-        CategoryDTO passedDTO = new CategoryDTO("TestUpdate", Color.GREEN);
-        passedDTO.getTransactions().add(TRANSACTION);
-        passedDTO.setId(15);   //attempting to change id in update
-
-
-        //Category already in the database
-        Category originalCategory = new Category(NAME, COLOR);
-        originalCategory.setId(ID);
-
-        when(categoryRepository.findByName(originalCategory.getName())).thenReturn(Optional.of(originalCategory));
-
-        assertThrows(InvalidIdModificationException.class,
-                () -> categoryService.updateCategoryByName(originalCategory.getName(), passedDTO));
-    }
-
-    @Test
     void patchCategoryById() {
 
         //CategoryDTO passed to updateCategoryById
@@ -523,13 +455,6 @@ class CategoryServiceImplTest {
         categoryService.deleteCategoryById(ID);
 
         verify(categoryRepository, times(1)).deleteById(anyInt());
-    }
-
-    @Test
-    void deleteCategoryByName() {
-        categoryService.deleteCategoryByName(NAME);
-
-        verify(categoryRepository, times(1)).deleteByName(anyString());
     }
 
     @Test

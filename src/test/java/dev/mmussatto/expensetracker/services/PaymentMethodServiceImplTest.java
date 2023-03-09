@@ -253,73 +253,6 @@ class PaymentMethodServiceImplTest {
     }
 
     @Test
-    void updatePaymentMethodByName() {
-
-        //DTO passed to updatePaymentMethodByName
-        PaymentMethodDTO passedDTO = new PaymentMethodDTO("TestUpdate", PaymentType.CASH);
-        passedDTO.getTransactions().add(TRANSACTION);
-
-        //Original PaymentMethod
-        PaymentMethod original = new PaymentMethod(NAME, TYPE);
-        original.setId(ID);
-
-        //Updated Payment Method
-        PaymentMethod updated = new PaymentMethod(passedDTO.getName(), passedDTO.getType());
-        updated.setId(original.getId());
-        updated.setTransactions(passedDTO.getTransactions());
-
-        when(paymentMethodRepository.findByName(original.getName())).thenReturn(Optional.of(original));
-        when(paymentMethodRepository.save(updated)).thenReturn(updated);
-
-        PaymentMethodDTO returnedDTO = paymentMethodService.updatePaymentMethodByName(original.getName(), passedDTO);
-
-        assertEquals(original.getId(), returnedDTO.getId());        //same id
-        assertEquals(passedDTO.getName(), returnedDTO.getName());   //updated name
-        assertEquals(passedDTO.getType(), returnedDTO.getType());   //updated type
-        assertEquals(passedDTO.getTransactions(),returnedDTO.getTransactions());    //updated transaction
-        assertEquals("/api/payment-methods/" + original.getId(), returnedDTO.getPath());
-
-        verify(paymentMethodRepository, times(1)).save(updated);
-    }
-
-    @Test
-    void updatePaymentMethodByName_NotFound() {
-
-        //DTO passed to updatePaymentMethodByName
-        PaymentMethodDTO passedDTO = new PaymentMethodDTO("TestUpdate", PaymentType.CASH);
-        passedDTO.getTransactions().add(TRANSACTION);
-
-        //Original PaymentMethod
-        PaymentMethod original = new PaymentMethod(NAME, TYPE);
-        original.setId(ID);
-
-
-        when(paymentMethodRepository.findByName(original.getName())).thenReturn(Optional.empty());
-
-        assertThrows(ResourceNotFoundException.class,
-                () -> paymentMethodService.updatePaymentMethodByName(original.getName(), passedDTO));
-    }
-
-    @Test
-    void updatePaymentMethodByName_InvalidIdModification() {
-
-        //DTO passed to updatePaymentMethodByName
-        PaymentMethodDTO passedDTO = new PaymentMethodDTO("TestUpdate", PaymentType.CASH);
-        passedDTO.getTransactions().add(TRANSACTION);
-        passedDTO.setId(15); //attempting to change id in update
-
-        //Original PaymentMethod
-        PaymentMethod original = new PaymentMethod(NAME, TYPE);
-        original.setId(ID);
-
-
-        when(paymentMethodRepository.findByName(original.getName())).thenReturn(Optional.of(original));
-
-        assertThrows(InvalidIdModificationException.class,
-                () -> paymentMethodService.updatePaymentMethodByName(original.getName(), passedDTO));
-    }
-
-    @Test
     void patchPaymentMethodById() {
 
         //DTO passed to patchPaymentMethodById
@@ -501,11 +434,4 @@ class PaymentMethodServiceImplTest {
         verify(paymentMethodRepository, times(1)).deleteById(ID);
     }
 
-    @Test
-    void deletePaymentMethodByName() {
-
-        paymentMethodService.deletePaymentMethodByName(NAME);
-
-        verify(paymentMethodRepository, times(1)).deleteByName(NAME);
-    }
 }

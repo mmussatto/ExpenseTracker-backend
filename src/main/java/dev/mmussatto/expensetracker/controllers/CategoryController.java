@@ -57,12 +57,6 @@ public class CategoryController {
         return categoryService.updateCategoryById(id, categoryDTO);
     }
 
-    @PutMapping("/name/{name}")
-    @ResponseStatus(HttpStatus.OK)
-    public CategoryDTO updateCategoryByName (@PathVariable final String name, @Valid @RequestBody CategoryDTO categoryDTO) {
-        return categoryService.updateCategoryByName(name, categoryDTO);
-    }
-
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public CategoryDTO patchCategoryById (@PathVariable final Integer id, @RequestBody CategoryDTO categoryDTO) {
@@ -73,12 +67,6 @@ public class CategoryController {
     @ResponseStatus(HttpStatus.OK)
     public void deleteCategoryById (@PathVariable final Integer id) {
         categoryService.deleteCategoryById(id);
-    }
-
-    @DeleteMapping("/name/{name}")
-    @ResponseStatus(HttpStatus.OK)
-    public void deleteCategoryById (@PathVariable final String name) {
-        categoryService.deleteCategoryByName(name);
     }
 
 

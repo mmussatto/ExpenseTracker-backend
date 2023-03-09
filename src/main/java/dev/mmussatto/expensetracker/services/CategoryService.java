@@ -22,13 +22,9 @@ public interface CategoryService {
 
     CategoryDTO updateCategoryById (Integer id, CategoryDTO categoryDTO);
 
-    CategoryDTO updateCategoryByName (String name, CategoryDTO categoryDTO);
-
     CategoryDTO patchCategoryById (Integer id, CategoryDTO categoryDTO);
 
     void deleteCategoryById (Integer id);
-
-    void deleteCategoryByName (String name);
 
     Set<Transaction> getTransactionsById(Integer id);
 }

@@ -24,7 +24,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -221,49 +220,6 @@ class CategoryControllerTest {
     }
 
     @Test
-    void updateCategoryByName() throws Exception{
-
-        CategoryDTO passDTO = new CategoryDTO();
-        passDTO.setName("Updated Test");
-        passDTO.setColor(Color.BLUE);
-
-        CategoryDTO updatedDTO = new CategoryDTO();
-        updatedDTO.setId(1);
-        updatedDTO.setName(passDTO.getName());
-        updatedDTO.setColor(passDTO.getColor());
-        updatedDTO.setPath("/api/categories/" + updatedDTO.getId());
-
-        when(categoryService.updateCategoryByName(updatedDTO.getName(), passDTO)).thenReturn(updatedDTO);
-
-        mockMvc.perform(put("/api/categories/name/{name}", updatedDTO.getName())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(passDTO)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", equalTo(updatedDTO.getId())))
-                .andExpect(jsonPath("$.name", equalTo(updatedDTO.getName())))
-                .andExpect(jsonPath("$.color", equalTo(updatedDTO.getColor().toString())))
-                .andExpect(jsonPath("$.path", equalTo(updatedDTO.getPath())));
-    }
-
-    @Test
-    void updateCategoryByName_NotFound() throws Exception {
-
-        String notFoundName = "Unsaved Object";
-
-        CategoryDTO passDTO = new CategoryDTO();
-        passDTO.setName("Updated Test");
-        passDTO.setColor(Color.BLUE);
-
-        when(categoryService.updateCategoryByName(notFoundName, passDTO)).thenThrow(ResourceNotFoundException.class);
-
-        mockMvc.perform(put("/api/categories/name/{name}", notFoundName)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(passDTO)))
-                .andExpect(status().isNotFound())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResourceNotFoundException));
-    }
-
-    @Test
     void patchCategoryById() throws Exception {
 
         CategoryDTO passDTO = new CategoryDTO();
@@ -333,16 +289,6 @@ class CategoryControllerTest {
                 .andExpect(status().isOk());
 
         verify(categoryService, times(1)).deleteCategoryById(anyInt());
-    }
-
-    @Test
-    void testDeleteCategoryById() throws Exception {
-
-        mockMvc.perform(delete("/api/categories/name/Test")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-
-        verify(categoryService, times(1)).deleteCategoryByName(anyString());
     }
 
     @Test

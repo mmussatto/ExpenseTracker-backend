@@ -193,44 +193,6 @@ class PaymentMethodControllerTest {
     }
 
     @Test
-    void updatePaymentMethodByName() throws Exception {
-
-        PaymentMethodDTO passDTO = new PaymentMethodDTO("Test Update", PaymentType.CREDIT_CARD);
-
-        PaymentMethodDTO returnDTO = new PaymentMethodDTO(passDTO.getName(), passDTO.getType());
-        returnDTO.setId(1);
-        returnDTO.setPath("/api/payment-methods/" + returnDTO.getId());
-
-        when(paymentMethodService.updatePaymentMethodByName(returnDTO.getName(), passDTO)).thenReturn(returnDTO);
-
-        mockMvc.perform(put("/api/payment-methods/name/{name}", returnDTO.getName())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(passDTO)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", equalTo(returnDTO.getId())))
-                .andExpect(jsonPath("$.name", equalTo(returnDTO.getName())))
-                .andExpect(jsonPath("$.type", equalTo(returnDTO.getType())))
-                .andExpect(jsonPath("$.path", equalTo(returnDTO.getPath())));
-    }
-
-    @Test
-    void updatePaymentMethodByName_NotFound() throws Exception {
-
-        String notFoundName = "Unsaved Resource Name";
-
-        PaymentMethodDTO passDTO = new PaymentMethodDTO("Test Update", PaymentType.CREDIT_CARD);
-
-        when(paymentMethodService.updatePaymentMethodByName(notFoundName, passDTO)).thenThrow(ResourceNotFoundException.class);
-
-        mockMvc.perform(put("/api/payment-methods/name/{name}", notFoundName)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(passDTO)))
-                .andExpect(status().isNotFound())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResourceNotFoundException));
-
-    }
-
-    @Test
     void patchPaymentMethodById() throws Exception {
 
         PaymentMethodDTO passDTO = new PaymentMethodDTO("Test Update", PaymentType.CREDIT_CARD);
@@ -296,15 +258,4 @@ class PaymentMethodControllerTest {
         verify(paymentMethodService, times(1)).deletePaymentMethodById(idToDelete);
     }
 
-    @Test
-    void testDeletePaymentMethodById() throws Exception {
-
-        String nameToDelete = "Object to be deleted";
-
-        mockMvc.perform(delete("/api/payment-methods/name/{name}", nameToDelete)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-
-        verify(paymentMethodService, times(1)).deletePaymentMethodByName(nameToDelete);
-    }
 }
