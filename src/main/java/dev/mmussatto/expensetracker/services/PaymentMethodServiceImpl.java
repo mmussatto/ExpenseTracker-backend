@@ -117,6 +117,9 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
 
     @Override
     public void deletePaymentMethodById(Integer id) {
+        paymentMethodRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Payment Method " + id + " not found!"));
+
         paymentMethodRepository.deleteById(id);
     }
 
