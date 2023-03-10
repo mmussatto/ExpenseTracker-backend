@@ -88,7 +88,7 @@ class PaymentMethodControllerTest {
         mockMvc.perform(get("/api/payment-methods/{id}", notFoundId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResourceNotFoundException));
+                .andExpect(result -> assertThat(result.getResolvedException(), instanceOf(ResourceNotFoundException.class)));
     }
 
     @Test
@@ -119,7 +119,7 @@ class PaymentMethodControllerTest {
         mockMvc.perform(get("/api/payment-methods/name/{name}", notFoundName)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResourceNotFoundException));
+                .andExpect(result -> assertThat(result.getResolvedException(), instanceOf(ResourceNotFoundException.class)));
     }
 
     @Test
@@ -167,7 +167,7 @@ class PaymentMethodControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(passDTO)))
                 .andExpect(status().isConflict())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResourceAlreadyExistsException));
+                .andExpect(result -> assertThat(result.getResolvedException(), instanceOf(ResourceAlreadyExistsException.class)));
     }
 
     @Test
@@ -204,7 +204,7 @@ class PaymentMethodControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(passDTO)))
                 .andExpect(status().isNotFound())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResourceNotFoundException));
+                .andExpect(result -> assertThat(result.getResolvedException(), instanceOf(ResourceNotFoundException.class)));
     }
 
     @Test
@@ -284,7 +284,7 @@ class PaymentMethodControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(passDTO)))
                 .andExpect(status().isNotFound())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResourceNotFoundException));
+                .andExpect(result -> assertThat(result.getResolvedException(), instanceOf(ResourceNotFoundException.class)));
     }
 
     @Test
@@ -311,6 +311,20 @@ class PaymentMethodControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(paymentMethodService, times(1)).deletePaymentMethodById(idToDelete);
+    }
+
+    @Test
+    void deletePaymentMethodById_NotFound() throws Exception {
+
+        doThrow(ResourceNotFoundException.class).when(paymentMethodService).deletePaymentMethodById(anyInt());
+
+
+        mockMvc.perform(delete("/api/payment-methods/{id}", 1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(result -> assertThat(result.getResolvedException(), instanceOf(ResourceNotFoundException.class)));
+
+        verify(paymentMethodService, times(1)).deletePaymentMethodById(anyInt());
     }
 
 }
