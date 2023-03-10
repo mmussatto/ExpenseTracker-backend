@@ -9,8 +9,10 @@ import dev.mmussatto.expensetracker.api.model.PaymentMethodDTO;
 import dev.mmussatto.expensetracker.services.PaymentMethodService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+@Validated
 @RestController
 @RequestMapping("/api/payment-methods")
 public class PaymentMethodController {
@@ -41,12 +43,14 @@ public class PaymentMethodController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @Validated(PaymentMethodDTO.allFieldsValidation.class)
     public PaymentMethodDTO createNewPaymentMethod (@Valid @RequestBody PaymentMethodDTO paymentMethodDTO) {
         return paymentMethodService.createNewPaymentMethod(paymentMethodDTO);
     }
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
+    @Validated(PaymentMethodDTO.allFieldsValidation.class)
     public PaymentMethodDTO updatePaymentMethodById (@PathVariable final Integer id,
                                                      @Valid @RequestBody PaymentMethodDTO paymentMethodDTO) {
         return paymentMethodService.updatePaymentMethodById(id, paymentMethodDTO);
@@ -55,8 +59,9 @@ public class PaymentMethodController {
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
+    @Validated(PaymentMethodDTO.onlyIdValidation.class)
     public PaymentMethodDTO patchPaymentMethodById (@PathVariable final Integer id,
-                                                    @RequestBody PaymentMethodDTO paymentMethodDTO) {
+                                                    @Valid @RequestBody PaymentMethodDTO paymentMethodDTO) {
         return paymentMethodService.patchPaymentMethodById(id, paymentMethodDTO);
     }
 

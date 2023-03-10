@@ -21,13 +21,17 @@ import java.util.Set;
 @NoArgsConstructor
 public class CategoryDTO {
 
-    @Null(message = "id field must be null")
+    // Validation Groups
+    public interface onlyIdValidation {}
+    public interface allFieldsValidation {}
+
+    @Null(message = "id field must be null", groups = {onlyIdValidation.class, allFieldsValidation.class})
     private Integer id;
 
-    @NotBlank(message = "name must not be blank")
+    @NotBlank(message = "name must not be blank", groups = allFieldsValidation.class)
     private String name;
 
-    @NotNull(message = "color must not be null")
+    @NotNull(message = "color must not be null", groups = allFieldsValidation.class)
     private Color color;
 
     @ToString.Exclude

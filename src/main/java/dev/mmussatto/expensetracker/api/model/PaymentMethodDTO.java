@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import dev.mmussatto.expensetracker.domain.PaymentType;
 import dev.mmussatto.expensetracker.domain.Transaction;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,13 +21,17 @@ import java.util.Set;
 @NoArgsConstructor
 public class PaymentMethodDTO {
 
-    @Null(message = "id field must be null")
+    // Validation Groups
+    public interface onlyIdValidation {}
+    public interface allFieldsValidation {}
+
+    @Null(message = "id field must be null", groups = {onlyIdValidation.class, allFieldsValidation.class})
     private Integer id;
 
-    @NotBlank(message = "name must not be blank")
+    @NotBlank(message = "name must not be blank", groups = allFieldsValidation.class)
     private String name;
 
-    @NotBlank(message = "type must not be null")
+    @NotNull(message = "type must not be null",  groups = allFieldsValidation.class)
     private PaymentType type;
 
     @ToString.Exclude

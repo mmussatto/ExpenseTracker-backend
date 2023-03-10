@@ -47,19 +47,22 @@ public class CategoryController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @Validated(CategoryDTO.allFieldsValidation.class)
     public CategoryDTO createNewCategory (@Valid @RequestBody CategoryDTO categoryDTO) {
         return categoryService.createNewCategory(categoryDTO);
     }
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
+    @Validated(CategoryDTO.allFieldsValidation.class)
     public CategoryDTO updateCategoryById (@PathVariable final Integer id, @Valid @RequestBody CategoryDTO categoryDTO) {
         return categoryService.updateCategoryById(id, categoryDTO);
     }
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public CategoryDTO patchCategoryById (@PathVariable final Integer id, @RequestBody CategoryDTO categoryDTO) {
+    @Validated(CategoryDTO.onlyIdValidation.class)
+    public CategoryDTO patchCategoryById (@PathVariable final Integer id, @Valid @RequestBody CategoryDTO categoryDTO) {
         return categoryService.patchCategoryById(id, categoryDTO);
     }
 
