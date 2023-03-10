@@ -7,6 +7,8 @@ package dev.mmussatto.expensetracker.controllers.exceptions;
 import dev.mmussatto.expensetracker.services.exceptions.InvalidIdModificationException;
 import dev.mmussatto.expensetracker.services.exceptions.ResourceAlreadyExistsException;
 import dev.mmussatto.expensetracker.services.exceptions.ResourceNotFoundException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -69,6 +71,26 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         responseBody.put("status", HttpStatus.BAD_REQUEST.value());
         responseBody.put("error", HttpStatus.BAD_REQUEST.getReasonPhrase());
         responseBody.put("path", ((ServletWebRequest) request).getRequest().getRequestURI());
+
+        return new ResponseEntity<>(responseBody, new HttpHeaders(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Object> handleConstraintViolationException(ConstraintViolationException exception, WebRequest request) {
+
+        Map<String, Object> responseBody = new LinkedHashMap<>();
+        responseBody.put("timestamp", LocalDateTime.now()
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss")));
+        responseBody.put("status", HttpStatus.BAD_REQUEST.value());
+        responseBody.put("error", HttpStatus.BAD_REQUEST.getReasonPhrase());
+        responseBody.put("path", ((ServletWebRequest) request).getRequest().getRequestURI());
+
+        List<String> errors = exception.getConstraintViolations()
+                .stream()
+                .map(ConstraintViolation::getMessage)
+                .collect(Collectors.toList());
+
+        responseBody.put("messages", errors);
 
         return new ResponseEntity<>(responseBody, new HttpHeaders(), HttpStatus.BAD_REQUEST);
     }
