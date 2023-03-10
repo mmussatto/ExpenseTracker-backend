@@ -18,7 +18,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.Arrays;
 
@@ -178,6 +177,24 @@ class CategoryControllerTest {
     }
 
     @Test
+    void createNewCategory_NameAlreadyExists() throws Exception {
+
+        CategoryDTO categoryDTO = new CategoryDTO();
+        categoryDTO.setName("Test");
+        categoryDTO.setColor(Color.BLUE);
+
+        when(categoryService.createNewCategory(any(CategoryDTO.class)))
+                .thenThrow(ResourceAlreadyExistsException.class);
+
+
+        mockMvc.perform(post("/api/categories")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(categoryDTO)))
+                .andExpect(status().isConflict())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResourceAlreadyExistsException));
+    }
+
+    @Test
     void updateCategoryById() throws Exception {
 
         CategoryDTO passDTO = new CategoryDTO();
@@ -326,9 +343,22 @@ class CategoryControllerTest {
     @Test
     void deleteCategoryById() throws Exception {
 
-        mockMvc.perform(delete("/api/categories/1")
+        mockMvc.perform(delete("/api/categories/{id}", 1)
                     .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
+
+        verify(categoryService, times(1)).deleteCategoryById(anyInt());
+    }
+
+    @Test
+    void deleteCategoryById_NotFound() throws Exception {
+
+        doThrow(ResourceNotFoundException.class).when(categoryService).deleteCategoryById(anyInt());
+
+        mockMvc.perform(delete("/api/categories/{id}", 1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResourceNotFoundException));
 
         verify(categoryService, times(1)).deleteCategoryById(anyInt());
     }
