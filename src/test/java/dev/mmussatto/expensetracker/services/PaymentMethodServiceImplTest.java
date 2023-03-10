@@ -10,7 +10,6 @@ import dev.mmussatto.expensetracker.domain.PaymentMethod;
 import dev.mmussatto.expensetracker.domain.PaymentType;
 import dev.mmussatto.expensetracker.domain.Transaction;
 import dev.mmussatto.expensetracker.repositories.PaymentMethodRepository;
-import dev.mmussatto.expensetracker.services.exceptions.InvalidIdModificationException;
 import dev.mmussatto.expensetracker.services.exceptions.ResourceAlreadyExistsException;
 import dev.mmussatto.expensetracker.services.exceptions.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -141,7 +140,6 @@ class PaymentMethodServiceImplTest {
 
         when(paymentMethodRepository.save(argThat(argumentMatcher))).thenReturn(paymentMethod);
 
-
         PaymentMethodDTO returnedDTO = paymentMethodService.createNewPaymentMethod(paymentMethodDTO);
 
         assertEquals(paymentMethod.getId(), returnedDTO.getId());
@@ -163,24 +161,6 @@ class PaymentMethodServiceImplTest {
 
         //When searching the repository by name, find an item
         when(paymentMethodRepository.findByName(paymentMethodDTO.getName())).thenReturn(Optional.of(paymentMethod));
-
-        assertThrows(ResourceAlreadyExistsException.class,
-                () -> paymentMethodService.createNewPaymentMethod(paymentMethodDTO));
-    }
-
-    @Test
-    void createNewPaymentMethod_IdAlreadyExists() {
-
-        PaymentMethod paymentMethod = new PaymentMethod(NAME, TYPE);
-        paymentMethod.setId(ID);
-        paymentMethod.getTransactions().add(TRANSACTION);
-
-        PaymentMethodDTO paymentMethodDTO = new PaymentMethodDTO(NAME, TYPE);
-        paymentMethodDTO.setId(ID);
-        paymentMethod.getTransactions().add(TRANSACTION);
-
-        //When searching the repository by id, find an item
-        when(paymentMethodRepository.findById(paymentMethodDTO.getId())).thenReturn(Optional.of(paymentMethod));
 
         assertThrows(ResourceAlreadyExistsException.class,
                 () -> paymentMethodService.createNewPaymentMethod(paymentMethodDTO));
@@ -235,21 +215,23 @@ class PaymentMethodServiceImplTest {
     }
 
     @Test
-    void updatePaymentMethodById_InvalidIdModification() {
+    void updatePaymentMethodById_NameAlreadyExists() {
 
         //DTO passed to updatePaymentMethodById
         PaymentMethodDTO passedDTO = new PaymentMethodDTO("TestUpdate", PaymentType.CASH);
         passedDTO.getTransactions().add(TRANSACTION);
-        passedDTO.setId(15); //attempting to change id in update
 
         //Original PaymentMethod
         PaymentMethod original = new PaymentMethod(NAME, TYPE);
         original.setId(ID);
 
+        //Original PaymentMethod
+        PaymentMethod nameAlreadyInUse = new PaymentMethod(passedDTO.getName(), TYPE);
 
         when(paymentMethodRepository.findById(original.getId())).thenReturn(Optional.of(original));
+        when(paymentMethodRepository.findByName(passedDTO.getName())).thenReturn(Optional.of(nameAlreadyInUse));
 
-        assertThrows(InvalidIdModificationException.class,
+        assertThrows(ResourceAlreadyExistsException.class,
                 () -> paymentMethodService.updatePaymentMethodById(original.getId(), passedDTO));
     }
 
@@ -411,21 +393,26 @@ class PaymentMethodServiceImplTest {
     }
 
     @Test
-    void patchPaymentMethodById_InvalidIdModification() {
+    void patchPaymentMethodById_NameAlreadyExists() {
 
-        //DTO passed to patchPaymentMethodById
-        PaymentMethodDTO passedDTO = new PaymentMethodDTO();
-        passedDTO.setId(123);   //attempting to change id in patch
+        //DTO passed to updatePaymentMethodById
+        PaymentMethodDTO passedDTO = new PaymentMethodDTO("TestUpdate", PaymentType.CASH);
+        passedDTO.getTransactions().add(TRANSACTION);
 
         //Original PaymentMethod
         PaymentMethod original = new PaymentMethod(NAME, TYPE);
         original.setId(ID);
 
-        when(paymentMethodRepository.findById(original.getId())).thenReturn(Optional.of(original));
+        //Original PaymentMethod
+        PaymentMethod nameAlreadyInUse = new PaymentMethod(passedDTO.getName(), TYPE);
 
-        assertThrows(InvalidIdModificationException.class,
+        when(paymentMethodRepository.findById(original.getId())).thenReturn(Optional.of(original));
+        when(paymentMethodRepository.findByName(passedDTO.getName())).thenReturn(Optional.of(nameAlreadyInUse));
+
+        assertThrows(ResourceAlreadyExistsException.class,
                 () -> paymentMethodService.patchPaymentMethodById(original.getId(), passedDTO));
     }
+
 
     @Test
     void deletePaymentMethodById() {

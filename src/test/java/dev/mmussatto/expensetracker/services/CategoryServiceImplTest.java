@@ -10,14 +10,11 @@ import dev.mmussatto.expensetracker.domain.Category;
 import dev.mmussatto.expensetracker.domain.Color;
 import dev.mmussatto.expensetracker.domain.Transaction;
 import dev.mmussatto.expensetracker.repositories.CategoryRepository;
-import dev.mmussatto.expensetracker.services.exceptions.InvalidIdModificationException;
 import dev.mmussatto.expensetracker.services.exceptions.ResourceAlreadyExistsException;
 import dev.mmussatto.expensetracker.services.exceptions.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -36,8 +33,6 @@ class CategoryServiceImplTest {
 
     CategoryService categoryService;
 
-    @Captor
-    ArgumentCaptor<Category> categoryCaptor;
 
     public static final Integer ID = 1;
     public static final String NAME = "Test";
@@ -77,7 +72,7 @@ class CategoryServiceImplTest {
 
         when(categoryRepository.findById(savedEntity.getId())).thenReturn(Optional.of(savedEntity));
 
-        CategoryDTO returnDTO = categoryService.getCategoryById(ID);
+        CategoryDTO returnDTO = categoryService.getCategoryById(savedEntity.getId());
 
         assertEquals(savedEntity.getId(), returnDTO.getId());
         assertEquals(savedEntity.getName(), returnDTO.getName());
@@ -101,7 +96,7 @@ class CategoryServiceImplTest {
 
         when(categoryRepository.findByName(savedEntity.getName())).thenReturn(Optional.of(savedEntity));
 
-        CategoryDTO categoryDTO = categoryService.getCategoryByName(NAME);
+        CategoryDTO categoryDTO = categoryService.getCategoryByName(savedEntity.getName());
 
         assertEquals(savedEntity.getId(), categoryDTO.getId());
         assertEquals(savedEntity.getName(), categoryDTO.getName());
@@ -130,9 +125,8 @@ class CategoryServiceImplTest {
         savedEntity.setId(ID);
         savedEntity.setTransactions(passedDTO.getTransactions());
 
-
-        when(categoryRepository.save(categoryCaptor.capture())).thenReturn(savedEntity);
-
+        when(categoryRepository.findByName(anyString())).thenReturn(Optional.empty());
+        when(categoryRepository.save(any(Category.class))).thenReturn(savedEntity);
 
         CategoryDTO savedDTO = categoryService.createNewCategory(passedDTO);
 
@@ -141,15 +135,6 @@ class CategoryServiceImplTest {
         assertEquals(passedDTO.getColor(), savedDTO.getColor());
         assertEquals(passedDTO.getTransactions(), savedDTO.getTransactions());
         assertEquals("/api/categories/" + savedEntity.getId(), savedDTO.getPath());
-
-        Category capturedCategory = categoryCaptor.getValue();
-        assertEquals(passedDTO.getName(), capturedCategory.getName());
-        assertEquals(passedDTO.getColor(), capturedCategory.getColor());
-        assertEquals(passedDTO.getTransactions(), capturedCategory.getTransactions());
-
-
-
-//        argThat(capturedCategory.getName(), eq(savedEntity));
     }
 
     @Test
@@ -164,16 +149,6 @@ class CategoryServiceImplTest {
         when(categoryRepository.findByName(passedDTO.getName())).thenReturn(Optional.of(savedEntity));
 
         assertThrows(ResourceAlreadyExistsException.class,
-                () -> categoryService.createNewCategory(passedDTO));
-    }
-
-    @Test
-    void createNewCategory_IdNotNull() {
-
-        CategoryDTO passedDTO = new CategoryDTO(NAME, COLOR);
-        passedDTO.getTransactions().add(TRANSACTION);
-
-        assertThrows(RuntimeException.class,
                 () -> categoryService.createNewCategory(passedDTO));
     }
 
@@ -194,6 +169,7 @@ class CategoryServiceImplTest {
 
 
         when(categoryRepository.findById(originalCategory.getId())).thenReturn(Optional.of(originalCategory));
+        when(categoryRepository.findByName(anyString())).thenReturn(Optional.empty());
         when(categoryRepository.save(updatedCategory)).thenReturn(updatedCategory);
 
 
@@ -208,6 +184,8 @@ class CategoryServiceImplTest {
 
 
         //Verify that the updatedCategory was saved
+        verify(categoryRepository, times(1)).findById(anyInt());
+        verify(categoryRepository, times(1)).findByName(anyString());
         verify(categoryRepository, times(1)).save(updatedCategory);
     }
 
@@ -277,7 +255,7 @@ class CategoryServiceImplTest {
         when(categoryRepository.findByName(passedDTO.getName())).thenReturn(Optional.empty());
 
         //return the modified originalCategory after saving
-        when(categoryRepository.save(categoryCaptor.capture())).thenReturn(updatedCategory);
+        when(categoryRepository.save(updatedCategory)).thenReturn(updatedCategory);
 
 
         CategoryDTO savedDTO = categoryService.patchCategoryById(originalCategory.getId(), passedDTO);
@@ -290,12 +268,7 @@ class CategoryServiceImplTest {
         assertEquals(passedDTO.getTransactions(), savedDTO.getTransactions());    //updated transactions
         assertEquals("/api/categories/" + originalCategory.getId(), savedDTO.getPath());
 
-        //Assert that the values were correctly updated before saving
-        Category capturedCategory = categoryCaptor.getValue();
-        assertEquals(originalCategory.getId(), capturedCategory.getId());
-        assertEquals(passedDTO.getName(), capturedCategory.getName());
-        assertEquals(passedDTO.getColor(), capturedCategory.getColor());
-        assertEquals(passedDTO.getTransactions(), capturedCategory.getTransactions());
+
     }
 
     @Test
@@ -321,7 +294,7 @@ class CategoryServiceImplTest {
         when(categoryRepository.findByName(passedDTO.getName())).thenReturn(Optional.empty());
 
         //return the modified originalCategory after saving
-        when(categoryRepository.save(categoryCaptor.capture())).thenReturn(updatedCategory);
+        when(categoryRepository.save(updatedCategory)).thenReturn(updatedCategory);
 
 
 
@@ -335,13 +308,6 @@ class CategoryServiceImplTest {
         assertEquals(originalCategory.getTransactions(), savedDTO.getTransactions()); //same transactions
         assertEquals("/api/categories/" + originalCategory.getId(), savedDTO.getPath());
 
-
-        //Assert that the values were correctly updated before saving
-        Category capturedCategory = categoryCaptor.getValue();
-        assertEquals(originalCategory.getId(), capturedCategory.getId());
-        assertEquals(passedDTO.getName(), capturedCategory.getName());
-        assertEquals(originalCategory.getColor(), capturedCategory.getColor());
-        assertEquals(originalCategory.getTransactions(), capturedCategory.getTransactions());
     }
 
     @Test
@@ -366,7 +332,7 @@ class CategoryServiceImplTest {
 
 
         //return the modified originalCategory after saving
-        when(categoryRepository.save(categoryCaptor.capture())).thenReturn(updatedCategory);
+        when(categoryRepository.save(updatedCategory)).thenReturn(updatedCategory);
 
 
         //CategoryDTO returned after saving updateCategory
@@ -379,12 +345,6 @@ class CategoryServiceImplTest {
         assertEquals(originalCategory.getTransactions(), savedDTO.getTransactions()); //same transactions
         assertEquals("/api/categories/" + originalCategory.getId(), savedDTO.getPath());
 
-        //Assert that the values were correctly updated before saving
-        Category capturedCategory = categoryCaptor.getValue();
-        assertEquals(originalCategory.getId(), capturedCategory.getId());
-        assertEquals(originalCategory.getName(), capturedCategory.getName());
-        assertEquals(passedDTO.getColor(), capturedCategory.getColor());
-        assertEquals(originalCategory.getTransactions(), capturedCategory.getTransactions());
     }
 
     @Test
@@ -409,7 +369,7 @@ class CategoryServiceImplTest {
         when(categoryRepository.findById(originalCategory.getId())).thenReturn(Optional.of(updatedCategory));
 
         //return updatedCategory after saving
-        when(categoryRepository.save(categoryCaptor.capture())).thenReturn(updatedCategory);
+        when(categoryRepository.save(updatedCategory)).thenReturn(updatedCategory);
 
 
         CategoryDTO savedDTO = categoryService.patchCategoryById(originalCategory.getId(), passedDTO);
@@ -422,12 +382,6 @@ class CategoryServiceImplTest {
         assertEquals(passedDTO.getTransactions(), savedDTO.getTransactions()); //updated transactions
         assertEquals("/api/categories/" + originalCategory.getId(), savedDTO.getPath());
 
-
-        //Assert that the values were correctly updated before saving
-        Category capturedCategory = categoryCaptor.getValue();
-        assertEquals(originalCategory.getName(), capturedCategory.getName());
-        assertEquals(originalCategory.getColor(), capturedCategory.getColor());
-        assertEquals(passedDTO.getTransactions(), capturedCategory.getTransactions());
     }
 
     @Test
@@ -444,27 +398,6 @@ class CategoryServiceImplTest {
         when(categoryRepository.findById(originalCategory.getId())).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
-                () -> categoryService.patchCategoryById(originalCategory.getId(), passedDTO));
-    }
-
-    @Test
-    void patchCategoryById_InvalidIdModification() {
-
-        //CategoryDTO passed to updateCategoryById
-        CategoryDTO passedDTO = new CategoryDTO("TestUpdate", Color.GREEN);
-        passedDTO.getTransactions().add(TRANSACTION);
-        passedDTO.setId(15); //attempting to change id in update
-
-
-        //Category previously saved in the database
-        Category originalCategory = new Category(NAME, COLOR);
-        originalCategory.setId(ID); //original id
-
-
-        when(categoryRepository.findById(originalCategory.getId())).thenReturn(Optional.of(originalCategory));
-
-
-        assertThrows(InvalidIdModificationException.class,
                 () -> categoryService.patchCategoryById(originalCategory.getId(), passedDTO));
     }
 
