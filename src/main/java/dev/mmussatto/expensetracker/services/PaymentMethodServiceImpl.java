@@ -8,13 +8,11 @@ import dev.mmussatto.expensetracker.api.mappers.PaymentMethodMapper;
 import dev.mmussatto.expensetracker.api.model.PaymentMethodDTO;
 import dev.mmussatto.expensetracker.domain.PaymentMethod;
 import dev.mmussatto.expensetracker.repositories.PaymentMethodRepository;
-import dev.mmussatto.expensetracker.services.exceptions.InvalidIdModificationException;
 import dev.mmussatto.expensetracker.services.exceptions.ResourceAlreadyExistsException;
 import dev.mmussatto.expensetracker.services.exceptions.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -65,28 +63,19 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
 
     @Override
     public PaymentMethodDTO createNewPaymentMethod(PaymentMethodDTO paymentMethodDTO) {
-        paymentMethodRepository.findByName(paymentMethodDTO.getName()).ifPresent(paymentMethod -> {
-            throw new ResourceAlreadyExistsException("Payment Method " + paymentMethodDTO.getName() + " already exists.",
-                    "/api/payment-methods/" + paymentMethod.getId());
-        });
 
-        if (paymentMethodDTO.getId() != null) {
-            paymentMethodRepository.findById(paymentMethodDTO.getId()).ifPresent(paymentMethod -> {
-                throw new ResourceAlreadyExistsException("Payment Method " + paymentMethodDTO.getId() + " already exists.",
-                        "/api/payment-methods/" + paymentMethod.getId());
-            });
-        }
+        checkIfNameIsAlreadyInUse(paymentMethodDTO);
 
         return saveAndReturn(paymentMethodMapper.convertToEntity(paymentMethodDTO));
     }
 
     @Override
     public PaymentMethodDTO updatePaymentMethodById(Integer id, PaymentMethodDTO paymentMethodDTO) {
+
         paymentMethodRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Payment Method " + id + " not found!"));
 
-        if (paymentMethodDTO.getId() != null && !Objects.equals(paymentMethodDTO.getId(), id))
-            throw new InvalidIdModificationException(id.toString(), "/api/payment-methods/" + id);
+        checkIfNameIsAlreadyInUse(paymentMethodDTO);
 
         PaymentMethod paymentMethod = paymentMethodMapper.convertToEntity(paymentMethodDTO);
         paymentMethod.setId(id);
@@ -98,11 +87,12 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
     public PaymentMethodDTO patchPaymentMethodById(Integer id, PaymentMethodDTO paymentMethodDTO) {
         return paymentMethodRepository.findById(id).map(paymentMethod -> {
 
-            if (paymentMethodDTO.getId() != null && !Objects.equals(paymentMethodDTO.getId(), id))
-                throw new InvalidIdModificationException(id.toString(), "/api/payment-methods/" + id);
+            if (paymentMethodDTO.getName() != null) {
 
-            if (paymentMethodDTO.getName() != null)
+                checkIfNameIsAlreadyInUse(paymentMethodDTO);
+
                 paymentMethod.setName(paymentMethodDTO.getName());
+            }
 
             if (paymentMethodDTO.getType() != null)
                 paymentMethod.setType(paymentMethodDTO.getType());
@@ -117,11 +107,13 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
 
     @Override
     public void deletePaymentMethodById(Integer id) {
+
         paymentMethodRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Payment Method " + id + " not found!"));
 
         paymentMethodRepository.deleteById(id);
     }
+
 
     private PaymentMethodDTO saveAndReturn(PaymentMethod paymentMethod) {
         PaymentMethod savedPaymentMethod = paymentMethodRepository.save(paymentMethod);
@@ -130,5 +122,12 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
         returnDTO.setPath("/api/payment-methods/" + returnDTO.getId());
 
         return returnDTO;
+    }
+
+    private void checkIfNameIsAlreadyInUse(PaymentMethodDTO paymentMethodDTO) {
+        paymentMethodRepository.findByName(paymentMethodDTO.getName()).ifPresent(paymentMethod -> {
+            throw new ResourceAlreadyExistsException("Payment Method " + paymentMethodDTO.getName() + " already exists.",
+                    "/api/payment-methods/" + paymentMethod.getId());
+        });
     }
 }
