@@ -430,9 +430,21 @@ class PaymentMethodServiceImplTest {
     @Test
     void deletePaymentMethodById() {
 
+        when(paymentMethodRepository.findById(ID)).thenReturn(Optional.of(new PaymentMethod()));
+        doNothing().when(paymentMethodRepository).deleteById(ID);
+
         paymentMethodService.deletePaymentMethodById(ID);
 
         verify(paymentMethodRepository, times(1)).deleteById(ID);
+    }
+
+    @Test
+    void deletePaymentMethodById_NotFound() {
+
+        when(paymentMethodRepository.findById(ID)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> paymentMethodService.deletePaymentMethodById(ID));
+
     }
 
 }

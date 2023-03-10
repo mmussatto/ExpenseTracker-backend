@@ -502,9 +502,20 @@ class CategoryServiceImplTest {
     @Test
     void deleteCategoryById() {
 
+        when(categoryRepository.findById(ID)).thenReturn(Optional.of(new Category()));
+        doNothing().when(categoryRepository).deleteById(ID);
+
         categoryService.deleteCategoryById(ID);
 
         verify(categoryRepository, times(1)).deleteById(anyInt());
+    }
+
+    @Test
+    void deleteCategoryById_NotFound() {
+
+        when(categoryRepository.findById(ID)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> categoryService.deleteCategoryById(ID));
     }
 
     @Test
