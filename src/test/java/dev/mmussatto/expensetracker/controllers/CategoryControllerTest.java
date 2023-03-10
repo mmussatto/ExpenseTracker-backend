@@ -287,7 +287,7 @@ class CategoryControllerTest {
 
         mockMvc.perform(delete("/api/categories/1")
                     .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         verify(categoryService, times(1)).deleteCategoryById(anyInt());
     }

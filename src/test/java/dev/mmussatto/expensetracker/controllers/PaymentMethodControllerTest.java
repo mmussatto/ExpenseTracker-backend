@@ -253,7 +253,7 @@ class PaymentMethodControllerTest {
 
         mockMvc.perform(delete("/api/payment-methods/{id}", idToDelete)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         verify(paymentMethodService, times(1)).deletePaymentMethodById(idToDelete);
     }
