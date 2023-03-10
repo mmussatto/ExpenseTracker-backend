@@ -11,6 +11,7 @@ import dev.mmussatto.expensetracker.domain.Transaction;
 import dev.mmussatto.expensetracker.services.CategoryService;
 import dev.mmussatto.expensetracker.services.exceptions.ResourceAlreadyExistsException;
 import dev.mmussatto.expensetracker.services.exceptions.ResourceNotFoundException;
+import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -161,20 +162,19 @@ class CategoryControllerTest {
     }
 
     @Test
-    void createNewCategory_IdNotNull() throws Exception {
+    void createNewCategory_BodyIdNotNull() throws Exception {
 
         CategoryDTO categoryDTO = new CategoryDTO();
         categoryDTO.setId(1);
         categoryDTO.setName("Test");
         categoryDTO.setColor(Color.BLUE);
 
-//        when(categoryService.createNewCategory(categoryDTO)).thenThrow(ResourceAlreadyExistsException.class);
 
         mockMvc.perform(post("/api/categories")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(categoryDTO)))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException));
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ConstraintViolationException));
     }
 
     @Test
@@ -218,6 +218,49 @@ class CategoryControllerTest {
                         .content(objectMapper.writeValueAsString(passDTO)))
                 .andExpect(status().isNotFound())
                 .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResourceNotFoundException));
+    }
+
+    @Test
+    void updateCategoryById_MissingColorField() throws Exception {
+
+        CategoryDTO passDTO = new CategoryDTO();
+        passDTO.setName("Updated Test");
+        //missing color field
+
+        mockMvc.perform(put("/api/categories/{id}", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(passDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ConstraintViolationException));
+    }
+
+    @Test
+    void updateCategoryById_BodyIdNotNull() throws Exception {
+
+        CategoryDTO passDTO = new CategoryDTO();
+        passDTO.setId(1);
+        passDTO.setName("Updated Test");
+        passDTO.setColor(Color.BLUE);
+
+        mockMvc.perform(put("/api/categories/{id}", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(passDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ConstraintViolationException));
+    }
+
+    @Test
+    void updateCategoryById_MissingNameField() throws Exception {
+
+        CategoryDTO passDTO = new CategoryDTO();
+        //missing name
+        passDTO.setColor(Color.BLUE);
+
+        mockMvc.perform(put("/api/categories/{id}", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(passDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ConstraintViolationException));
     }
 
     @Test
@@ -265,21 +308,19 @@ class CategoryControllerTest {
     }
 
     @Test
-    void patchCategoryById_AlreadyExists() throws Exception {
-
-        Integer alreadySavedId = 122;
+    void patchCategoryById_BodyIdNotNull() throws Exception {
 
         CategoryDTO passDTO = new CategoryDTO();
+        passDTO.setId(1);
         passDTO.setName("Updated Test");
         passDTO.setColor(Color.BLUE);
 
-        when(categoryService.patchCategoryById(alreadySavedId, passDTO)).thenThrow(ResourceAlreadyExistsException.class);
 
-        mockMvc.perform(patch("/api/categories/{id}", alreadySavedId)
+        mockMvc.perform(patch("/api/categories/{id}", 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(passDTO)))
-                .andExpect(status().isConflict())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResourceAlreadyExistsException));
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ConstraintViolationException));
     }
 
     @Test

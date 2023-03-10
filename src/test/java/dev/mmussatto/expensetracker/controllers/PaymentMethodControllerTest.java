@@ -10,6 +10,7 @@ import dev.mmussatto.expensetracker.domain.PaymentType;
 import dev.mmussatto.expensetracker.services.PaymentMethodService;
 import dev.mmussatto.expensetracker.services.exceptions.ResourceAlreadyExistsException;
 import dev.mmussatto.expensetracker.services.exceptions.ResourceNotFoundException;
+import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -20,8 +21,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Arrays;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -142,7 +144,20 @@ class PaymentMethodControllerTest {
     }
 
     @Test
-    void createNewPaymentMethod_AlreadyExists() throws Exception {
+    void createNewPaymentMethod_IdNotNull() throws Exception {
+
+        PaymentMethodDTO passDTO = new PaymentMethodDTO("p1", PaymentType.CREDIT_CARD);
+        passDTO.setId(123);
+
+        mockMvc.perform(post("/api/payment-methods")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(passDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertThat(result.getResolvedException(), instanceOf(ConstraintViolationException.class)));
+    }
+
+    @Test
+    void createNewPaymentMethod_NameAlreadyExists() throws Exception {
 
         PaymentMethodDTO passDTO = new PaymentMethodDTO("p1", PaymentType.CREDIT_CARD);
 
@@ -193,6 +208,48 @@ class PaymentMethodControllerTest {
     }
 
     @Test
+    void updatePaymentMethodById_BodyIdNotNull() throws Exception {
+
+        PaymentMethodDTO passDTO = new PaymentMethodDTO("Test Update", PaymentType.CREDIT_CARD);
+        passDTO.setId(1);
+
+        mockMvc.perform(put("/api/payment-methods/{id}", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(passDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertThat(result.getResolvedException(), instanceOf(ConstraintViolationException.class)));
+    }
+
+    @Test
+    void updatePaymentMethodById_MissingNameField() throws Exception {
+
+        PaymentMethodDTO passDTO = new PaymentMethodDTO();
+        //missing name field
+        passDTO.setType(PaymentType.CREDIT_CARD);
+
+        mockMvc.perform(put("/api/payment-methods/{id}", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(passDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertThat(result.getResolvedException(), instanceOf(ConstraintViolationException.class)));
+    }
+
+    @Test
+    void updatePaymentMethodById_MissingTypeField() throws Exception {
+
+        PaymentMethodDTO passDTO = new PaymentMethodDTO();
+        passDTO.setName("Test Update");
+        //missing type field
+
+        mockMvc.perform(put("/api/payment-methods/{id}", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(passDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertThat(result.getResolvedException(), instanceOf(ConstraintViolationException.class)));
+    }
+
+
+    @Test
     void patchPaymentMethodById() throws Exception {
 
         PaymentMethodDTO passDTO = new PaymentMethodDTO("Test Update", PaymentType.CREDIT_CARD);
@@ -231,19 +288,17 @@ class PaymentMethodControllerTest {
     }
 
     @Test
-    void patchPaymentMethodById_AlreadyExists() throws Exception {
-
-        Integer alreadySavedId = 122;
+    void patchPaymentMethodById_IdNotNull() throws Exception {
 
         PaymentMethodDTO passDTO = new PaymentMethodDTO("Test Update", PaymentType.CREDIT_CARD);
+        passDTO.setId(1);
 
-        when(paymentMethodService.patchPaymentMethodById(alreadySavedId, passDTO)).thenThrow(ResourceAlreadyExistsException.class);
 
-        mockMvc.perform(patch("/api/payment-methods/{id}", alreadySavedId)
+        mockMvc.perform(patch("/api/payment-methods/{id}", 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(passDTO)))
-                .andExpect(status().isConflict())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResourceAlreadyExistsException));
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertThat(result.getResolvedException(), instanceOf(ConstraintViolationException.class)));
     }
 
     @Test
