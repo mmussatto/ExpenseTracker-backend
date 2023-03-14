@@ -116,7 +116,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
 
         responseBody.put("messages", errors);
 
-        return new ResponseEntity<>(responseBody, headers, status);
+        return handleExceptionInternal(ex, responseBody, headers, status, request);
     }
 
     @Override
