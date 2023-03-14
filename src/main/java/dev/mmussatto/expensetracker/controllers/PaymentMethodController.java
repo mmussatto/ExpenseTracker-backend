@@ -6,11 +6,14 @@ package dev.mmussatto.expensetracker.controllers;
 
 import dev.mmussatto.expensetracker.api.model.ListDTO;
 import dev.mmussatto.expensetracker.api.model.PaymentMethodDTO;
+import dev.mmussatto.expensetracker.api.model.TransactionDTO;
 import dev.mmussatto.expensetracker.services.PaymentMethodService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Set;
 
 @Validated
 @RestController
@@ -69,6 +72,12 @@ public class PaymentMethodController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deletePaymentMethodById (@PathVariable final Integer id) {
         paymentMethodService.deletePaymentMethodById(id);
+    }
+
+    @GetMapping("/{id}/transactions")
+    @ResponseStatus(HttpStatus.OK)
+    public Set<TransactionDTO> getPaymentMethodTransactionsById (@PathVariable final Integer id) {
+        return paymentMethodService.getPaymentMethodTransactionsById(id);
     }
 
 
