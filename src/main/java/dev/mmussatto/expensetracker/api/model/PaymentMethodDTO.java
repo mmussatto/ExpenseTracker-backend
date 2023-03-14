@@ -20,13 +20,15 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 public class PaymentMethodDTO {
-
     // Validation Groups
     public interface onlyIdValidation {}
+
     public interface allFieldsValidation {}
 
     @Null(message = "id field must be null", groups = {onlyIdValidation.class, allFieldsValidation.class})
     private Integer id;
+
+    private String path;
 
     @NotBlank(message = "name must not be blank", groups = allFieldsValidation.class)
     private String name;
@@ -35,10 +37,8 @@ public class PaymentMethodDTO {
     private PaymentType type;
 
     @ToString.Exclude
-    @JsonIgnore
+    @JsonIgnore //for transactions, use the /transactions endpoint (returns a TransactionDTO)
     private Set<Transaction> transactions = new HashSet<>();
-
-    private String path;
 
     public PaymentMethodDTO(String name, PaymentType type) {
         this.name = name;
