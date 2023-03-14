@@ -19,10 +19,7 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -434,4 +431,42 @@ class PaymentMethodServiceImplTest {
 
     }
 
+    @Test
+    void getPaymentMethodTransactionsById() {
+
+        Transaction t1 = new Transaction();
+        t1.setId(1);
+        t1.setAmount(53.00);
+        t1.setDescription("Test Transaction 1");
+
+        Transaction t2 = new Transaction();
+        t2.setId(2);
+        t2.setAmount(123.00);
+        t2.setDescription("Test Transaction 2");
+
+        Set<Transaction> transactions = new HashSet<>(Arrays.asList(t1, t2));
+
+        PaymentMethod paymentMethod = new PaymentMethod(NAME, TYPE);
+        paymentMethod.setId(ID);
+        t1.setPaymentMethod(paymentMethod);
+        t2.setPaymentMethod(paymentMethod);
+        paymentMethod.setTransactions(transactions);
+
+        when(paymentMethodRepository.findById(paymentMethod.getId())).thenReturn(Optional.of(paymentMethod));
+
+        Set<Transaction> returnedSet = paymentMethodService.getPaymentMethodTransactionsById(paymentMethod.getId());
+
+        assertEquals(transactions, returnedSet);
+    }
+
+    @Test
+    void getPaymentMethodTransactionsById_NotFound() {
+
+        Integer notFoundId = 123;
+
+        when(paymentMethodRepository.findById(notFoundId)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> paymentMethodService.getPaymentMethodTransactionsById(notFoundId));
+    }
 }
