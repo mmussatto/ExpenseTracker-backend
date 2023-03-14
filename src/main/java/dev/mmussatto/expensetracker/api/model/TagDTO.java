@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -27,7 +28,7 @@ public class TagDTO {
 
     @ToString.Exclude
     @JsonIgnore
-    private Set<Transaction> transactions;
+    private Set<Transaction> transactions = new HashSet<>();
 
     public TagDTO(String name, Color color) {
         this.name = name;
