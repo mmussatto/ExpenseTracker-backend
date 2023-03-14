@@ -11,19 +11,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DataJpaTest
-class StoreRepositoryTest {
+class VendorRepositoryTest {
 
     @Autowired
     private TestEntityManager testEntityManager;
 
     @Autowired
-    private StoreRepository<OnlineStore> onlineStoreStoreRepository;
+    private VendorRepository<OnlineStore> onlineStoreStoreRepository;
 
     @Autowired
-    StoreRepository<PhysicalStore> physicalStoreStoreRepository;
+    VendorRepository<PhysicalStore> physicalStoreStoreRepository;
 
 
     @Test

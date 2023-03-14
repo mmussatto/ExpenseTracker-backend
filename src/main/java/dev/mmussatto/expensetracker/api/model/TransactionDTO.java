@@ -6,8 +6,8 @@ package dev.mmussatto.expensetracker.api.model;
 
 import dev.mmussatto.expensetracker.domain.Category;
 import dev.mmussatto.expensetracker.domain.PaymentMethod;
-import dev.mmussatto.expensetracker.domain.Store;
 import dev.mmussatto.expensetracker.domain.Tag;
+import dev.mmussatto.expensetracker.domain.Vendor;
 import lombok.Data;
 
 import java.sql.Timestamp;
@@ -23,5 +23,5 @@ public class TransactionDTO {
     private PaymentMethod paymentMethod;
     private Category category;
     private Set<Tag> tags;
-    private Store store;
+    private Vendor vendor;
 }

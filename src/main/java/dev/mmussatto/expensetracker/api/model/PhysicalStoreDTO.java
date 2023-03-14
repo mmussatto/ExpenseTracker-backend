@@ -9,6 +9,6 @@ import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class PhysicalStoreDTO extends StoreDTO{
+public class PhysicalStoreDTO extends VendorDTO {
     private String address;
 }

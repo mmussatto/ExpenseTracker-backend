@@ -12,7 +12,7 @@ import lombok.ToString;
 import java.util.Set;
 
 @Data
-public abstract class StoreDTO {
+public abstract class VendorDTO {
     private Integer id;
     private String name;
     @ToString.Exclude

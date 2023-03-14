@@ -22,15 +22,15 @@ public class DataLoader implements CommandLineRunner {
 
     private final CategoryRepository categoryRepository;
     private final PaymentMethodRepository paymentMethodRepository;
-    private final StoreRepository<OnlineStore> onlineStoreStoreRepository;
-    private final StoreRepository<PhysicalStore> physicalStoreStoreRepository;
+    private final VendorRepository<OnlineStore> onlineStoreStoreRepository;
+    private final VendorRepository<PhysicalStore> physicalStoreStoreRepository;
     private final TagRepository tagRepository;
     private final TransactionRepository transactionRepository;
 
     public DataLoader(CategoryRepository categoryRepository,
                       PaymentMethodRepository paymentMethodRepository,
-                      StoreRepository<OnlineStore> onlineStoreStoreRepository,
-                      StoreRepository<PhysicalStore> physicalStoreStoreRepository,
+                      VendorRepository<OnlineStore> onlineStoreStoreRepository,
+                      VendorRepository<PhysicalStore> physicalStoreStoreRepository,
                       TagRepository tagRepository,
                       TransactionRepository transactionRepository) {
         this.categoryRepository = categoryRepository;

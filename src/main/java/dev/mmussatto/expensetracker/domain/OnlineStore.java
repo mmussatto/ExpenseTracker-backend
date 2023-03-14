@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @Entity
-public class OnlineStore extends Store {
+public class OnlineStore extends Vendor {
 
     private String url;
 

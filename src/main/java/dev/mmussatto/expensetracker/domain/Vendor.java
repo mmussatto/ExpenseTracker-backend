@@ -20,7 +20,7 @@ import java.util.Set;
 @EqualsAndHashCode(exclude = {"transactions"})
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-public abstract class Store {
+public abstract class Vendor {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,12 +29,12 @@ public abstract class Store {
     @NotNull
     private String name;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "store")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "vendor")
     @ToString.Exclude
     @JsonIgnore
     private Set<Transaction> transactions = new HashSet<>();
 
-    public Store(String name) {
+    public Vendor(String name) {
         this.name = name;
     }
 }

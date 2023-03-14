@@ -28,7 +28,7 @@ class TransactionMapperTest {
     public static final Set<Tag> TAGS = Stream
             .of(new Tag("TestTag1", Color.RED), new Tag("TestTag2", Color.GREEN))
             .collect(Collectors.toSet());
-    public static final Store STORE = new OnlineStore("TestStore", "www.somewebsite.com");
+    public static final Vendor VENDOR = new OnlineStore("TestStore", "www.somewebsite.com");
 
     TransactionMapper transactionMapper = TransactionMapper.INSTANCE;
 
@@ -41,7 +41,7 @@ class TransactionMapperTest {
         PAYMENT.getTransactions().add(testRelationships);
         CATEGORY.getTransactions().add(testRelationships);
         TAGS.forEach(tag -> tag.getTransactions().add(testRelationships));
-        STORE.getTransactions().add(testRelationships);
+        VENDOR.getTransactions().add(testRelationships);
     }
 
 
@@ -63,8 +63,8 @@ class TransactionMapperTest {
         TAGS.forEach(tag -> tag.getTransactions().add(transaction));
         transaction.setTags(TAGS);
 
-        STORE.getTransactions().add(transaction);
-        transaction.setStore(STORE);
+        VENDOR.getTransactions().add(transaction);
+        transaction.setVendor(VENDOR);
 
         TransactionDTO transactionDTO = transactionMapper.convertToDTO(transaction);
 
@@ -76,7 +76,7 @@ class TransactionMapperTest {
         assertEquals(transaction.getPaymentMethod(), transactionDTO.getPaymentMethod());
         assertEquals(transaction.getCategory(), transactionDTO.getCategory());
         assertEquals(transaction.getTags(), transactionDTO.getTags());
-        assertEquals(transaction.getStore(), transactionDTO.getStore());
+        assertEquals(transaction.getVendor(), transactionDTO.getVendor());
 
     }
 
@@ -95,7 +95,7 @@ class TransactionMapperTest {
 
         transactionDTO.setTags(TAGS);
 
-        transactionDTO.setStore(STORE);
+        transactionDTO.setVendor(VENDOR);
 
         Transaction transaction = transactionMapper.convertToEntity(transactionDTO);
 
@@ -106,6 +106,6 @@ class TransactionMapperTest {
         assertEquals(transactionDTO.getPaymentMethod(), transaction.getPaymentMethod());
         assertEquals(transactionDTO.getCategory(), transaction.getCategory());
         assertEquals(transactionDTO.getTags(), transaction.getTags());
-        assertEquals(transactionDTO.getStore(), transaction.getStore());
+        assertEquals(transactionDTO.getVendor(), transaction.getVendor());
     }
 }

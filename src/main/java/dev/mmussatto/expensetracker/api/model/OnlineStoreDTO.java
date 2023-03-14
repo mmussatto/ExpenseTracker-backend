@@ -9,6 +9,6 @@ import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class OnlineStoreDTO extends StoreDTO{
+public class OnlineStoreDTO extends VendorDTO {
     private String url;
 }

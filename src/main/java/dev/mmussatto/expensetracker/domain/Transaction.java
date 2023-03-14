@@ -42,16 +42,16 @@ public class Transaction {
     private Set<Tag> tags = new HashSet<>();
 
     @ManyToOne
-    private Store store;
+    private Vendor vendor;
 
     public Transaction(Double amount, Timestamp date, String description, PaymentMethod paymentMethod,
-                       Category category, Set<Tag> tags, Store store) {
+                       Category category, Set<Tag> tags, Vendor vendor) {
         this.amount = amount;
         this.date = date;
         this.description = description;
         this.paymentMethod = paymentMethod;
         this.category = category;
         this.tags = tags;
-        this.store = store;
+        this.vendor = vendor;
     }
 }
