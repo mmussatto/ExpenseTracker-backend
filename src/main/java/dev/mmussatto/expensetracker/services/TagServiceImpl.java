@@ -96,7 +96,7 @@ public class TagServiceImpl implements TagService {
             if (tagDTO.getColor() != null)
                 tag.setColor(tagDTO.getColor());
 
-            if (tagDTO.getTransactions() != null && tag.getTransactions().size() != 0)
+            if (tagDTO.getTransactions() != null && tagDTO.getTransactions().size() != 0)
                 tag.setTransactions(tagDTO.getTransactions());
 
             return saveAndReturn(tag);
