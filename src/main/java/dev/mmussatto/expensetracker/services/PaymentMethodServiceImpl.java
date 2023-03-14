@@ -5,7 +5,9 @@
 package dev.mmussatto.expensetracker.services;
 
 import dev.mmussatto.expensetracker.api.mappers.PaymentMethodMapper;
+import dev.mmussatto.expensetracker.api.mappers.TransactionMapper;
 import dev.mmussatto.expensetracker.api.model.PaymentMethodDTO;
+import dev.mmussatto.expensetracker.api.model.TransactionDTO;
 import dev.mmussatto.expensetracker.domain.PaymentMethod;
 import dev.mmussatto.expensetracker.repositories.PaymentMethodRepository;
 import dev.mmussatto.expensetracker.services.exceptions.ResourceAlreadyExistsException;
@@ -13,6 +15,7 @@ import dev.mmussatto.expensetracker.services.exceptions.ResourceNotFoundExceptio
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -112,6 +115,22 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
                 .orElseThrow(() -> new ResourceNotFoundException("Payment Method " + id + " not found!"));
 
         paymentMethodRepository.deleteById(id);
+    }
+
+    @Override
+    public Set<TransactionDTO> getPaymentMethodTransactionsById(Integer id) {
+
+        PaymentMethod paymentMethod = paymentMethodRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Payment Method " + id + " not found!"));
+
+
+        return paymentMethod.getTransactions()
+                .stream()
+                .map(transaction -> {
+                    TransactionDTO transactionDTO = TransactionMapper.INSTANCE.convertToDTO(transaction);
+                    transactionDTO.setPath("/api/transactions/" + transactionDTO.getId());
+                    return transactionDTO;
+                }).collect(Collectors.toSet());
     }
 
 
