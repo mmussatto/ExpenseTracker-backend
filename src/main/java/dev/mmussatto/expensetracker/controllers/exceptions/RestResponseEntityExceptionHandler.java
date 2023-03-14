@@ -4,6 +4,7 @@
 
 package dev.mmussatto.expensetracker.controllers.exceptions;
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import dev.mmussatto.expensetracker.services.exceptions.InvalidIdModificationException;
 import dev.mmussatto.expensetracker.services.exceptions.ResourceAlreadyExistsException;
 import dev.mmussatto.expensetracker.services.exceptions.ResourceNotFoundException;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -22,6 +24,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -114,6 +117,33 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         responseBody.put("messages", errors);
 
         return new ResponseEntity<>(responseBody, headers, status);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers,
+                                                                  HttpStatusCode status, WebRequest request) {
+
+        String genericMessage = "Unacceptable JSON " + ex.getMessage();
+        String errorDetails = genericMessage;
+
+        if (ex.getCause() instanceof InvalidFormatException) {
+            InvalidFormatException ifx = (InvalidFormatException) ex.getCause();
+            if (ifx.getTargetType()!=null && ifx.getTargetType().isEnum()) {
+                errorDetails = String.format("Invalid enum value: '%s' for the field: '%s'. The value must be one of: %s.",
+                        ifx.getValue(), ifx.getPath().get(ifx.getPath().size()-1).getFieldName(), Arrays.toString(ifx.getTargetType().getEnumConstants()));
+            }
+        }
+
+        Map<String, Object> responseBody = new LinkedHashMap<>();
+        responseBody.put("timestamp", LocalDateTime.now()
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss")));
+        responseBody.put("status", status.value());
+        responseBody.put("error", HttpStatus.valueOf(status.value()).getReasonPhrase());
+        responseBody.put("path", ((ServletWebRequest) request).getRequest().getRequestURI());
+        responseBody.put("messages", errorDetails);
+
+
+        return handleExceptionInternal(ex, responseBody, headers, status, request);
     }
 
 }
