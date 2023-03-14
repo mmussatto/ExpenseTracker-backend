@@ -7,6 +7,7 @@ package dev.mmussatto.expensetracker.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.mmussatto.expensetracker.api.model.PaymentMethodDTO;
 import dev.mmussatto.expensetracker.domain.PaymentType;
+import dev.mmussatto.expensetracker.domain.Transaction;
 import dev.mmussatto.expensetracker.services.PaymentMethodService;
 import dev.mmussatto.expensetracker.services.exceptions.ResourceAlreadyExistsException;
 import dev.mmussatto.expensetracker.services.exceptions.ResourceNotFoundException;
@@ -24,6 +25,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -327,4 +329,43 @@ class PaymentMethodControllerTest {
         verify(paymentMethodService, times(1)).deletePaymentMethodById(anyInt());
     }
 
+    @Test
+    void getPaymentMethodTransactionsById() throws Exception{
+
+        Transaction t1 = new Transaction();
+        t1.setId(1);
+        t1.setAmount(53.00);
+        t1.setDescription("Test Transaction 1");
+
+        Transaction t2 = new Transaction();
+        t2.setId(2);
+        t2.setAmount(123.00);
+        t2.setDescription("Test Transaction 2");
+
+        PaymentMethodDTO paymentMethodDTO = new PaymentMethodDTO();
+        paymentMethodDTO.setId(1);
+        paymentMethodDTO.getTransactions().addAll(Arrays.asList(t1, t2));
+
+        when(paymentMethodService.getPaymentMethodTransactionsById(paymentMethodDTO.getId()))
+                .thenReturn(paymentMethodDTO.getTransactions());
+
+        mockMvc.perform(get("/api/payment-methods/{id}/transactions", paymentMethodDTO.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)));
+    }
+
+    @Test
+    void getPaymentMethodTransactionsById_NotFound() throws Exception{
+
+        Integer notFoundId = 123;
+
+        when(paymentMethodService.getPaymentMethodTransactionsById(notFoundId))
+                .thenThrow(ResourceNotFoundException.class);
+
+        mockMvc.perform(get("/api/payment-methods/{id}/transactions", notFoundId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResourceNotFoundException));
+    }
 }
