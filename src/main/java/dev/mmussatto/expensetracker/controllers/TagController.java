@@ -10,12 +10,15 @@ import dev.mmussatto.expensetracker.api.model.TagDTO;
 import dev.mmussatto.expensetracker.api.model.TransactionDTO;
 import dev.mmussatto.expensetracker.domain.Transaction;
 import dev.mmussatto.expensetracker.services.TagService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Validated
 @RestController
 @RequestMapping("/api/tags")
 public class TagController {
@@ -47,19 +50,22 @@ public class TagController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public TagDTO createNewTag (@RequestBody TagDTO tagDTO) {
+    @Validated(TagDTO.allFieldsValidation.class)
+    public TagDTO createNewTag (@Valid @RequestBody TagDTO tagDTO) {
         return tagService.createNewTag(tagDTO);
     }
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public TagDTO updateTagById (@PathVariable final Integer id, @RequestBody TagDTO tagDTO) {
+    @Validated(TagDTO.allFieldsValidation.class)
+    public TagDTO updateTagById (@PathVariable final Integer id, @Valid @RequestBody TagDTO tagDTO) {
         return tagService.updateTagById(id, tagDTO);
     }
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public TagDTO patchTagById (@PathVariable final Integer id, @RequestBody TagDTO tagDTO) {
+    @Validated(TagDTO.onlyIdValidation.class)
+    public TagDTO patchTagById (@PathVariable final Integer id, @Valid @RequestBody TagDTO tagDTO) {
         return tagService.patchTagById(id, tagDTO);
     }
 
