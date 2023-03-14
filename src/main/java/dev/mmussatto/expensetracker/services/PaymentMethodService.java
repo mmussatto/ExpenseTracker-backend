@@ -5,7 +5,7 @@
 package dev.mmussatto.expensetracker.services;
 
 import dev.mmussatto.expensetracker.api.model.PaymentMethodDTO;
-import dev.mmussatto.expensetracker.api.model.TransactionDTO;
+import dev.mmussatto.expensetracker.domain.Transaction;
 
 import java.util.List;
 import java.util.Set;
@@ -26,5 +26,5 @@ public interface PaymentMethodService {
 
     void deletePaymentMethodById (Integer id);
 
-    Set<TransactionDTO> getPaymentMethodTransactionsById(Integer id);
+    Set<Transaction> getPaymentMethodTransactionsById(Integer id);
 }
