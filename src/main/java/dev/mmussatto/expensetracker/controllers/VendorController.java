@@ -72,7 +72,7 @@ public class VendorController {
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Validated(VendorDTO.allFieldsValidation.class)
-    public VendorDTO updateVendorById (@Valid @PathVariable final Integer id, @RequestBody VendorDTO vendorDTO) {
+    public VendorDTO updateVendorById (@PathVariable final Integer id, @Valid @RequestBody VendorDTO vendorDTO) {
 
         Vendor vendor = getVendor(vendorDTO);
 
