@@ -4,7 +4,7 @@
 
 package dev.mmussatto.expensetracker.api.model;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -12,6 +12,6 @@ import lombok.EqualsAndHashCode;
 @Data
 public class PhysicalStoreDTO extends VendorDTO {
 
-    @NotNull(message = "address must not be null",  groups = VendorDTO.allFieldsValidation.class)
+    @NotBlank(message = "address must not be null",  groups = VendorDTO.allFieldsValidation.class)
     private String address;
 }
