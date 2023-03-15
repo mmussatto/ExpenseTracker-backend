@@ -88,7 +88,7 @@ public class VendorServiceImpl<V extends Vendor> implements VendorService<V> {
             if (vendor.getTransactions() != null && vendor.getTransactions().size() != 0)
                 savedVendor.setTransactions(vendor.getTransactions());
 
-            return vendorRepository.save(vendor);
+            return vendorRepository.save(savedVendor);
         }).orElseThrow(() -> new ResourceNotFoundException(String.format("Vendor %d not found!", id)));
     }
 
