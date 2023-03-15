@@ -79,16 +79,16 @@ public class PaymentMethodController {
 
     @GetMapping("/{id}/transactions")
     @ResponseStatus(HttpStatus.OK)
-    public Set<TransactionDTO> getPaymentMethodTransactionsById (@PathVariable final Integer id) {
+    public ListDTO<TransactionDTO> getPaymentMethodTransactionsById (@PathVariable final Integer id) {
         Set<Transaction> transactions = paymentMethodService.getPaymentMethodTransactionsById(id);
 
         //Convert to dto
-        return transactions.stream()
+        return new ListDTO<>(transactions.stream()
                 .map(transaction -> {
                     TransactionDTO transactionDTO = TransactionMapper.INSTANCE.convertToDTO(transaction);
                     transactionDTO.setPath("/api/transactions/" + transactionDTO.getId());
                     return transactionDTO;
-                }).collect(Collectors.toSet());
+                }).collect(Collectors.toList()));
     }
 
 

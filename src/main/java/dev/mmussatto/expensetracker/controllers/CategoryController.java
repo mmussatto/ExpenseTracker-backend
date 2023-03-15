@@ -4,8 +4,10 @@
 
 package dev.mmussatto.expensetracker.controllers;
 
+import dev.mmussatto.expensetracker.api.mappers.TransactionMapper;
 import dev.mmussatto.expensetracker.api.model.CategoryDTO;
 import dev.mmussatto.expensetracker.api.model.ListDTO;
+import dev.mmussatto.expensetracker.api.model.TransactionDTO;
 import dev.mmussatto.expensetracker.domain.Transaction;
 import dev.mmussatto.expensetracker.services.CategoryService;
 import jakarta.validation.Valid;
@@ -14,6 +16,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Validated
 @RestController
@@ -76,8 +79,15 @@ public class CategoryController {
     //Categories' Transactions
     @GetMapping("/{id}/transactions")
     @ResponseStatus(HttpStatus.OK)
-    public Set<Transaction> getCategoryTransactionsById (@PathVariable final Integer id) {
-        return categoryService.getTransactionsById(id);
+    public ListDTO<TransactionDTO> getCategoryTransactionsById (@PathVariable final Integer id) {
+        Set<Transaction> transactions = categoryService.getTransactionsById(id);
+
+        return new ListDTO<>(transactions.stream()
+                .map(transaction -> {
+                    TransactionDTO dto = TransactionMapper.INSTANCE.convertToDTO(transaction);
+                    dto.setPath("/api/transactions/" + dto.getId());
+                    return dto;
+                }).collect(Collectors.toList()));
     }
 
 }
