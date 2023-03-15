@@ -13,13 +13,16 @@ import dev.mmussatto.expensetracker.domain.PhysicalStore;
 import dev.mmussatto.expensetracker.domain.Transaction;
 import dev.mmussatto.expensetracker.domain.Vendor;
 import dev.mmussatto.expensetracker.services.VendorServiceImpl;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Validated
 @RestController
 @RequestMapping("/api/vendors")
 public class VendorController {
@@ -56,7 +59,8 @@ public class VendorController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public VendorDTO createNewVendor (@RequestBody VendorDTO vendorDTO) {
+    @Validated(VendorDTO.allFieldsValidation.class)
+    public VendorDTO createNewVendor (@Valid @RequestBody VendorDTO vendorDTO) {
 
         Vendor vendor = getVendor(vendorDTO);
 
@@ -67,7 +71,8 @@ public class VendorController {
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public VendorDTO updateVendorById (@PathVariable final Integer id, @RequestBody VendorDTO vendorDTO) {
+    @Validated(VendorDTO.allFieldsValidation.class)
+    public VendorDTO updateVendorById (@Valid @PathVariable final Integer id, @RequestBody VendorDTO vendorDTO) {
 
         Vendor vendor = getVendor(vendorDTO);
 
@@ -78,7 +83,8 @@ public class VendorController {
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public VendorDTO patchVendorById (@PathVariable final Integer id, @RequestBody VendorDTO vendorDTO) {
+    @Validated(VendorDTO.onlyIdValidation.class)
+    public VendorDTO patchVendorById (@PathVariable final Integer id, @Valid @RequestBody VendorDTO vendorDTO) {
 
         Vendor vendor = getVendor(vendorDTO);
 
