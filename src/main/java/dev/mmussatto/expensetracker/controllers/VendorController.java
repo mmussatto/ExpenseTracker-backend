@@ -12,7 +12,7 @@ import dev.mmussatto.expensetracker.domain.OnlineStore;
 import dev.mmussatto.expensetracker.domain.PhysicalStore;
 import dev.mmussatto.expensetracker.domain.Transaction;
 import dev.mmussatto.expensetracker.domain.Vendor;
-import dev.mmussatto.expensetracker.services.VendorServiceImpl;
+import dev.mmussatto.expensetracker.services.VendorService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -27,9 +27,9 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/vendors")
 public class VendorController {
 
-    private final VendorServiceImpl<Vendor> vendorService;
+    private final VendorService<Vendor> vendorService;
 
-    public VendorController(VendorServiceImpl<Vendor> vendorService) {
+    public VendorController(VendorService<Vendor> vendorService) {
         this.vendorService = vendorService;
     }
 
@@ -53,7 +53,7 @@ public class VendorController {
 
     @GetMapping("/name/{name}")
     @ResponseStatus(HttpStatus.OK)
-    public VendorDTO getVendorById (@PathVariable final String name) {
+    public VendorDTO getVendorByName (@PathVariable final String name) {
         return getVendorDTO(vendorService.getVendorByName(name));
     }
 
