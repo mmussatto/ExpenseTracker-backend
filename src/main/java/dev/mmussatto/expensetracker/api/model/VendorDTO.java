@@ -11,12 +11,13 @@ import dev.mmussatto.expensetracker.domain.Transaction;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Null;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.util.Set;
 
 @Data
-
+@NoArgsConstructor
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = OnlineStoreDTO.class, name = "Online Store"),
@@ -40,4 +41,8 @@ public abstract class VendorDTO {
     @ToString.Exclude
     @JsonIgnore //for transactions, use the /transactions endpoint (returns a TransactionDTO)
     private Set<Transaction> transactions;
+
+    public VendorDTO(String name) {
+        this.name = name;
+    }
 }
