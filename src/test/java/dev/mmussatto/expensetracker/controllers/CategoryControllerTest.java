@@ -387,7 +387,8 @@ class CategoryControllerTest {
         mockMvc.perform(get("/api/categories/{id}/transactions", categoryDTO.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)));
+                .andExpect(jsonPath("$.numberOfItems", equalTo(2)))
+                .andExpect(jsonPath("$.items", hasSize(2)));
     }
 
     @Test

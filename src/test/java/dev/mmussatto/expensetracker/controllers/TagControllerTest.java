@@ -374,7 +374,8 @@ class TagControllerTest {
         mockMvc.perform(get("/api/tags/{id}/transactions", tagDTO.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)));
+                .andExpect(jsonPath("$.numberOfItems", equalTo(2)))
+                .andExpect(jsonPath("$.items", hasSize(2)));
     }
 
     @Test

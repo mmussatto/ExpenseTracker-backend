@@ -352,7 +352,8 @@ class PaymentMethodControllerTest {
         mockMvc.perform(get("/api/payment-methods/{id}/transactions", paymentMethodDTO.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)));
+                .andExpect(jsonPath("$.numberOfItems", equalTo(2)))
+                .andExpect(jsonPath("$.items", hasSize(2)));
     }
 
     @Test
