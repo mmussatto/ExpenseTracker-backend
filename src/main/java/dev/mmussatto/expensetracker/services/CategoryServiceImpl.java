@@ -4,8 +4,6 @@
 
 package dev.mmussatto.expensetracker.services;
 
-import dev.mmussatto.expensetracker.api.mappers.CategoryMapper;
-import dev.mmussatto.expensetracker.api.model.CategoryDTO;
 import dev.mmussatto.expensetracker.domain.Category;
 import dev.mmussatto.expensetracker.domain.Transaction;
 import dev.mmussatto.expensetracker.repositories.CategoryRepository;
@@ -15,94 +13,72 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class CategoryServiceImpl implements CategoryService {
 
-    private final CategoryMapper categoryMapper;
     private final CategoryRepository categoryRepository;
 
-    public CategoryServiceImpl(CategoryMapper categoryMapper, CategoryRepository categoryRepository) {
-        this.categoryMapper = categoryMapper;
+    public CategoryServiceImpl(CategoryRepository categoryRepository) {
         this.categoryRepository = categoryRepository;
     }
 
     @Override
-    public List<CategoryDTO> getAllCategories() {
-        return categoryRepository.findAll()
-                .stream()
-                .map(category -> {
-                    CategoryDTO categoryDTO = categoryMapper.convertToDTO(category);
-                    categoryDTO.setPath("/api/categories/" + categoryDTO.getId());
-                    return categoryDTO;
-                })
-                .collect(Collectors.toList());
+    public List<Category> getAllCategories() {
+        return categoryRepository.findAll();
     }
 
     @Override
-    public CategoryDTO getCategoryById(Integer id) {
+    public Category getCategoryById(Integer id) {
         return categoryRepository.findById(id)
-                .map(category -> {
-                    CategoryDTO categoryDTO = categoryMapper.convertToDTO(category);
-                    categoryDTO.setPath("/api/categories/" + categoryDTO.getId());
-                    return categoryDTO;
-                })
                 .orElseThrow(() -> new ResourceNotFoundException("Category " + id + " not found!"));
     }
 
     @Override
-    public CategoryDTO getCategoryByName(String name) {
+    public Category getCategoryByName(String name) {
         return categoryRepository.findByName(name)
-                .map(category -> {
-                    CategoryDTO categoryDTO = categoryMapper.convertToDTO(category);
-                    categoryDTO.setPath("/api/categories/" + categoryDTO.getId());
-                    return categoryDTO;
-                })
                 .orElseThrow(() -> new ResourceNotFoundException("Category " + name + " not found!"));
     }
 
     @Override
-    public CategoryDTO createNewCategory(CategoryDTO categoryDTO) {
+    public Category createNewCategory(Category category) {
 
-        checkIfNameIsAlreadyInUse(categoryDTO);
+        checkIfNameIsAlreadyInUse(category);
 
-        return saveAndReturnDTO(categoryMapper.convertToEntity(categoryDTO)) ;
+        return categoryRepository.save(category) ;
     }
 
     @Override
-    public CategoryDTO updateCategoryById(Integer id, CategoryDTO categoryDTO) {
+    public Category updateCategoryById(Integer id, Category category) {
 
         categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category " + id + " not found!"));
 
 
-        checkIfNameIsAlreadyInUse(categoryDTO);
+        checkIfNameIsAlreadyInUse(category);
 
-        Category category = categoryMapper.convertToEntity(categoryDTO);
         category.setId(id);
 
-        return saveAndReturnDTO(category);
+        return categoryRepository.save(category);
     }
 
     @Override
-    public CategoryDTO patchCategoryById (Integer id, CategoryDTO categoryDTO) {
+    public Category patchCategoryById (Integer id, Category category) {
 
-        return categoryRepository.findById(id).map(category -> {
+        return categoryRepository.findById(id).map(savedCategory -> {
 
-            if (categoryDTO.getName() != null) {
-                checkIfNameIsAlreadyInUse(categoryDTO);
-
-                category.setName(categoryDTO.getName());
+            if (category.getName() != null) {
+                checkIfNameIsAlreadyInUse(category);
+                savedCategory.setName(category.getName());
             }
 
-            if (categoryDTO.getColor() != null)
-                category.setColor(categoryDTO.getColor());
+            if (category.getColor() != null)
+                savedCategory.setColor(category.getColor());
 
-            if (categoryDTO.getTransactions() != null && categoryDTO.getTransactions().size() != 0)
-                category.setTransactions(categoryDTO.getTransactions());
+            if (category.getTransactions() != null && category.getTransactions().size() != 0)
+                savedCategory.setTransactions(category.getTransactions());
 
-            return saveAndReturnDTO(category);
+            return categoryRepository.save(savedCategory);
 
         }).orElseThrow(() -> new ResourceNotFoundException("Category " + id + " not found!"));
     }
@@ -123,20 +99,10 @@ public class CategoryServiceImpl implements CategoryService {
         return  category.getTransactions();
     }
 
-
-    private CategoryDTO saveAndReturnDTO(Category category) {
-        Category savedCategory = categoryRepository.save(category);
-
-        CategoryDTO returnDTO = categoryMapper.convertToDTO(savedCategory);
-        returnDTO.setPath("/api/categories/" + returnDTO.getId());
-
-        return returnDTO;
-    }
-
-    private void checkIfNameIsAlreadyInUse(CategoryDTO categoryDTO) {
-        categoryRepository.findByName(categoryDTO.getName()).ifPresent(category -> {
-            throw new ResourceAlreadyExistsException("Category " + categoryDTO.getName() + " already exists.",
-                    "/api/categories/" + category.getId());
+    private void checkIfNameIsAlreadyInUse(Category category) {
+        categoryRepository.findByName(category.getName()).ifPresent(savedCategory -> {
+            throw new ResourceAlreadyExistsException("Category " + category.getName() + " already exists.",
+                    "/api/categories/" + savedCategory.getId());
         });
     }
 }

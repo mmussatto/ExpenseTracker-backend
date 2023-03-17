@@ -4,7 +4,7 @@
 
 package dev.mmussatto.expensetracker.services;
 
-import dev.mmussatto.expensetracker.api.model.CategoryDTO;
+import dev.mmussatto.expensetracker.domain.Category;
 import dev.mmussatto.expensetracker.domain.Transaction;
 
 import java.util.List;
@@ -12,17 +12,17 @@ import java.util.Set;
 
 public interface CategoryService {
 
-    List<CategoryDTO> getAllCategories ();
+    List<Category> getAllCategories ();
 
-    CategoryDTO getCategoryById (Integer id);
+    Category getCategoryById (Integer id);
 
-    CategoryDTO getCategoryByName (String name);
+    Category getCategoryByName (String name);
 
-    CategoryDTO createNewCategory (CategoryDTO categoryDTO);
+    Category createNewCategory (Category category);
 
-    CategoryDTO updateCategoryById (Integer id, CategoryDTO categoryDTO);
+    Category updateCategoryById (Integer id, Category category);
 
-    CategoryDTO patchCategoryById (Integer id, CategoryDTO categoryDTO);
+    Category patchCategoryById (Integer id, Category category);
 
     void deleteCategoryById (Integer id);
 
