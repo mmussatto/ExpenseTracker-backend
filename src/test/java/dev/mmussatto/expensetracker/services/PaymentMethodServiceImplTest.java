@@ -4,24 +4,23 @@
 
 package dev.mmussatto.expensetracker.services;
 
-import dev.mmussatto.expensetracker.api.mappers.PaymentMethodMapper;
-import dev.mmussatto.expensetracker.api.model.PaymentMethodDTO;
 import dev.mmussatto.expensetracker.domain.PaymentMethod;
 import dev.mmussatto.expensetracker.domain.PaymentType;
 import dev.mmussatto.expensetracker.domain.Transaction;
 import dev.mmussatto.expensetracker.repositories.PaymentMethodRepository;
 import dev.mmussatto.expensetracker.services.exceptions.ResourceAlreadyExistsException;
 import dev.mmussatto.expensetracker.services.exceptions.ResourceNotFoundException;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatcher;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,16 +29,16 @@ class PaymentMethodServiceImplTest {
     @Mock
     PaymentMethodRepository paymentMethodRepository;
 
-    PaymentMethodService paymentMethodService;
+    @InjectMocks
+    PaymentMethodServiceImpl paymentMethodService;
 
     public static final Integer ID = 1;
     public static final String NAME = "Test";
     public static final PaymentType TYPE = PaymentType.CREDIT_CARD;
     public static final Transaction TRANSACTION = new Transaction();
 
-    @BeforeEach
-    void setUp() {
-        paymentMethodService = new PaymentMethodServiceImpl(PaymentMethodMapper.INSTANCE, paymentMethodRepository);
+    @BeforeAll
+    static void initializeTransaction() {
         TRANSACTION.setId(1);
     }
 
@@ -56,29 +55,24 @@ class PaymentMethodServiceImplTest {
 
         when(paymentMethodRepository.findAll()).thenReturn(paymentMethods);
 
-        List<PaymentMethodDTO> returnedList = paymentMethodService.getAllPaymentMethods();
+        List<PaymentMethod> returnedList = paymentMethodService.getAllPaymentMethods();
 
         assertEquals(paymentMethods.size(), returnedList.size());
-        assertEquals("/api/payment-methods/" + p1.getId(),returnedList.get(0).getPath());
-        assertEquals("/api/payment-methods/" + p2.getId(),returnedList.get(1).getPath());
     }
 
     @Test
     void getPaymentMethodById() {
 
-        PaymentMethod paymentMethod = new PaymentMethod(NAME, TYPE);
-        paymentMethod.setId(ID);
-        paymentMethod.getTransactions().add(TRANSACTION);
+        PaymentMethod savedEntity = createPaymentMethodEntity();
 
-        when(paymentMethodRepository.findById(paymentMethod.getId())).thenReturn(Optional.of(paymentMethod));
+        when(paymentMethodRepository.findById(savedEntity.getId())).thenReturn(Optional.of(savedEntity));
 
-        PaymentMethodDTO paymentMethodDTO = paymentMethodService.getPaymentMethodById(ID);
+        PaymentMethod returnedEntity = paymentMethodService.getPaymentMethodById(savedEntity.getId());
 
-        assertEquals(paymentMethod.getId(),paymentMethodDTO.getId());
-        assertEquals(paymentMethod.getName(),paymentMethodDTO.getName());
-        assertEquals(paymentMethod.getType(),paymentMethodDTO.getType());
-        assertEquals(paymentMethod.getTransactions(),paymentMethodDTO.getTransactions());
-        assertEquals("/api/payment-methods/" + paymentMethod.getId(),paymentMethodDTO.getPath());
+        assertEquals(savedEntity.getId(),returnedEntity.getId());
+        assertEquals(savedEntity.getName(),returnedEntity.getName());
+        assertEquals(savedEntity.getType(),returnedEntity.getType());
+        assertEquals(savedEntity.getTransactions(),returnedEntity.getTransactions());
     }
 
     @Test
@@ -92,19 +86,16 @@ class PaymentMethodServiceImplTest {
     @Test
     void getPaymentMethodByName() {
 
-        PaymentMethod paymentMethod = new PaymentMethod(NAME, TYPE);
-        paymentMethod.setId(ID);
-        paymentMethod.getTransactions().add(TRANSACTION);
+        PaymentMethod savedEntity = createPaymentMethodEntity();
 
-        when(paymentMethodRepository.findByName(paymentMethod.getName())).thenReturn(Optional.of(paymentMethod));
+        when(paymentMethodRepository.findByName(savedEntity.getName())).thenReturn(Optional.of(savedEntity));
 
-        PaymentMethodDTO paymentMethodDTO = paymentMethodService.getPaymentMethodByName(NAME);
+        PaymentMethod returnedEntity = paymentMethodService.getPaymentMethodByName(savedEntity.getName());
 
-        assertEquals(paymentMethod.getId(),paymentMethodDTO.getId());
-        assertEquals(paymentMethod.getName(),paymentMethodDTO.getName());
-        assertEquals(paymentMethod.getType(),paymentMethodDTO.getType());
-        assertEquals(paymentMethod.getTransactions(),paymentMethodDTO.getTransactions());
-        assertEquals("/api/payment-methods/" + paymentMethod.getId(),paymentMethodDTO.getPath());
+        assertEquals(savedEntity.getId(),returnedEntity.getId());
+        assertEquals(savedEntity.getName(),returnedEntity.getName());
+        assertEquals(savedEntity.getType(),returnedEntity.getType());
+        assertEquals(savedEntity.getTransactions(),returnedEntity.getTransactions());
     }
 
     @Test
@@ -119,149 +110,135 @@ class PaymentMethodServiceImplTest {
     @Test
     void createNewPaymentMethod() {
 
-        //DTO passed to function
-        PaymentMethodDTO paymentMethodDTO = new PaymentMethodDTO(NAME, TYPE);
-        paymentMethodDTO.getTransactions().add(TRANSACTION);
+        //Entity passed to function
+        PaymentMethod passedEntity = new PaymentMethod(NAME, TYPE);
+        passedEntity.getTransactions().add(TRANSACTION);
 
         //Saved Entity
-        PaymentMethod paymentMethod = new PaymentMethod(paymentMethodDTO.getName(), paymentMethodDTO.getType());
-        paymentMethod.setId(ID);
-        paymentMethod.setTransactions(paymentMethodDTO.getTransactions());
-
-        //Check if entity is saved correctly
-        ArgumentMatcher<PaymentMethod> argumentMatcher = paymentMethodToSave ->
-                Objects.equals(paymentMethodToSave.getName(), paymentMethod.getName())
-                && Objects.equals(paymentMethodToSave.getType(), paymentMethod.getType())
-                && Objects.equals(paymentMethodToSave.getTransactions(), paymentMethod.getTransactions());
+        PaymentMethod savedEntity = new PaymentMethod(passedEntity.getName(), passedEntity.getType());
+        savedEntity.setId(ID);
+        savedEntity.setTransactions(passedEntity.getTransactions());
 
 
-        when(paymentMethodRepository.save(argThat(argumentMatcher))).thenReturn(paymentMethod);
+        when(paymentMethodRepository.save(passedEntity)).thenReturn(savedEntity);
 
-        PaymentMethodDTO returnedDTO = paymentMethodService.createNewPaymentMethod(paymentMethodDTO);
+        PaymentMethod returnedEntity = paymentMethodService.createNewPaymentMethod(passedEntity);
 
-        assertEquals(paymentMethod.getId(), returnedDTO.getId());
-        assertEquals(paymentMethod.getName(), returnedDTO.getName());
-        assertEquals(paymentMethod.getType(), returnedDTO.getType());
-        assertEquals(paymentMethod.getTransactions(),returnedDTO.getTransactions());
-        assertEquals("/api/payment-methods/" + paymentMethod.getId(), returnedDTO.getPath());
+        assertEquals(savedEntity.getId(), returnedEntity.getId());
+        assertEquals(passedEntity.getName(), returnedEntity.getName());
+        assertEquals(passedEntity.getType(), returnedEntity.getType());
+        assertEquals(passedEntity.getTransactions(),returnedEntity.getTransactions());
     }
 
     @Test
     void createNewPaymentMethod_NameAlreadyExists() {
 
-        PaymentMethod paymentMethod = new PaymentMethod(NAME, TYPE);
-        paymentMethod.setId(ID);
-        paymentMethod.getTransactions().add(TRANSACTION);
-
-        PaymentMethodDTO paymentMethodDTO = new PaymentMethodDTO(NAME, TYPE);
-        paymentMethod.getTransactions().add(TRANSACTION);
+        PaymentMethod passedEntity = createPaymentMethodEntity();
 
         //When searching the repository by name, find an item
-        when(paymentMethodRepository.findByName(paymentMethodDTO.getName())).thenReturn(Optional.of(paymentMethod));
+        when(paymentMethodRepository.findByName(passedEntity.getName())).thenReturn(Optional.of(passedEntity));
 
         assertThrows(ResourceAlreadyExistsException.class,
-                () -> paymentMethodService.createNewPaymentMethod(paymentMethodDTO));
+                () -> paymentMethodService.createNewPaymentMethod(passedEntity));
     }
 
     @Test
     void updatePaymentMethodById() {
 
-        //DTO passed to updatePaymentMethodById
-        PaymentMethodDTO passedDTO = new PaymentMethodDTO("TestUpdate", PaymentType.CASH);
-        passedDTO.getTransactions().add(TRANSACTION);
+        //Entity passed to updatePaymentMethodById
+        PaymentMethod passedEntity = new PaymentMethod("TestUpdate", PaymentType.CASH);
+        passedEntity.getTransactions().add(TRANSACTION);
 
         //Original PaymentMethod
-        PaymentMethod original = new PaymentMethod(NAME, TYPE);
-        original.setId(ID);
+        PaymentMethod originalEntity = new PaymentMethod(NAME, TYPE);
+        originalEntity.setId(ID);
 
         //Updated Payment Method
-        PaymentMethod updated = new PaymentMethod(passedDTO.getName(), passedDTO.getType());
-        updated.setId(original.getId());
-        updated.setTransactions(passedDTO.getTransactions());
+        PaymentMethod updatedEntity = new PaymentMethod(passedEntity.getName(), passedEntity.getType());
+        updatedEntity.setId(originalEntity.getId());
+        updatedEntity.setTransactions(passedEntity.getTransactions());
 
-        when(paymentMethodRepository.findById(original.getId())).thenReturn(Optional.of(original));
-        when(paymentMethodRepository.save(updated)).thenReturn(updated);
+        when(paymentMethodRepository.findById(originalEntity.getId())).thenReturn(Optional.of(originalEntity));
+        when(paymentMethodRepository.save(updatedEntity)).thenReturn(updatedEntity);
 
-        PaymentMethodDTO returnedDTO = paymentMethodService.updatePaymentMethodById(original.getId(), passedDTO);
+        PaymentMethod returnedEntity = paymentMethodService.updatePaymentMethodById(ID, passedEntity);
 
-        assertEquals(original.getId(), returnedDTO.getId());        //same id
-        assertEquals(passedDTO.getName(), returnedDTO.getName());   //updated name
-        assertEquals(passedDTO.getType(), returnedDTO.getType());   //updated type
-        assertEquals(passedDTO.getTransactions(),returnedDTO.getTransactions());    //updated transaction
-        assertEquals("/api/payment-methods/" + original.getId(), returnedDTO.getPath());
+        assertEquals(originalEntity.getId(), returnedEntity.getId());        //same id
+        assertEquals(passedEntity.getName(), returnedEntity.getName());   //updated name
+        assertEquals(passedEntity.getType(), returnedEntity.getType());   //updated type
+        assertEquals(passedEntity.getTransactions(),returnedEntity.getTransactions());    //updated transaction
 
-        verify(paymentMethodRepository, times(1)).save(updated);
+        verify(paymentMethodRepository, times(1)).save(updatedEntity);
     }
 
     @Test
     void updatePaymentMethodById_NotFound() {
 
-        //DTO passed to updatePaymentMethodById
-        PaymentMethodDTO passedDTO = new PaymentMethodDTO("TestUpdate", PaymentType.CASH);
-        passedDTO.getTransactions().add(TRANSACTION);
+        //Entity passed to updatePaymentMethodById
+        PaymentMethod passedEntity = new PaymentMethod("TestUpdate", PaymentType.CASH);
+        passedEntity.getTransactions().add(TRANSACTION);
 
         //Original PaymentMethod
-        PaymentMethod original = new PaymentMethod(NAME, TYPE);
-        original.setId(ID);
+        PaymentMethod originalEntity = new PaymentMethod(NAME, TYPE);
+        originalEntity.setId(ID);
 
 
-        when(paymentMethodRepository.findById(original.getId())).thenReturn(Optional.empty());
+        when(paymentMethodRepository.findById(originalEntity.getId())).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
-                () -> paymentMethodService.updatePaymentMethodById(original.getId(), passedDTO));
+                () -> paymentMethodService.updatePaymentMethodById(originalEntity.getId(), passedEntity));
     }
 
     @Test
     void updatePaymentMethodById_NameAlreadyExists() {
 
-        //DTO passed to updatePaymentMethodById
-        PaymentMethodDTO passedDTO = new PaymentMethodDTO("TestUpdate", PaymentType.CASH);
-        passedDTO.getTransactions().add(TRANSACTION);
+        //Entity passed to updatePaymentMethodById
+        PaymentMethod passedEntity = new PaymentMethod("TestUpdate", PaymentType.CASH);
+        passedEntity.getTransactions().add(TRANSACTION);
 
         //Original PaymentMethod
         PaymentMethod original = new PaymentMethod(NAME, TYPE);
         original.setId(ID);
 
         //Original PaymentMethod
-        PaymentMethod nameAlreadyInUse = new PaymentMethod(passedDTO.getName(), TYPE);
+        PaymentMethod nameAlreadyInUse = new PaymentMethod(passedEntity.getName(), TYPE);
 
         when(paymentMethodRepository.findById(original.getId())).thenReturn(Optional.of(original));
-        when(paymentMethodRepository.findByName(passedDTO.getName())).thenReturn(Optional.of(nameAlreadyInUse));
+        when(paymentMethodRepository.findByName(passedEntity.getName())).thenReturn(Optional.of(nameAlreadyInUse));
 
         assertThrows(ResourceAlreadyExistsException.class,
-                () -> paymentMethodService.updatePaymentMethodById(original.getId(), passedDTO));
+                () -> paymentMethodService.updatePaymentMethodById(original.getId(), passedEntity));
     }
 
     @Test
     void patchPaymentMethodById() {
 
-        //DTO passed to patchPaymentMethodById
-        PaymentMethodDTO passedDTO = new PaymentMethodDTO("TestUpdate", PaymentType.CASH);
-        passedDTO.getTransactions().add(TRANSACTION);
+        //Entity passed to patchPaymentMethodById
+        PaymentMethod passedEntity = new PaymentMethod("Test Patch", PaymentType.CASH);
+        passedEntity.getTransactions().add(TRANSACTION);
 
         //Original PaymentMethod
-        PaymentMethod original = new PaymentMethod(NAME, TYPE);
-        original.setId(ID);
+        PaymentMethod originalEntity = new PaymentMethod(NAME, TYPE);
+        originalEntity.setId(ID);
 
         //Updated Payment Method
-        PaymentMethod updated = new PaymentMethod(original.getName(), original.getType());
-        updated.setId(original.getId());
+        PaymentMethod updated = new PaymentMethod(passedEntity.getName(), passedEntity.getType());
+        updated.setId(originalEntity.getId());
+        updated.setTransactions(passedEntity.getTransactions());
 
-        when(paymentMethodRepository.findById(original.getId())).thenReturn(Optional.of(updated));
+        when(paymentMethodRepository.findById(originalEntity.getId())).thenReturn(Optional.of(originalEntity));
+        when(paymentMethodRepository.findByName(passedEntity.getName())).thenReturn(Optional.empty());
         when(paymentMethodRepository.save(updated)).thenReturn(updated);
 
-        PaymentMethodDTO returnedDTO = paymentMethodService.patchPaymentMethodById(original.getId(), passedDTO);
 
-        assertEquals(original.getId(), returnedDTO.getId());        //same id
-        assertEquals(passedDTO.getName(), returnedDTO.getName());   //updated name
-        assertEquals(passedDTO.getType(), returnedDTO.getType());   //updated type
-        assertEquals(passedDTO.getTransactions(),returnedDTO.getTransactions());    //updated transaction
-        assertEquals("/api/payment-methods/" + original.getId(), returnedDTO.getPath());
+        PaymentMethod returnedEntity = paymentMethodService.patchPaymentMethodById(originalEntity.getId(), passedEntity);
 
-        //Assert that the payment method was updated before saving
-        assertNotEquals(original.getName(), updated.getName());
-        assertNotEquals(original.getType(), updated.getType());
-        assertNotEquals(original.getTransactions(), updated.getTransactions());
+
+        assertEquals(originalEntity.getId(), returnedEntity.getId());       //same id
+        assertEquals(passedEntity.getName(), returnedEntity.getName());     //updated name
+        assertEquals(passedEntity.getType(), returnedEntity.getType());     //updated type
+        assertEquals(passedEntity.getTransactions(),returnedEntity.getTransactions()); //updated transaction
+
 
         verify(paymentMethodRepository, times(1)).save(updated);
     }
@@ -269,35 +246,28 @@ class PaymentMethodServiceImplTest {
     @Test
     void patchPaymentMethodById_UpdateOnlyName() {
 
-        //DTO passed to patchPaymentMethodById
-        PaymentMethodDTO passedDTO = new PaymentMethodDTO();
-        passedDTO.setName("TestUpdate");
+        //Entity passed to patchPaymentMethodById
+        PaymentMethod passedEntity = new PaymentMethod();
+        passedEntity.setName("Test Patch");
 
         //Original PaymentMethod
-        PaymentMethod original = new PaymentMethod(NAME, TYPE);
-        original.setId(ID);
-        original.getTransactions().add(TRANSACTION);
+        PaymentMethod original = createPaymentMethodEntity();
 
         //Updated Payment Method
-        PaymentMethod updated = new PaymentMethod(original.getName(), original.getType());
+        PaymentMethod updated = new PaymentMethod(passedEntity.getName(), original.getType());
         updated.setId(original.getId());
         updated.setTransactions(original.getTransactions());
 
-        when(paymentMethodRepository.findById(original.getId())).thenReturn(Optional.of(updated));
+        when(paymentMethodRepository.findById(original.getId())).thenReturn(Optional.of(original));
+        when(paymentMethodRepository.findByName(passedEntity.getName())).thenReturn(Optional.empty());
         when(paymentMethodRepository.save(updated)).thenReturn(updated);
 
-        PaymentMethodDTO returnedDTO = paymentMethodService.patchPaymentMethodById(original.getId(), passedDTO);
+        PaymentMethod returnedEntity = paymentMethodService.patchPaymentMethodById(original.getId(), passedEntity);
 
-        assertEquals(original.getId(), returnedDTO.getId());                        //same id
-        assertEquals(passedDTO.getName(), returnedDTO.getName());                   //updated name
-        assertEquals(original.getType(), returnedDTO.getType());                    //same type
-        assertEquals(original.getTransactions(),returnedDTO.getTransactions());     //same transactions
-        assertEquals("/api/payment-methods/" + original.getId(), returnedDTO.getPath());
-
-        //Assert that only the name was updated before saving
-        assertNotEquals(original.getName(), updated.getName());
-        assertEquals(original.getType(), updated.getType());
-        assertEquals(original.getTransactions(), updated.getTransactions());
+        assertEquals(original.getId(), returnedEntity.getId());             //same id
+        assertEquals(passedEntity.getName(), returnedEntity.getName());     //updated name
+        assertEquals(original.getType(), returnedEntity.getType());         //same type
+        assertEquals(original.getTransactions(),returnedEntity.getTransactions());  //same transactions
 
         verify(paymentMethodRepository, times(1)).save(updated);
     }
@@ -305,35 +275,27 @@ class PaymentMethodServiceImplTest {
     @Test
     void patchPaymentMethodById_UpdateOnlyType() {
 
-        //DTO passed to patchPaymentMethodById
-        PaymentMethodDTO passedDTO = new PaymentMethodDTO();
-        passedDTO.setType(PaymentType.CASH);
+        //Entity passed to patchPaymentMethodById
+        PaymentMethod passedEntity = new PaymentMethod();
+        passedEntity.setType(PaymentType.CASH);
 
         //Original PaymentMethod
-        PaymentMethod original = new PaymentMethod(NAME, TYPE);
-        original.setId(ID);
-        original.getTransactions().add(TRANSACTION);
+        PaymentMethod original = createPaymentMethodEntity();
 
         //Updated Payment Method
-        PaymentMethod updated = new PaymentMethod(original.getName(), original.getType());
+        PaymentMethod updated = new PaymentMethod(original.getName(), passedEntity.getType());
         updated.setId(original.getId());
         updated.setTransactions(original.getTransactions());
 
-        when(paymentMethodRepository.findById(original.getId())).thenReturn(Optional.of(updated));
+        when(paymentMethodRepository.findById(original.getId())).thenReturn(Optional.of(original));
         when(paymentMethodRepository.save(updated)).thenReturn(updated);
 
-        PaymentMethodDTO returnedDTO = paymentMethodService.patchPaymentMethodById(original.getId(), passedDTO);
+        PaymentMethod returnedEntity = paymentMethodService.patchPaymentMethodById(original.getId(), passedEntity);
 
-        assertEquals(original.getId(), returnedDTO.getId());                        //same id
-        assertEquals(original.getName(), returnedDTO.getName());                    //same name
-        assertEquals(passedDTO.getType(), returnedDTO.getType());                   //updated type
-        assertEquals(original.getTransactions(),returnedDTO.getTransactions());     //same transaction
-        assertEquals("/api/payment-methods/" + original.getId(), returnedDTO.getPath());
-
-        //Assert that only the type was updated before saving
-        assertEquals(original.getName(), updated.getName());
-        assertNotEquals(original.getType(), updated.getType());
-        assertEquals(original.getTransactions(), updated.getTransactions());
+        assertEquals(original.getId(), returnedEntity.getId());         //same id
+        assertEquals(original.getName(), returnedEntity.getName());     //same name
+        assertEquals(passedEntity.getType(), returnedEntity.getType()); //updated type
+        assertEquals(original.getTransactions(),returnedEntity.getTransactions());  //same transaction
 
         verify(paymentMethodRepository, times(1)).save(updated);
     }
@@ -341,9 +303,9 @@ class PaymentMethodServiceImplTest {
     @Test
     void patchPaymentMethodById_UpdateOnlyTransactions() {
 
-        //DTO passed to patchPaymentMethodById
-        PaymentMethodDTO passedDTO = new PaymentMethodDTO();
-        passedDTO.getTransactions().add(TRANSACTION);
+        //Entity passed to patchPaymentMethodById
+        PaymentMethod passedEntity = new PaymentMethod();
+        passedEntity.getTransactions().add(TRANSACTION);
 
         //Original PaymentMethod
         PaymentMethod original = new PaymentMethod(NAME, TYPE);
@@ -352,22 +314,18 @@ class PaymentMethodServiceImplTest {
         //Updated Payment Method
         PaymentMethod updated = new PaymentMethod(original.getName(), original.getType());
         updated.setId(original.getId());
+        updated.setTransactions(passedEntity.getTransactions());
 
-        when(paymentMethodRepository.findById(original.getId())).thenReturn(Optional.of(updated));
+        when(paymentMethodRepository.findById(original.getId())).thenReturn(Optional.of(original));
         when(paymentMethodRepository.save(updated)).thenReturn(updated);
 
-        PaymentMethodDTO returnedDTO = paymentMethodService.patchPaymentMethodById(original.getId(), passedDTO);
+        PaymentMethod returnedEntity = paymentMethodService.patchPaymentMethodById(original.getId(), passedEntity);
 
-        assertEquals(original.getId(), returnedDTO.getId());                        //same id
-        assertEquals(original.getName(), returnedDTO.getName());                    //same name
-        assertEquals(original.getType(), returnedDTO.getType());                    //same type
-        assertEquals(passedDTO.getTransactions(),returnedDTO.getTransactions());    //updated transactions
-        assertEquals("/api/payment-methods/" + original.getId(), returnedDTO.getPath());
+        assertEquals(original.getId(), returnedEntity.getId());         //same id
+        assertEquals(original.getName(), returnedEntity.getName());     //same name
+        assertEquals(original.getType(), returnedEntity.getType());     //same type
+        assertEquals(passedEntity.getTransactions(),returnedEntity.getTransactions()); //updated transactions
 
-        //Assert that only the type was updated before saving
-        assertEquals(original.getName(), updated.getName());
-        assertEquals(original.getType(), updated.getType());
-        assertNotEquals(original.getTransactions(), updated.getTransactions());
 
         verify(paymentMethodRepository, times(1)).save(updated);
     }
@@ -375,39 +333,36 @@ class PaymentMethodServiceImplTest {
     @Test
     void patchPaymentMethodById_NotFound() {
 
-        //DTO passed to patchPaymentMethodById
-        PaymentMethodDTO passedDTO = new PaymentMethodDTO();
-        passedDTO.getTransactions().add(TRANSACTION);
+        Integer notFoundId = 123;
 
-        //Original PaymentMethod
-        PaymentMethod original = new PaymentMethod(NAME, TYPE);
-        original.setId(ID);
+        //Entity passed to patchPaymentMethodById
+        PaymentMethod passedEntity = new PaymentMethod();
 
-        when(paymentMethodRepository.findById(original.getId())).thenReturn(Optional.empty());
+        when(paymentMethodRepository.findById(notFoundId)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
-                () -> paymentMethodService.patchPaymentMethodById(original.getId(), passedDTO));
+                () -> paymentMethodService.patchPaymentMethodById(notFoundId, passedEntity));
     }
 
     @Test
     void patchPaymentMethodById_NameAlreadyExists() {
 
-        //DTO passed to updatePaymentMethodById
-        PaymentMethodDTO passedDTO = new PaymentMethodDTO("TestUpdate", PaymentType.CASH);
-        passedDTO.getTransactions().add(TRANSACTION);
+        //Entity passed to updatePaymentMethodById
+        PaymentMethod passedEntity = new PaymentMethod("Test Patch", PaymentType.CASH);
+        passedEntity.getTransactions().add(TRANSACTION);
 
         //Original PaymentMethod
         PaymentMethod original = new PaymentMethod(NAME, TYPE);
         original.setId(ID);
 
         //Original PaymentMethod
-        PaymentMethod nameAlreadyInUse = new PaymentMethod(passedDTO.getName(), TYPE);
+        PaymentMethod nameAlreadyInUse = new PaymentMethod(passedEntity.getName(), TYPE);
 
         when(paymentMethodRepository.findById(original.getId())).thenReturn(Optional.of(original));
-        when(paymentMethodRepository.findByName(passedDTO.getName())).thenReturn(Optional.of(nameAlreadyInUse));
+        when(paymentMethodRepository.findByName(passedEntity.getName())).thenReturn(Optional.of(nameAlreadyInUse));
 
         assertThrows(ResourceAlreadyExistsException.class,
-                () -> paymentMethodService.patchPaymentMethodById(original.getId(), passedDTO));
+                () -> paymentMethodService.patchPaymentMethodById(original.getId(), passedEntity));
     }
 
 
@@ -468,5 +423,13 @@ class PaymentMethodServiceImplTest {
 
         assertThrows(ResourceNotFoundException.class,
                 () -> paymentMethodService.getPaymentMethodTransactionsById(notFoundId));
+    }
+
+
+    private static PaymentMethod createPaymentMethodEntity() {
+        PaymentMethod entity = new PaymentMethod(NAME, TYPE);
+        entity.setId(ID);
+        entity.getTransactions().add(TRANSACTION);
+        return entity;
     }
 }
