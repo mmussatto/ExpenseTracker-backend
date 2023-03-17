@@ -237,13 +237,13 @@ class CategoryServiceImplTest {
         Category originalCategory = createCategoryEntity();
 
         //Category modified by function and saved
-        Category updatedCategory = new Category(originalCategory.getName(), originalCategory.getColor());
+        Category updatedCategory = new Category(passedEntity.getName(), passedEntity.getColor());
         updatedCategory.setId(originalCategory.getId());
-        updatedCategory.setTransactions(originalCategory.getTransactions());
+        updatedCategory.setTransactions(passedEntity.getTransactions());
 
 
         //when searching repository, returned object with original values
-        when(categoryRepository.findById(originalCategory.getId())).thenReturn(Optional.of(updatedCategory));
+        when(categoryRepository.findById(originalCategory.getId())).thenReturn(Optional.of(originalCategory));
 
         //there is no other category already using the name
         when(categoryRepository.findByName(passedEntity.getName())).thenReturn(Optional.empty());
@@ -261,7 +261,7 @@ class CategoryServiceImplTest {
         assertEquals(passedEntity.getColor(), returnedEntity.getColor());    //updated color
         assertEquals(passedEntity.getTransactions(), returnedEntity.getTransactions()); //updated transactions
 
-
+        verify(categoryRepository, times(1)).save(updatedCategory);
     }
 
     @Test
