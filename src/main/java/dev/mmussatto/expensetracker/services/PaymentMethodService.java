@@ -4,7 +4,7 @@
 
 package dev.mmussatto.expensetracker.services;
 
-import dev.mmussatto.expensetracker.api.model.PaymentMethodDTO;
+import dev.mmussatto.expensetracker.domain.PaymentMethod;
 import dev.mmussatto.expensetracker.domain.Transaction;
 
 import java.util.List;
@@ -12,17 +12,17 @@ import java.util.Set;
 
 public interface PaymentMethodService {
 
-    List<PaymentMethodDTO> getAllPaymentMethods ();
+    List<PaymentMethod> getAllPaymentMethods ();
 
-    PaymentMethodDTO getPaymentMethodById (Integer id);
+    PaymentMethod getPaymentMethodById (Integer id);
 
-    PaymentMethodDTO getPaymentMethodByName (String name);
+    PaymentMethod getPaymentMethodByName (String name);
 
-    PaymentMethodDTO createNewPaymentMethod (PaymentMethodDTO paymentMethodDTO);
+    PaymentMethod createNewPaymentMethod (PaymentMethod paymentMethod);
 
-    PaymentMethodDTO updatePaymentMethodById (Integer id, PaymentMethodDTO paymentMethodDTO);
+    PaymentMethod updatePaymentMethodById (Integer id, PaymentMethod paymentMethod);
 
-    PaymentMethodDTO patchPaymentMethodById (Integer id, PaymentMethodDTO paymentMethodDTO);
+    PaymentMethod patchPaymentMethodById (Integer id, PaymentMethod paymentMethod);
 
     void deletePaymentMethodById (Integer id);
 
