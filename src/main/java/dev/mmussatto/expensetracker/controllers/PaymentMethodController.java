@@ -4,10 +4,12 @@
 
 package dev.mmussatto.expensetracker.controllers;
 
+import dev.mmussatto.expensetracker.api.mappers.PaymentMethodMapper;
 import dev.mmussatto.expensetracker.api.mappers.TransactionMapper;
 import dev.mmussatto.expensetracker.api.model.ListDTO;
 import dev.mmussatto.expensetracker.api.model.PaymentMethodDTO;
 import dev.mmussatto.expensetracker.api.model.TransactionDTO;
+import dev.mmussatto.expensetracker.domain.PaymentMethod;
 import dev.mmussatto.expensetracker.domain.Transaction;
 import dev.mmussatto.expensetracker.services.PaymentMethodService;
 import jakarta.validation.Valid;
@@ -15,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -24,34 +27,42 @@ import java.util.stream.Collectors;
 public class PaymentMethodController {
 
     private final PaymentMethodService paymentMethodService;
+    private final PaymentMethodMapper paymentMethodMapper;
 
-    public PaymentMethodController(PaymentMethodService paymentMethodService) {
+    public PaymentMethodController(PaymentMethodService paymentMethodService, PaymentMethodMapper paymentMethodMapper) {
         this.paymentMethodService = paymentMethodService;
+        this.paymentMethodMapper = paymentMethodMapper;
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public ListDTO<PaymentMethodDTO> getAllPaymentMethods () {
-        return new ListDTO<>(paymentMethodService.getAllPaymentMethods());
+        List<PaymentMethodDTO> list = paymentMethodService.getAllPaymentMethods()
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+
+        return new ListDTO<>(list);
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public PaymentMethodDTO getPaymentMethodById (@PathVariable final Integer id) {
-        return paymentMethodService.getPaymentMethodById(id);
+        return convertToDTO(paymentMethodService.getPaymentMethodById(id));
     }
 
     @GetMapping("/name/{name}")
     @ResponseStatus(HttpStatus.OK)
     public PaymentMethodDTO getPaymentMethodByName (@PathVariable final String name) {
-        return paymentMethodService.getPaymentMethodByName(name);
+        return convertToDTO(paymentMethodService.getPaymentMethodByName(name));
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Validated(PaymentMethodDTO.allFieldsValidation.class)
     public PaymentMethodDTO createNewPaymentMethod (@Valid @RequestBody PaymentMethodDTO paymentMethodDTO) {
-        return paymentMethodService.createNewPaymentMethod(paymentMethodDTO);
+        PaymentMethod entity = convertToEntity(paymentMethodDTO);
+        return convertToDTO(paymentMethodService.createNewPaymentMethod(entity));
     }
 
     @PutMapping("/{id}")
@@ -59,7 +70,8 @@ public class PaymentMethodController {
     @Validated(PaymentMethodDTO.allFieldsValidation.class)
     public PaymentMethodDTO updatePaymentMethodById (@PathVariable final Integer id,
                                                      @Valid @RequestBody PaymentMethodDTO paymentMethodDTO) {
-        return paymentMethodService.updatePaymentMethodById(id, paymentMethodDTO);
+        PaymentMethod entity = convertToEntity(paymentMethodDTO);
+        return convertToDTO(paymentMethodService.updatePaymentMethodById(id, entity));
     }
 
 
@@ -68,7 +80,8 @@ public class PaymentMethodController {
     @Validated(PaymentMethodDTO.onlyIdValidation.class)
     public PaymentMethodDTO patchPaymentMethodById (@PathVariable final Integer id,
                                                     @Valid @RequestBody PaymentMethodDTO paymentMethodDTO) {
-        return paymentMethodService.patchPaymentMethodById(id, paymentMethodDTO);
+        PaymentMethod entity = convertToEntity(paymentMethodDTO);
+        return convertToDTO(paymentMethodService.patchPaymentMethodById(id, entity));
     }
 
     @DeleteMapping("/{id}")
@@ -92,4 +105,13 @@ public class PaymentMethodController {
     }
 
 
+    private PaymentMethodDTO convertToDTO (PaymentMethod entity) {
+        PaymentMethodDTO paymentMethodDTO = paymentMethodMapper.convertToDTO(entity);
+        paymentMethodDTO.setPath("/api/payment-methods/" + paymentMethodDTO.getId());
+        return paymentMethodDTO;
+    }
+
+    private PaymentMethod convertToEntity(PaymentMethodDTO paymentMethodDTO) {
+        return paymentMethodMapper.convertToEntity(paymentMethodDTO);
+    }
 }

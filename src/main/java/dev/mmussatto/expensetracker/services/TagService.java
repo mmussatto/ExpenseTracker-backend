@@ -4,7 +4,7 @@
 
 package dev.mmussatto.expensetracker.services;
 
-import dev.mmussatto.expensetracker.api.model.TagDTO;
+import dev.mmussatto.expensetracker.domain.Tag;
 import dev.mmussatto.expensetracker.domain.Transaction;
 
 import java.util.List;
@@ -12,17 +12,17 @@ import java.util.Set;
 
 public interface TagService {
 
-    List<TagDTO> getAllTags ();
+    List<Tag> getAllTags ();
 
-    TagDTO getTagById (Integer id);
+    Tag getTagById (Integer id);
 
-    TagDTO getTagByName (String name);
+    Tag getTagByName (String name);
 
-    TagDTO createNewTag (TagDTO tagDTO);
+    Tag createNewTag (Tag tag);
 
-    TagDTO updateTagById (Integer id, TagDTO tagDTO);
+    Tag updateTagById (Integer id, Tag tag);
 
-    TagDTO patchTagById (Integer id, TagDTO tagDTO);
+    Tag patchTagById (Integer id, Tag tag);
 
     void deleteTagById (Integer id);
 

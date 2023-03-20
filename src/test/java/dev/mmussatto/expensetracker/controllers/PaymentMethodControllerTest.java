@@ -5,7 +5,9 @@
 package dev.mmussatto.expensetracker.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.mmussatto.expensetracker.api.mappers.PaymentMethodMapper;
 import dev.mmussatto.expensetracker.api.model.PaymentMethodDTO;
+import dev.mmussatto.expensetracker.domain.PaymentMethod;
 import dev.mmussatto.expensetracker.domain.PaymentType;
 import dev.mmussatto.expensetracker.domain.Transaction;
 import dev.mmussatto.expensetracker.services.PaymentMethodService;
@@ -40,6 +42,9 @@ class PaymentMethodControllerTest {
     @MockBean
     private PaymentMethodService paymentMethodService;
 
+    @MockBean
+    private PaymentMethodMapper paymentMethodMapper;
+
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -48,13 +53,21 @@ class PaymentMethodControllerTest {
     @Test
     void getAllPaymentMethods() throws Exception {
 
-        PaymentMethodDTO p1 = new PaymentMethodDTO("p1", PaymentType.CREDIT_CARD);
+        PaymentMethod p1 = new PaymentMethod("p1", PaymentType.CREDIT_CARD);
         p1.setId(1);
 
-        PaymentMethodDTO p2 = new PaymentMethodDTO("p2", PaymentType.CASH);
+        PaymentMethod p2 = new PaymentMethod("p2", PaymentType.CASH);
         p2.setId(2);
 
+        PaymentMethodDTO dto1 = new PaymentMethodDTO(p1.getName(), p1.getType());
+        dto1.setId(p1.getId());
+
+        PaymentMethodDTO dto2 = new PaymentMethodDTO(p2.getName(), p2.getType());
+        dto2.setId(p2.getId());
+
         when(paymentMethodService.getAllPaymentMethods()).thenReturn(Arrays.asList(p1, p2));
+        when(paymentMethodMapper.convertToDTO(p1)).thenReturn(dto1);
+        when(paymentMethodMapper.convertToDTO(p2)).thenReturn(dto2);
 
         mockMvc.perform(get("/api/payment-methods").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -65,19 +78,23 @@ class PaymentMethodControllerTest {
     @Test
     void getPaymentMethodById() throws Exception {
 
-        PaymentMethodDTO dto = new PaymentMethodDTO("p1", PaymentType.CREDIT_CARD);
-        dto.setId(1);
-        dto.setPath("/api/payment-methods/" + dto.getId());
+        PaymentMethod savedEntity = new PaymentMethod("p1", PaymentType.CREDIT_CARD);
+        savedEntity.setId(1);
 
-        when(paymentMethodService.getPaymentMethodById(dto.getId())).thenReturn(dto);
+        PaymentMethodDTO returnedDTO = new PaymentMethodDTO(savedEntity.getName(), savedEntity.getType());
+        returnedDTO.setId(savedEntity.getId());
+        returnedDTO.setPath("/api/payment-methods/" + returnedDTO.getId());
 
-        mockMvc.perform(get("/api/payment-methods/{id}", dto.getId())
+        when(paymentMethodService.getPaymentMethodById(savedEntity.getId())).thenReturn(savedEntity);
+        when(paymentMethodMapper.convertToDTO(savedEntity)).thenReturn(returnedDTO);
+
+        mockMvc.perform(get("/api/payment-methods/{id}", savedEntity.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", equalTo(dto.getId())))
-                .andExpect(jsonPath("$.name", equalTo(dto.getName())))
-                .andExpect(jsonPath("$.type", equalTo(dto.getType().toString())))
-                .andExpect(jsonPath("$.path", equalTo(dto.getPath())));
+                .andExpect(jsonPath("$.id", equalTo(returnedDTO.getId())))
+                .andExpect(jsonPath("$.name", equalTo(returnedDTO.getName())))
+                .andExpect(jsonPath("$.type", equalTo(returnedDTO.getType().toString())))
+                .andExpect(jsonPath("$.path", equalTo(returnedDTO.getPath())));
     }
 
     @Test
@@ -96,19 +113,23 @@ class PaymentMethodControllerTest {
     @Test
     void getPaymentMethodByName() throws Exception {
 
-        PaymentMethodDTO dto = new PaymentMethodDTO("p1", PaymentType.CREDIT_CARD);
-        dto.setId(1);
-        dto.setPath("/api/payment-methods/" + dto.getId());
+        PaymentMethod savedEntity = new PaymentMethod("p1", PaymentType.CREDIT_CARD);
+        savedEntity.setId(1);
 
-        when(paymentMethodService.getPaymentMethodByName(dto.getName())).thenReturn(dto);
+        PaymentMethodDTO returnedDTO = new PaymentMethodDTO(savedEntity.getName(), savedEntity.getType());
+        returnedDTO.setId(savedEntity.getId());
+        returnedDTO.setPath("/api/payment-methods/" + returnedDTO.getId());
 
-        mockMvc.perform(get("/api/payment-methods/name/{name}", dto.getName())
+        when(paymentMethodService.getPaymentMethodByName(savedEntity.getName())).thenReturn(savedEntity);
+        when(paymentMethodMapper.convertToDTO(savedEntity)).thenReturn(returnedDTO);
+
+        mockMvc.perform(get("/api/payment-methods/name/{name}", savedEntity.getName())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", equalTo(dto.getId())))
-                .andExpect(jsonPath("$.name", equalTo(dto.getName())))
-                .andExpect(jsonPath("$.type", equalTo(dto.getType().toString())))
-                .andExpect(jsonPath("$.path", equalTo(dto.getPath())));
+                .andExpect(jsonPath("$.id", equalTo(returnedDTO.getId())))
+                .andExpect(jsonPath("$.name", equalTo(returnedDTO.getName())))
+                .andExpect(jsonPath("$.type", equalTo(returnedDTO.getType().toString())))
+                .andExpect(jsonPath("$.path", equalTo(returnedDTO.getPath())));
     }
 
     @Test
@@ -127,33 +148,40 @@ class PaymentMethodControllerTest {
     @Test
     void createNewPaymentMethod() throws Exception {
 
-        PaymentMethodDTO passDTO = new PaymentMethodDTO("p1", PaymentType.CREDIT_CARD);
+        PaymentMethodDTO passedDTO = new PaymentMethodDTO("p1", PaymentType.CREDIT_CARD);
 
-        PaymentMethodDTO returnDTO = new PaymentMethodDTO(passDTO.getName(), passDTO.getType());
-        returnDTO.setId(1);
-        returnDTO.setPath("/api/payment-methods/" + returnDTO.getId());
+        PaymentMethod toSaveEntity = new PaymentMethod(passedDTO.getName(), passedDTO.getType());
 
-        when(paymentMethodService.createNewPaymentMethod(passDTO)).thenReturn(returnDTO);
+        PaymentMethod savedEntity = new PaymentMethod(toSaveEntity.getName(), toSaveEntity.getType());
+        savedEntity.setId(1);
+
+        PaymentMethodDTO returnedDTO = new PaymentMethodDTO(savedEntity.getName(), savedEntity.getType());
+        returnedDTO.setId(savedEntity.getId());
+        returnedDTO.setPath("/api/payment-methods/" + returnedDTO.getId());
+
+        when(paymentMethodMapper.convertToEntity(passedDTO)).thenReturn(toSaveEntity);
+        when(paymentMethodService.createNewPaymentMethod(toSaveEntity)).thenReturn(savedEntity);
+        when(paymentMethodMapper.convertToDTO(savedEntity)).thenReturn(returnedDTO);
 
         mockMvc.perform(post("/api/payment-methods")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(passDTO)))
+                        .content(objectMapper.writeValueAsString(passedDTO)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", equalTo(returnDTO.getId())))
-                .andExpect(jsonPath("$.name", equalTo(returnDTO.getName())))
-                .andExpect(jsonPath("$.type", equalTo(returnDTO.getType().toString())))
-                .andExpect(jsonPath("$.path", equalTo(returnDTO.getPath())));
+                .andExpect(jsonPath("$.id", equalTo(returnedDTO.getId())))
+                .andExpect(jsonPath("$.name", equalTo(returnedDTO.getName())))
+                .andExpect(jsonPath("$.type", equalTo(returnedDTO.getType().toString())))
+                .andExpect(jsonPath("$.path", equalTo(returnedDTO.getPath())));
     }
 
     @Test
     void createNewPaymentMethod_IdNotNull() throws Exception {
 
-        PaymentMethodDTO passDTO = new PaymentMethodDTO("p1", PaymentType.CREDIT_CARD);
-        passDTO.setId(123);
+        PaymentMethodDTO passedDTO = new PaymentMethodDTO("p1", PaymentType.CREDIT_CARD);
+        passedDTO.setId(123);
 
         mockMvc.perform(post("/api/payment-methods")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(passDTO)))
+                        .content(objectMapper.writeValueAsString(passedDTO)))
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> assertThat(result.getResolvedException(), instanceOf(ConstraintViolationException.class)));
     }
@@ -161,13 +189,16 @@ class PaymentMethodControllerTest {
     @Test
     void createNewPaymentMethod_NameAlreadyExists() throws Exception {
 
-        PaymentMethodDTO passDTO = new PaymentMethodDTO("p1", PaymentType.CREDIT_CARD);
+        PaymentMethodDTO passedDTO = new PaymentMethodDTO("p1", PaymentType.CREDIT_CARD);
 
-        when(paymentMethodService.createNewPaymentMethod(passDTO)).thenThrow(ResourceAlreadyExistsException.class);
+        PaymentMethod toSaveEntity = new PaymentMethod(passedDTO.getName(), passedDTO.getType());
 
-        mockMvc.perform(post("/api/payment-methods", passDTO)
+        when(paymentMethodMapper.convertToEntity(passedDTO)).thenReturn(toSaveEntity);
+        when(paymentMethodService.createNewPaymentMethod(toSaveEntity)).thenThrow(ResourceAlreadyExistsException.class);
+
+        mockMvc.perform(post("/api/payment-methods", passedDTO)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(passDTO)))
+                        .content(objectMapper.writeValueAsString(passedDTO)))
                 .andExpect(status().isConflict())
                 .andExpect(result -> assertThat(result.getResolvedException(), instanceOf(ResourceAlreadyExistsException.class)));
     }
@@ -175,22 +206,32 @@ class PaymentMethodControllerTest {
     @Test
     void updatePaymentMethodById() throws Exception {
 
-        PaymentMethodDTO passDTO = new PaymentMethodDTO("Test Update", PaymentType.CREDIT_CARD);
+        Integer savedID = 1;
 
-        PaymentMethodDTO returnDTO = new PaymentMethodDTO(passDTO.getName(), passDTO.getType());
-        returnDTO.setId(1);
-        returnDTO.setPath("/api/payment-methods/" + returnDTO.getId());
+        PaymentMethodDTO passedDTO = new PaymentMethodDTO("Test Update", PaymentType.CREDIT_CARD);
 
-        when(paymentMethodService.updatePaymentMethodById(returnDTO.getId(), passDTO)).thenReturn(returnDTO);
+        PaymentMethod toUpdateEntity = new PaymentMethod(passedDTO.getName(), passedDTO.getType());
 
-        mockMvc.perform(put("/api/payment-methods/{id}", returnDTO.getId())
+        PaymentMethod updatedEntity = new PaymentMethod(toUpdateEntity.getName(), toUpdateEntity.getType());
+        updatedEntity.setId(savedID);
+
+        PaymentMethodDTO returnedDTO = new PaymentMethodDTO(updatedEntity.getName(), updatedEntity.getType());
+        returnedDTO.setId(updatedEntity.getId());
+        returnedDTO.setPath("/api/payment-methods/" + returnedDTO.getId());
+
+        when(paymentMethodMapper.convertToEntity(passedDTO)).thenReturn(toUpdateEntity);
+        when(paymentMethodService.updatePaymentMethodById(savedID, toUpdateEntity)).thenReturn(updatedEntity);
+        when(paymentMethodMapper.convertToDTO(updatedEntity)).thenReturn(returnedDTO);
+
+
+        mockMvc.perform(put("/api/payment-methods/{id}", savedID)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(passDTO)))
+                        .content(objectMapper.writeValueAsString(passedDTO)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", equalTo(returnDTO.getId())))
-                .andExpect(jsonPath("$.name", equalTo(returnDTO.getName())))
-                .andExpect(jsonPath("$.type", equalTo(returnDTO.getType().toString())))
-                .andExpect(jsonPath("$.path", equalTo(returnDTO.getPath())));
+                .andExpect(jsonPath("$.id", equalTo(returnedDTO.getId())))
+                .andExpect(jsonPath("$.name", equalTo(returnedDTO.getName())))
+                .andExpect(jsonPath("$.type", equalTo(returnedDTO.getType().toString())))
+                .andExpect(jsonPath("$.path", equalTo(returnedDTO.getPath())));
     }
 
     @Test
@@ -198,13 +239,16 @@ class PaymentMethodControllerTest {
 
         Integer notFoundId = 123;
 
-        PaymentMethodDTO passDTO = new PaymentMethodDTO("Test Update", PaymentType.CREDIT_CARD);
+        PaymentMethodDTO passedDTO = new PaymentMethodDTO("Test Update", PaymentType.CREDIT_CARD);
 
-        when(paymentMethodService.updatePaymentMethodById(notFoundId, passDTO)).thenThrow(ResourceNotFoundException.class);
+        PaymentMethod toUpdateEntity = new PaymentMethod(passedDTO.getName(), passedDTO.getType());
+
+        when(paymentMethodMapper.convertToEntity(passedDTO)).thenReturn(toUpdateEntity);
+        when(paymentMethodService.updatePaymentMethodById(notFoundId, toUpdateEntity)).thenThrow(ResourceNotFoundException.class);
 
         mockMvc.perform(put("/api/payment-methods/{id}", notFoundId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(passDTO)))
+                        .content(objectMapper.writeValueAsString(passedDTO)))
                 .andExpect(status().isNotFound())
                 .andExpect(result -> assertThat(result.getResolvedException(), instanceOf(ResourceNotFoundException.class)));
     }
@@ -212,12 +256,12 @@ class PaymentMethodControllerTest {
     @Test
     void updatePaymentMethodById_BodyIdNotNull() throws Exception {
 
-        PaymentMethodDTO passDTO = new PaymentMethodDTO("Test Update", PaymentType.CREDIT_CARD);
-        passDTO.setId(1);
+        PaymentMethodDTO passed = new PaymentMethodDTO("Test Update", PaymentType.CREDIT_CARD);
+        passed.setId(1);
 
         mockMvc.perform(put("/api/payment-methods/{id}", 1)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(passDTO)))
+                        .content(objectMapper.writeValueAsString(passed)))
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> assertThat(result.getResolvedException(), instanceOf(ConstraintViolationException.class)));
     }
@@ -225,13 +269,13 @@ class PaymentMethodControllerTest {
     @Test
     void updatePaymentMethodById_MissingNameField() throws Exception {
 
-        PaymentMethodDTO passDTO = new PaymentMethodDTO();
+        PaymentMethodDTO passedDTO = new PaymentMethodDTO();
         //missing name field
-        passDTO.setType(PaymentType.CREDIT_CARD);
+        passedDTO.setType(PaymentType.CREDIT_CARD);
 
         mockMvc.perform(put("/api/payment-methods/{id}", 1)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(passDTO)))
+                        .content(objectMapper.writeValueAsString(passedDTO)))
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> assertThat(result.getResolvedException(), instanceOf(ConstraintViolationException.class)));
     }
@@ -239,13 +283,13 @@ class PaymentMethodControllerTest {
     @Test
     void updatePaymentMethodById_MissingTypeField() throws Exception {
 
-        PaymentMethodDTO passDTO = new PaymentMethodDTO();
-        passDTO.setName("Test Update");
+        PaymentMethodDTO passedDTO = new PaymentMethodDTO();
+        passedDTO.setName("Test Update");
         //missing type field
 
         mockMvc.perform(put("/api/payment-methods/{id}", 1)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(passDTO)))
+                        .content(objectMapper.writeValueAsString(passedDTO)))
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> assertThat(result.getResolvedException(), instanceOf(ConstraintViolationException.class)));
     }
@@ -254,22 +298,32 @@ class PaymentMethodControllerTest {
     @Test
     void patchPaymentMethodById() throws Exception {
 
-        PaymentMethodDTO passDTO = new PaymentMethodDTO("Test Update", PaymentType.CREDIT_CARD);
+        Integer savedID = 1;
 
-        PaymentMethodDTO returnDTO = new PaymentMethodDTO(passDTO.getName(), passDTO.getType());
-        returnDTO.setId(1);
-        returnDTO.setPath("/api/payment-methods/" + returnDTO.getId());
+        PaymentMethodDTO passedDTO = new PaymentMethodDTO("Test Patch", PaymentType.CREDIT_CARD);
 
-        when(paymentMethodService.patchPaymentMethodById(returnDTO.getId(), passDTO)).thenReturn(returnDTO);
+        PaymentMethod toPatchEntity = new PaymentMethod(passedDTO.getName(), passedDTO.getType());
 
-        mockMvc.perform(patch("/api/payment-methods/{id}", returnDTO.getId())
+        PaymentMethod patchedEntity = new PaymentMethod(toPatchEntity.getName(), toPatchEntity.getType());
+        patchedEntity.setId(savedID);
+
+        PaymentMethodDTO returnedDTO = new PaymentMethodDTO(patchedEntity.getName(), patchedEntity.getType());
+        returnedDTO.setId(patchedEntity.getId());
+        returnedDTO.setPath("/api/payment-methods/" + returnedDTO.getId());
+
+        when(paymentMethodMapper.convertToEntity(passedDTO)).thenReturn(toPatchEntity);
+        when(paymentMethodService.patchPaymentMethodById(savedID, toPatchEntity)).thenReturn(patchedEntity);
+        when(paymentMethodMapper.convertToDTO(patchedEntity)).thenReturn(returnedDTO);
+
+
+        mockMvc.perform(patch("/api/payment-methods/{id}", savedID)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(passDTO)))
+                        .content(objectMapper.writeValueAsString(passedDTO)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", equalTo(returnDTO.getId())))
-                .andExpect(jsonPath("$.name", equalTo(returnDTO.getName())))
-                .andExpect(jsonPath("$.type", equalTo(returnDTO.getType().toString())))
-                .andExpect(jsonPath("$.path", equalTo(returnDTO.getPath())));
+                .andExpect(jsonPath("$.id", equalTo(returnedDTO.getId())))
+                .andExpect(jsonPath("$.name", equalTo(returnedDTO.getName())))
+                .andExpect(jsonPath("$.type", equalTo(returnedDTO.getType().toString())))
+                .andExpect(jsonPath("$.path", equalTo(returnedDTO.getPath())));
     }
 
     @Test
@@ -277,14 +331,16 @@ class PaymentMethodControllerTest {
 
         Integer notFoundId = 123;
 
-        PaymentMethodDTO passDTO = new PaymentMethodDTO("Test Update", PaymentType.CREDIT_CARD);
+        PaymentMethodDTO passedDTO = new PaymentMethodDTO("Test Patch", PaymentType.CREDIT_CARD);
 
+        PaymentMethod toPatchEntity = new PaymentMethod(passedDTO.getName(), passedDTO.getType());
 
-        when(paymentMethodService.patchPaymentMethodById(notFoundId, passDTO)).thenThrow(ResourceNotFoundException.class);
+        when(paymentMethodMapper.convertToEntity(passedDTO)).thenReturn(toPatchEntity);
+        when(paymentMethodService.patchPaymentMethodById(notFoundId, toPatchEntity)).thenThrow(ResourceNotFoundException.class);
 
         mockMvc.perform(patch("/api/payment-methods/{id}", notFoundId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(passDTO)))
+                        .content(objectMapper.writeValueAsString(passedDTO)))
                 .andExpect(status().isNotFound())
                 .andExpect(result -> assertThat(result.getResolvedException(), instanceOf(ResourceNotFoundException.class)));
     }
@@ -292,13 +348,13 @@ class PaymentMethodControllerTest {
     @Test
     void patchPaymentMethodById_IdNotNull() throws Exception {
 
-        PaymentMethodDTO passDTO = new PaymentMethodDTO("Test Update", PaymentType.CREDIT_CARD);
-        passDTO.setId(1);
+        PaymentMethodDTO passedDTO = new PaymentMethodDTO("Test Update", PaymentType.CREDIT_CARD);
+        passedDTO.setId(1);
 
 
         mockMvc.perform(patch("/api/payment-methods/{id}", 1)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(passDTO)))
+                        .content(objectMapper.writeValueAsString(passedDTO)))
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> assertThat(result.getResolvedException(), instanceOf(ConstraintViolationException.class)));
     }

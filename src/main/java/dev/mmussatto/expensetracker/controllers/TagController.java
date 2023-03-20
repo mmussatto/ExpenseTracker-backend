@@ -4,10 +4,12 @@
 
 package dev.mmussatto.expensetracker.controllers;
 
+import dev.mmussatto.expensetracker.api.mappers.TagMapper;
 import dev.mmussatto.expensetracker.api.mappers.TransactionMapper;
 import dev.mmussatto.expensetracker.api.model.ListDTO;
 import dev.mmussatto.expensetracker.api.model.TagDTO;
 import dev.mmussatto.expensetracker.api.model.TransactionDTO;
+import dev.mmussatto.expensetracker.domain.Tag;
 import dev.mmussatto.expensetracker.domain.Transaction;
 import dev.mmussatto.expensetracker.services.TagService;
 import jakarta.validation.Valid;
@@ -24,49 +26,56 @@ import java.util.stream.Collectors;
 public class TagController {
 
     private final TagService tagService;
+    private final TagMapper tagMapper;
 
-    public TagController(TagService tagService) {
+    public TagController(TagService tagService, TagMapper tagMapper) {
         this.tagService = tagService;
+        this.tagMapper = tagMapper;
     }
-
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public ListDTO<TagDTO> getAllTags () {
-        return new ListDTO<>(tagService.getAllTags());
+        return new ListDTO<>(tagService.getAllTags()
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList()));
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public TagDTO getTagById (@PathVariable final Integer id) {
-        return tagService.getTagById(id);
+        return convertToDTO(tagService.getTagById(id));
     }
 
     @GetMapping("/name/{name}")
     @ResponseStatus(HttpStatus.OK)
     public TagDTO getTagByName (@PathVariable final String name) {
-        return tagService.getTagByName(name);
+        return convertToDTO(tagService.getTagByName(name));
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Validated(TagDTO.allFieldsValidation.class)
     public TagDTO createNewTag (@Valid @RequestBody TagDTO tagDTO) {
-        return tagService.createNewTag(tagDTO);
+        Tag entity = convertToEntity(tagDTO);
+        return convertToDTO(tagService.createNewTag(entity));
     }
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Validated(TagDTO.allFieldsValidation.class)
     public TagDTO updateTagById (@PathVariable final Integer id, @Valid @RequestBody TagDTO tagDTO) {
-        return tagService.updateTagById(id, tagDTO);
+        Tag entity = convertToEntity(tagDTO);
+        return convertToDTO(tagService.updateTagById(id, entity));
     }
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Validated(TagDTO.onlyIdValidation.class)
     public TagDTO patchTagById (@PathVariable final Integer id, @Valid @RequestBody TagDTO tagDTO) {
-        return tagService.patchTagById(id, tagDTO);
+        Tag entity = convertToEntity(tagDTO);
+        return convertToDTO(tagService.patchTagById(id, entity));
     }
 
     @DeleteMapping("/{id}")
@@ -87,5 +96,15 @@ public class TagController {
                     transactionDTO.setPath("/api/transactions/" + transactionDTO.getId());
                     return transactionDTO;
                 }).collect(Collectors.toList()));
+    }
+
+    private TagDTO convertToDTO (Tag entity) {
+        TagDTO tagDTO = tagMapper.convertToDTO(entity);
+        tagDTO.setPath("/api/tags/" + tagDTO.getId());
+        return tagDTO;
+    }
+
+    private Tag convertToEntity (TagDTO dto) {
+        return tagMapper.convertToEntity(dto);
     }
 }
