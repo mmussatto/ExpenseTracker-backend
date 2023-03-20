@@ -4,8 +4,6 @@
 
 package dev.mmussatto.expensetracker.services;
 
-import dev.mmussatto.expensetracker.api.mappers.TagMapper;
-import dev.mmussatto.expensetracker.api.model.TagDTO;
 import dev.mmussatto.expensetracker.domain.Color;
 import dev.mmussatto.expensetracker.domain.Tag;
 import dev.mmussatto.expensetracker.domain.Transaction;
@@ -39,7 +37,7 @@ class TagServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        tagService = new TagServiceImpl(TagMapper.INSTANCE, tagRepository);
+        tagService = new TagServiceImpl(tagRepository);
         TRANSACTION.setId(1);
     }
 
@@ -56,12 +54,9 @@ class TagServiceImplTest {
 
         when(tagRepository.findAll()).thenReturn(tags);
 
-        List<TagDTO> returnedList = tagService.getAllTags();
+        List<Tag> returnedList = tagService.getAllTags();
 
         assertEquals(tags.size(), returnedList.size());
-        assertEquals("/api/tags/" + t1.getId(), returnedList.get(0).getPath());
-        assertEquals("/api/tags/" + t2.getId(), returnedList.get(1).getPath());
-
     }
 
     @Test
@@ -71,13 +66,12 @@ class TagServiceImplTest {
 
         when(tagRepository.findById(tag.getId())).thenReturn(Optional.of(tag));
 
-        TagDTO tagDTO = tagService.getTagById(tag.getId());
+        Tag returnedEntity = tagService.getTagById(tag.getId());
 
-        assertEquals(tag.getId(), tagDTO.getId());
-        assertEquals(tag.getName(), tagDTO.getName());
-        assertEquals(tag.getColor(), tagDTO.getColor());
-        assertEquals(tag.getTransactions(), tagDTO.getTransactions());
-        assertEquals("/api/tags/" + tag.getId() , tagDTO.getPath());
+        assertEquals(tag.getId(), returnedEntity.getId());
+        assertEquals(tag.getName(), returnedEntity.getName());
+        assertEquals(tag.getColor(), returnedEntity.getColor());
+        assertEquals(tag.getTransactions(), returnedEntity.getTransactions());
     }
 
     @Test
@@ -95,13 +89,12 @@ class TagServiceImplTest {
 
         when(tagRepository.findByName(tag.getName())).thenReturn(Optional.of(tag));
 
-        TagDTO tagDTO = tagService.getTagByName(tag.getName());
+        Tag returnedEntity = tagService.getTagByName(tag.getName());
 
-        assertEquals(tag.getId(), tagDTO.getId());
-        assertEquals(tag.getName(), tagDTO.getName());
-        assertEquals(tag.getColor(), tagDTO.getColor());
-        assertEquals(tag.getTransactions(), tagDTO.getTransactions());
-        assertEquals("/api/tags/" + tag.getId() , tagDTO.getPath());
+        assertEquals(tag.getId(), returnedEntity.getId());
+        assertEquals(tag.getName(), returnedEntity.getName());
+        assertEquals(tag.getColor(), returnedEntity.getColor());
+        assertEquals(tag.getTransactions(), returnedEntity.getTransactions());
     }
 
     @Test
@@ -115,84 +108,78 @@ class TagServiceImplTest {
     @Test
     void createNewTag() {
 
-        //DTO passed to function
-        TagDTO passedDTO = new TagDTO(NAME, COLOR);
-        passedDTO.getTransactions().add(TRANSACTION);
-
-        //Tag to be saved
-        Tag tagToBeSaved = new Tag(NAME, COLOR);
-        tagToBeSaved.getTransactions().add(TRANSACTION);
+        //Entity passed to function
+        Tag passedEntity = new Tag(NAME, COLOR);
+        passedEntity.getTransactions().add(TRANSACTION);
 
         //Saved Entity
-        Tag savedTag = createTagEntity();
+        Tag savedTag = new Tag(passedEntity.getName(), passedEntity.getColor());
+        savedTag.setTransactions(passedEntity.getTransactions());
+        savedTag.setId(ID);
 
-        when(tagRepository.findByName(passedDTO.getName())).thenReturn(Optional.empty());
-        when(tagRepository.save(tagToBeSaved)).thenReturn(savedTag);
+        when(tagRepository.findByName(passedEntity.getName())).thenReturn(Optional.empty());
+        when(tagRepository.save(passedEntity)).thenReturn(savedTag);
 
 
-        TagDTO returnedDTO = tagService.createNewTag(passedDTO);
+        Tag returnedEntity = tagService.createNewTag(passedEntity);
 
 
-        assertEquals(savedTag.getId(), returnedDTO.getId());
-        assertEquals(passedDTO.getName(), returnedDTO.getName());
-        assertEquals(passedDTO.getColor(), returnedDTO.getColor());
-        assertEquals(passedDTO.getTransactions(), returnedDTO.getTransactions());
-        assertEquals("/api/tags/" + savedTag.getId() , returnedDTO.getPath());
-
-        verify(tagRepository, times(1)).findByName(passedDTO.getName());
+        assertEquals(savedTag.getId(), returnedEntity.getId());
+        assertEquals(passedEntity.getName(), returnedEntity.getName());
+        assertEquals(passedEntity.getColor(), returnedEntity.getColor());
+        assertEquals(passedEntity.getTransactions(), returnedEntity.getTransactions());
     }
 
     @Test
     void createNewTag_NameAlreadyExists() {
 
-        //DTO passed to function
-        TagDTO passedDTO = new TagDTO(NAME, COLOR);
-        passedDTO.getTransactions().add(TRANSACTION);
+        //Entity passed to function
+        Tag passedEntity = new Tag(NAME, COLOR);
+        passedEntity.getTransactions().add(TRANSACTION);
 
         //Saved Entity
         Tag savedTag = createTagEntity();
 
-        when(tagRepository.findByName(passedDTO.getName())).thenReturn(Optional.of(savedTag));
+        when(tagRepository.findByName(passedEntity.getName())).thenReturn(Optional.of(savedTag));
 
-        assertThrows(ResourceAlreadyExistsException.class, () -> tagService.createNewTag(passedDTO));
+        assertThrows(ResourceAlreadyExistsException.class, () -> tagService.createNewTag(passedEntity));
     }
 
     @Test
     void updateTagById() {
 
-        //DTO passed to function
-        TagDTO passedDTO = new TagDTO("Test Update", Color.GREEN);
+        //Entity passed to function
+        Tag passedEntity = new Tag("Test Update", Color.GREEN);
 
         //Saved Entity
         Tag original = createTagEntity();
 
         //Updated Tag
-        Tag updatedTag = new Tag(passedDTO.getName(), passedDTO.getColor());
+        Tag updatedTag = new Tag(passedEntity.getName(), passedEntity.getColor());
         updatedTag.setId(original.getId());
-        updatedTag.setTransactions(passedDTO.getTransactions());
+        updatedTag.setTransactions(passedEntity.getTransactions());
 
         when(tagRepository.findById(original.getId())).thenReturn(Optional.of(original));
-        when(tagRepository.findByName(passedDTO.getName())).thenReturn(Optional.empty());
+        when(tagRepository.findByName(passedEntity.getName())).thenReturn(Optional.empty());
         when(tagRepository.save(updatedTag)).thenReturn(updatedTag);
 
 
-        TagDTO returnedDTO = tagService.updateTagById(original.getId(), passedDTO);
+        Tag returnedEntity = tagService.updateTagById(original.getId(), passedEntity);
 
 
-        assertEquals(original.getId(), returnedDTO.getId());
-        assertEquals(passedDTO.getName(), returnedDTO.getName());
-        assertEquals(passedDTO.getColor(), returnedDTO.getColor());
-        assertEquals(passedDTO.getTransactions(), returnedDTO.getTransactions());
-        assertEquals("/api/tags/" + original.getId() , returnedDTO.getPath());
+        assertEquals(original.getId(), returnedEntity.getId());
+        assertEquals(passedEntity.getName(), returnedEntity.getName());
+        assertEquals(passedEntity.getColor(), returnedEntity.getColor());
+        assertEquals(passedEntity.getTransactions(), returnedEntity.getTransactions());
 
-        verify(tagRepository, times(1)).findByName(passedDTO.getName());
+        verify(tagRepository, times(1)).findByName(passedEntity.getName());
     }
 
     @Test
     void updateTagById_NotFound() {
 
         //DTO passed to function
-        TagDTO passedDTO = new TagDTO("Test Update", Color.GREEN);
+        Tag passedEntity = new Tag("Test Update", Color.GREEN);
 
         //Saved Entity
         Tag original = createTagEntity();
@@ -200,124 +187,129 @@ class TagServiceImplTest {
         when(tagRepository.findById(original.getId())).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
-                () -> tagService.updateTagById(original.getId(), passedDTO));
+                () -> tagService.updateTagById(original.getId(), passedEntity));
     }
 
     @Test
     void updateTagById_NameAlreadyExists() {
 
         //DTO passed to function
-        TagDTO passedDTO = new TagDTO("Test Update", Color.GREEN);
+        Tag passedEntity = new Tag("Test Update", Color.GREEN);
 
         //Saved Entity
         Tag original = createTagEntity();
 
-        //Saved Entity already using passedDTO name
+        //Saved Entity already using passedEntity name
         Tag anotherSavedEntity = createTagEntity();
         anotherSavedEntity.setName("Test Update");
 
 
         when(tagRepository.findById(original.getId())).thenReturn(Optional.of(original));
-        when(tagRepository.findByName(passedDTO.getName())).thenReturn(Optional.of(anotherSavedEntity));
+        when(tagRepository.findByName(passedEntity.getName())).thenReturn(Optional.of(anotherSavedEntity));
 
 
         assertThrows(ResourceAlreadyExistsException.class,
-                () -> tagService.updateTagById(original.getId(), passedDTO));
+                () -> tagService.updateTagById(original.getId(), passedEntity));
     }
 
     @Test
     void patchTagById() {
 
         //DTO passed to function
-        TagDTO passedDTO = new TagDTO("Test Patch", Color.GREEN);
+        Tag passedEntity = new Tag("Test Patch", Color.GREEN);
+        passedEntity.getTransactions().add(TRANSACTION);
 
         //Saved Entity
-        Tag original = createTagEntity();
+        Tag original = new Tag(NAME, COLOR);
+        original.setId(ID);
 
         //Tag that will be updated and saved
-        Tag updatedTag = createTagEntity();
+        Tag updated = new Tag(passedEntity.getName(), passedEntity.getColor());
+        updated.setId(original.getId());
+        updated.setTransactions(passedEntity.getTransactions());
 
-        when(tagRepository.findById(original.getId())).thenReturn(Optional.of(updatedTag));
-        when(tagRepository.findByName(passedDTO.getName())).thenReturn(Optional.empty());
-        when(tagRepository.save(updatedTag)).thenReturn(updatedTag);
+        when(tagRepository.findById(original.getId())).thenReturn(Optional.of(original));
+        when(tagRepository.findByName(passedEntity.getName())).thenReturn(Optional.empty());
+        when(tagRepository.save(updated)).thenReturn(updated);
 
 
-        TagDTO returnedDTO = tagService.patchTagById(original.getId(), passedDTO);
+        Tag returnedEntity = tagService.patchTagById(original.getId(), passedEntity);
 
 
-        assertEquals(original.getId(), returnedDTO.getId());
-        assertEquals(passedDTO.getName(), returnedDTO.getName());
-        assertEquals(passedDTO.getColor(), returnedDTO.getColor());
-        assertEquals(original.getTransactions(), returnedDTO.getTransactions());
-        assertEquals("/api/tags/" + original.getId() , returnedDTO.getPath());
+        assertEquals(original.getId(), returnedEntity.getId());
+        assertEquals(passedEntity.getName(), returnedEntity.getName());
+        assertEquals(passedEntity.getColor(), returnedEntity.getColor());
+        assertEquals(original.getTransactions(), returnedEntity.getTransactions());
 
-        verify(tagRepository, times(1)).findByName(passedDTO.getName());
+        verify(tagRepository, times(1)).findByName(passedEntity.getName());
     }
 
     @Test
     void patchTagById_UpdateOnlyName() {
 
         //DTO passed to function
-        TagDTO passedDTO = new TagDTO();
-        passedDTO.setName("Test Patch");
+        Tag passedEntity = new Tag();
+        passedEntity.setName("Test Patch");
 
         //Saved Entity
         Tag original = createTagEntity();
 
         //Tag that will be updated and saved
-        Tag updatedTag = createTagEntity();
+        Tag updated = new Tag(passedEntity.getName(), original.getColor());
+        updated.setId(original.getId());
+        updated.setTransactions(original.getTransactions());
 
-        when(tagRepository.findById(original.getId())).thenReturn(Optional.of(updatedTag));
-        when(tagRepository.findByName(passedDTO.getName())).thenReturn(Optional.empty());
-        when(tagRepository.save(updatedTag)).thenReturn(updatedTag);
+        when(tagRepository.findById(original.getId())).thenReturn(Optional.of(original));
+        when(tagRepository.findByName(passedEntity.getName())).thenReturn(Optional.empty());
+        when(tagRepository.save(updated)).thenReturn(updated);
 
 
-        TagDTO returnedDTO = tagService.patchTagById(original.getId(), passedDTO);
+        Tag returnedEntity = tagService.patchTagById(original.getId(), passedEntity);
 
 
-        assertEquals(original.getId(), returnedDTO.getId());
-        assertEquals(passedDTO.getName(), returnedDTO.getName());
-        assertEquals(original.getColor(), returnedDTO.getColor());
-        assertEquals(original.getTransactions(), returnedDTO.getTransactions());
-        assertEquals("/api/tags/" + original.getId() , returnedDTO.getPath());
+        assertEquals(original.getId(), returnedEntity.getId());
+        assertEquals(passedEntity.getName(), returnedEntity.getName());
+        assertEquals(original.getColor(), returnedEntity.getColor());
+        assertEquals(original.getTransactions(), returnedEntity.getTransactions());
 
-        verify(tagRepository, times(1)).findByName(passedDTO.getName());
+        verify(tagRepository, times(1)).findByName(passedEntity.getName());
     }
 
     @Test
     void patchTagById_UpdateOnlyColor() {
 
         //DTO passed to function
-        TagDTO passedDTO = new TagDTO();
-        passedDTO.setColor(Color.GREEN);
+        Tag passedEntity = new Tag();
+        passedEntity.setColor(Color.RED);
 
         //Saved Entity
         Tag original = createTagEntity();
 
         //Tag that will be updated and saved
-        Tag updatedTag = createTagEntity();
+        Tag updated = new Tag(original.getName(), passedEntity.getColor());
+        updated.setId(original.getId());
+        updated.setTransactions(original.getTransactions());
 
-        when(tagRepository.findById(original.getId())).thenReturn(Optional.of(updatedTag));
-        when(tagRepository.save(updatedTag)).thenReturn(updatedTag);
+        when(tagRepository.findById(original.getId())).thenReturn(Optional.of(original));
+        when(tagRepository.save(updated)).thenReturn(updated);
 
 
-        TagDTO returnedDTO = tagService.patchTagById(original.getId(), passedDTO);
+        Tag returnedEntity = tagService.patchTagById(original.getId(), passedEntity);
 
 
-        assertEquals(original.getId(), returnedDTO.getId());
-        assertEquals(original.getName(), returnedDTO.getName());
-        assertEquals(passedDTO.getColor(), returnedDTO.getColor());
-        assertEquals(original.getTransactions(), returnedDTO.getTransactions());
-        assertEquals("/api/tags/" + original.getId() , returnedDTO.getPath());
+        assertEquals(original.getId(), returnedEntity.getId());
+        assertEquals(original.getName(), returnedEntity.getName());
+        assertEquals(passedEntity.getColor(), returnedEntity.getColor());
+        assertEquals(original.getTransactions(), returnedEntity.getTransactions());
 
-        verify(tagRepository, never()).findByName(passedDTO.getName());
+        verify(tagRepository, never()).findByName(passedEntity.getName());
     }
 
     @Test
     void patchTagById_NotFound() {
 
         //DTO passed to function
-        TagDTO passedDTO = new TagDTO("Test Patch", Color.GREEN);
+        Tag passedEntity = new Tag("Test Patch", Color.GREEN);
 
         //Saved Entity
         Tag original = createTagEntity();
@@ -326,32 +318,30 @@ class TagServiceImplTest {
 
 
         assertThrows(ResourceNotFoundException.class,
-                () -> tagService.patchTagById(original.getId(), passedDTO));
+                () -> tagService.patchTagById(original.getId(), passedEntity));
     }
 
     @Test
     void patchTagById_NameAlreadyExists() {
 
         //DTO passed to function
-        TagDTO passedDTO = new TagDTO();
-        passedDTO.setName("Test Patch");
+        Tag passedEntity = new Tag();
+        passedEntity.setName("Test Patch");
 
         //Saved Entity
         Tag original = createTagEntity();
 
-        //Another Saved Entity with the passedDTO name
+        //Another Saved Entity with the passedEntity name
         Tag anotherSavedEntity = createTagEntity();
         anotherSavedEntity.setName("Test Patch");
 
-        //Tag that will be updated and saved
-        Tag updatedTag = createTagEntity();
 
-        when(tagRepository.findById(original.getId())).thenReturn(Optional.of(updatedTag));
-        when(tagRepository.findByName(passedDTO.getName())).thenReturn(Optional.of(anotherSavedEntity));
+        when(tagRepository.findById(original.getId())).thenReturn(Optional.of(original));
+        when(tagRepository.findByName(passedEntity.getName())).thenReturn(Optional.of(anotherSavedEntity));
 
 
         assertThrows(ResourceAlreadyExistsException.class,
-                () -> tagService.patchTagById(original.getId(), passedDTO));
+                () -> tagService.patchTagById(original.getId(), passedEntity));
     }
 
     @Test

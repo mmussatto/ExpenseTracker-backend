@@ -5,8 +5,10 @@
 package dev.mmussatto.expensetracker.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.mmussatto.expensetracker.api.mappers.TagMapper;
 import dev.mmussatto.expensetracker.api.model.TagDTO;
 import dev.mmussatto.expensetracker.domain.Color;
+import dev.mmussatto.expensetracker.domain.Tag;
 import dev.mmussatto.expensetracker.domain.Transaction;
 import dev.mmussatto.expensetracker.services.TagService;
 import dev.mmussatto.expensetracker.services.exceptions.ResourceAlreadyExistsException;
@@ -39,6 +41,9 @@ class TagControllerTest {
     @MockBean
     private TagService tagService;
 
+    @MockBean
+    private TagMapper tagMapper;
+
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -47,13 +52,21 @@ class TagControllerTest {
     @Test
     void getAllTags() throws Exception {
 
-        TagDTO t1 = new TagDTO("t1", Color.BLUE);
+        Tag t1 = new Tag("t1", Color.BLUE);
         t1.setId(1);
 
-        TagDTO t2 = new TagDTO("t2", Color.GREEN);
+        Tag t2 = new Tag("t2", Color.GREEN);
         t2.setId(2);
 
+        TagDTO dto1 = new TagDTO(t1.getName(), t1.getColor());
+        dto1.setId(t1.getId());
+
+        TagDTO dto2 = new TagDTO(t2.getName(), t2.getColor());
+        dto2.setId(t2.getId());
+
         when(tagService.getAllTags()).thenReturn(Arrays.asList(t1,t2));
+        when(tagMapper.convertToDTO(t1)).thenReturn(dto1);
+        when(tagMapper.convertToDTO(t2)).thenReturn(dto2);
 
         mockMvc.perform(get("/api/tags")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -64,19 +77,24 @@ class TagControllerTest {
 
     @Test
     void getTagById() throws Exception {
-        TagDTO dto = new TagDTO("t1", Color.BLUE);
-        dto.setId(1);
-        dto.setPath("/api/tags" + dto.getId());
 
-        when(tagService.getTagById(dto.getId())).thenReturn(dto);
+        Tag savedEntity = new Tag("t1", Color.BLUE);
+        savedEntity.setId(1);
 
-        mockMvc.perform(get("/api/tags/{id}", dto.getId())
+        TagDTO returnedDTO = new TagDTO(savedEntity.getName(), savedEntity.getColor());
+        returnedDTO.setId(savedEntity.getId());
+        returnedDTO.setPath("/api/tags" + returnedDTO.getId());
+
+        when(tagService.getTagById(savedEntity.getId())).thenReturn(savedEntity);
+        when(tagMapper.convertToDTO(savedEntity)).thenReturn(returnedDTO);
+
+        mockMvc.perform(get("/api/tags/{id}", savedEntity.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", equalTo(dto.getId())))
-                .andExpect(jsonPath("$.name", equalTo(dto.getName())))
-                .andExpect(jsonPath("$.color", equalTo(dto.getColor().toString())))
-                .andExpect(jsonPath("$.path", equalTo(dto.getPath())));
+                .andExpect(jsonPath("$.id", equalTo(returnedDTO.getId())))
+                .andExpect(jsonPath("$.name", equalTo(returnedDTO.getName())))
+                .andExpect(jsonPath("$.color", equalTo(returnedDTO.getColor().toString())))
+                .andExpect(jsonPath("$.path", equalTo(returnedDTO.getPath())));
     }
 
     @Test
@@ -95,19 +113,25 @@ class TagControllerTest {
 
     @Test
     void getTagByName() throws Exception {
-        TagDTO dto = new TagDTO("t1", Color.BLUE);
-        dto.setId(1);
-        dto.setPath("/api/tags" + dto.getId());
 
-        when(tagService.getTagByName(dto.getName())).thenReturn(dto);
+        Tag savedEntity = new Tag("t1", Color.BLUE);
+        savedEntity.setId(1);
 
-        mockMvc.perform(get("/api/tags/name/{name}", dto.getName())
+        TagDTO returnedDTO = new TagDTO(savedEntity.getName(), savedEntity.getColor());
+        returnedDTO.setId(savedEntity.getId());
+        returnedDTO.setPath("/api/tags" + returnedDTO.getId());
+
+        when(tagService.getTagByName(savedEntity.getName())).thenReturn(savedEntity);
+        when(tagMapper.convertToDTO(savedEntity)).thenReturn(returnedDTO);
+
+
+        mockMvc.perform(get("/api/tags/name/{name}", returnedDTO.getName())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", equalTo(dto.getId())))
-                .andExpect(jsonPath("$.name", equalTo(dto.getName())))
-                .andExpect(jsonPath("$.color", equalTo(dto.getColor().toString())))
-                .andExpect(jsonPath("$.path", equalTo(dto.getPath())));
+                .andExpect(jsonPath("$.id", equalTo(returnedDTO.getId())))
+                .andExpect(jsonPath("$.name", equalTo(returnedDTO.getName())))
+                .andExpect(jsonPath("$.color", equalTo(returnedDTO.getColor().toString())))
+                .andExpect(jsonPath("$.path", equalTo(returnedDTO.getPath())));
     }
 
     @Test
@@ -128,11 +152,18 @@ class TagControllerTest {
 
         TagDTO passedDTO = new TagDTO("t1", Color.BLUE);
 
-        TagDTO returnedDTO = new TagDTO(passedDTO.getName(), passedDTO.getColor());
-        returnedDTO.setId(1);
+        Tag toSaveEntity = new Tag(passedDTO.getName(), passedDTO.getColor());
+
+        Tag savedEntity = new Tag(toSaveEntity.getName(), toSaveEntity.getColor());
+        savedEntity.setId(1);
+
+        TagDTO returnedDTO = new TagDTO(savedEntity.getName(), savedEntity.getColor());
+        returnedDTO.setId(savedEntity.getId());
         returnedDTO.setPath("/api/tags" + returnedDTO.getId());
 
-        when(tagService.createNewTag(passedDTO)).thenReturn(returnedDTO);
+        when(tagMapper.convertToEntity(passedDTO)).thenReturn(toSaveEntity);
+        when(tagService.createNewTag(toSaveEntity)).thenReturn(savedEntity);
+        when(tagMapper.convertToDTO(savedEntity)).thenReturn(returnedDTO);
 
         mockMvc.perform(post("/api/tags")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -163,7 +194,10 @@ class TagControllerTest {
 
         TagDTO passedDTO = new TagDTO("t1", Color.BLUE);
 
-        when(tagService.createNewTag(passedDTO)).thenThrow(ResourceAlreadyExistsException.class);
+        Tag toSaveEntity = new Tag(passedDTO.getName(), passedDTO.getColor());
+
+        when(tagMapper.convertToEntity(passedDTO)).thenReturn(toSaveEntity);
+        when(tagService.createNewTag(toSaveEntity)).thenThrow(ResourceAlreadyExistsException.class);
 
         mockMvc.perform(post("/api/tags")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -176,13 +210,23 @@ class TagControllerTest {
     @Test
     void updateTagById() throws Exception {
 
-        TagDTO passedDTO = new TagDTO("Test Update", Color.GREEN);
+        Integer savedId = 1;
 
-        TagDTO returnedDTO = new TagDTO(passedDTO.getName(), passedDTO.getColor());
-        returnedDTO.setId(1);
+        TagDTO passedDTO = new TagDTO("t1", Color.BLUE);
+
+        Tag toUpdateEntity = new Tag(passedDTO.getName(), passedDTO.getColor());
+
+        Tag updatedEntity = new Tag(toUpdateEntity.getName(), toUpdateEntity.getColor());
+        updatedEntity.setId(savedId);
+
+        TagDTO returnedDTO = new TagDTO(updatedEntity.getName(), updatedEntity.getColor());
+        returnedDTO.setId(updatedEntity.getId());
         returnedDTO.setPath("/api/tags" + returnedDTO.getId());
 
-        when(tagService.updateTagById(returnedDTO.getId(), passedDTO)).thenReturn(returnedDTO);
+        when(tagMapper.convertToEntity(passedDTO)).thenReturn(toUpdateEntity);
+        when(tagService.updateTagById(savedId, toUpdateEntity)).thenReturn(updatedEntity);
+        when(tagMapper.convertToDTO(updatedEntity)).thenReturn(returnedDTO);
+
 
         mockMvc.perform(put("/api/tags/{id}", returnedDTO.getId())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -199,9 +243,12 @@ class TagControllerTest {
 
         TagDTO passedDTO = new TagDTO("Test Update", Color.GREEN);
 
+        Tag toUpdateEntity = new Tag(passedDTO.getName(), passedDTO.getColor());
+
         Integer notFoundId = 123;
 
-        when(tagService.updateTagById(notFoundId, passedDTO)).thenThrow(ResourceNotFoundException.class);
+        when(tagMapper.convertToEntity(passedDTO)).thenReturn(toUpdateEntity);
+        when(tagService.updateTagById(notFoundId, toUpdateEntity)).thenThrow(ResourceNotFoundException.class);
 
         mockMvc.perform(put("/api/tags/{id}", notFoundId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -255,13 +302,24 @@ class TagControllerTest {
 
     @Test
     void patchTagById() throws Exception {
-        TagDTO passedDTO = new TagDTO("Test Update", Color.GREEN);
 
-        TagDTO returnedDTO = new TagDTO(passedDTO.getName(), passedDTO.getColor());
-        returnedDTO.setId(1);
+        Integer savedId = 1;
+
+        TagDTO passedDTO = new TagDTO("t1", Color.BLUE);
+
+        Tag toPatchEntity = new Tag(passedDTO.getName(), passedDTO.getColor());
+
+        Tag patchedEntity = new Tag(toPatchEntity.getName(), toPatchEntity.getColor());
+        patchedEntity.setId(savedId);
+
+        TagDTO returnedDTO = new TagDTO(patchedEntity.getName(), patchedEntity.getColor());
+        returnedDTO.setId(patchedEntity.getId());
         returnedDTO.setPath("/api/tags" + returnedDTO.getId());
 
-        when(tagService.patchTagById(returnedDTO.getId(), passedDTO)).thenReturn(returnedDTO);
+        when(tagMapper.convertToEntity(passedDTO)).thenReturn(toPatchEntity);
+        when(tagService.patchTagById(savedId, toPatchEntity)).thenReturn(patchedEntity);
+        when(tagMapper.convertToDTO(patchedEntity)).thenReturn(returnedDTO);
+
 
         mockMvc.perform(patch("/api/tags/{id}", returnedDTO.getId())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -272,18 +330,19 @@ class TagControllerTest {
                 .andExpect(jsonPath("$.color", equalTo(returnedDTO.getColor().toString())))
                 .andExpect(jsonPath("$.path", equalTo(returnedDTO.getPath())));
 
-        verify(tagService, times(1)).patchTagById(1, passedDTO);
-
     }
 
     @Test
     void patchTagById_IdNotFound() throws Exception {
+
         TagDTO passedDTO = new TagDTO("Test Update", Color.GREEN);
+
+        Tag toPatchEntity = new Tag(passedDTO.getName(), passedDTO.getColor());
 
         Integer notFoundId = 123;
 
-
-        when(tagService.patchTagById(notFoundId, passedDTO)).thenThrow(ResourceNotFoundException.class);
+        when(tagMapper.convertToEntity(passedDTO)).thenReturn(toPatchEntity);
+        when(tagService.patchTagById(notFoundId, toPatchEntity)).thenThrow(ResourceNotFoundException.class);
 
         mockMvc.perform(patch("/api/tags/{id}", notFoundId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -296,11 +355,10 @@ class TagControllerTest {
     }
 
     @Test
-    void patchTagById_IdNotNull() throws Exception {
+    void patchTagById_BodyIdNotNull() throws Exception {
         TagDTO passedDTO = new TagDTO("Test Update", Color.GREEN);
         passedDTO.setId(123);
 
-        when(tagService.updateTagById(1, passedDTO)).thenThrow(ResourceNotFoundException.class);
 
         mockMvc.perform(patch("/api/tags/{id}", 1)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -314,9 +372,15 @@ class TagControllerTest {
 
     @Test
     void patchTagById_NameAlreadyExists() throws Exception {
+        Integer savedId = 1;
+
         TagDTO passedDTO = new TagDTO("Test Update", Color.GREEN);
 
-        when(tagService.patchTagById(1, passedDTO)).thenThrow(ResourceAlreadyExistsException.class);
+        Tag toPatchEntity = new Tag(passedDTO.getName(), passedDTO.getColor());
+
+
+        when(tagMapper.convertToEntity(passedDTO)).thenReturn(toPatchEntity);
+        when(tagService.patchTagById(savedId, toPatchEntity)).thenThrow(ResourceAlreadyExistsException.class);
 
         mockMvc.perform(patch("/api/tags/{id}", 1)
                         .contentType(MediaType.APPLICATION_JSON)
