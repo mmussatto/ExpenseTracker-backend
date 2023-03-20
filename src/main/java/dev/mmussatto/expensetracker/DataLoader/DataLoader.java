@@ -135,21 +135,21 @@ public class DataLoader implements CommandLineRunner {
 
 
         Transaction t1 = new Transaction(200.00, new Timestamp(new Date().getTime()),
-                "God of War Ragnarok", nubank, gamesCategory, tagSet, playstationStore );
+                "God of War Ragnarok", gamesCategory, nubank, playstationStore, tagSet );
         nubank.getTransactions().add(t1);
         gamesCategory.getTransactions().add(t1);
         tagSet.forEach(tag -> tag.getTransactions().add(t1));
         playstationStore.getTransactions().add(t1);
 
         Transaction t2 = new Transaction(10.76, new Timestamp(new Date().getTime()), "Avatar",
-                debNubank, recreationCategory, Stream.of(moviesTag).collect(Collectors.toSet()), cinemark );
+                recreationCategory, debNubank, cinemark, Stream.of(moviesTag).collect(Collectors.toSet()) );
         debNubank.getTransactions().add(t2);
         recreationCategory.getTransactions().add(t2);
         moviesTag.getTransactions().add(t2);
         cinemark.getTransactions().add(t2);
 
         Transaction t3 = new Transaction(10.76, new Timestamp(new Date().getTime()), "Top Gun: Maverick",
-                debNubank, recreationCategory, Stream.of(moviesTag, happyTag).collect(Collectors.toSet()), cinemark );
+                recreationCategory, debNubank, cinemark, Stream.of(moviesTag, happyTag).collect(Collectors.toSet()) );
         debNubank.getTransactions().add(t3);
         recreationCategory.getTransactions().add(t3);
         moviesTag.getTransactions().add(t3);

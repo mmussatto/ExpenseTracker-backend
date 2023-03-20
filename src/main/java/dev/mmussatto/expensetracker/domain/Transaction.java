@@ -44,8 +44,8 @@ public class Transaction {
     private Set<Tag> tags = new HashSet<>();
 
 
-    public Transaction(Double amount, Timestamp date, String description, PaymentMethod paymentMethod,
-                       Category category, Set<Tag> tags, Vendor vendor) {
+    public Transaction(Double amount, Timestamp date, String description, Category category,
+                       PaymentMethod paymentMethod, Vendor vendor, Set<Tag> tags) {
         this.amount = amount;
         this.date = date;
         this.description = description;
