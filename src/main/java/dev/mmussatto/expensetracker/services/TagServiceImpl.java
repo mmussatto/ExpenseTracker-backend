@@ -4,8 +4,6 @@
 
 package dev.mmussatto.expensetracker.services;
 
-import dev.mmussatto.expensetracker.api.mappers.TagMapper;
-import dev.mmussatto.expensetracker.api.model.TagDTO;
 import dev.mmussatto.expensetracker.domain.Tag;
 import dev.mmussatto.expensetracker.domain.Transaction;
 import dev.mmussatto.expensetracker.repositories.TagRepository;
@@ -15,91 +13,70 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class TagServiceImpl implements TagService {
 
-    private final TagMapper tagMapper;
     private final TagRepository tagRepository;
 
-    public TagServiceImpl(TagMapper tagMapper, TagRepository tagRepository) {
-        this.tagMapper = tagMapper;
+    public TagServiceImpl(TagRepository tagRepository) {
         this.tagRepository = tagRepository;
     }
 
     @Override
-    public List<TagDTO> getAllTags() {
-        return tagRepository.findAll()
-                .stream()
-                .map(tag -> {
-                    TagDTO tagDTO = tagMapper.convertToDTO(tag);
-                    tagDTO.setPath("/api/tags/" + tagDTO.getId());
-                    return tagDTO;
-                })
-                .collect(Collectors.toList());
+    public List<Tag> getAllTags() {
+        return tagRepository.findAll();
     }
 
     @Override
-    public TagDTO getTagById(Integer id) {
+    public Tag getTagById(Integer id) {
         return tagRepository.findById(id)
-                .map(tag -> {
-                    TagDTO tagDTO = tagMapper.convertToDTO(tag);
-                    tagDTO.setPath("/api/tags/" + tagDTO.getId());
-                    return tagDTO;
-                })
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Tag %d not found!", id)));
     }
 
     @Override
-    public TagDTO getTagByName(String name) {
+    public Tag getTagByName(String name) {
         return tagRepository.findByName(name)
-                .map(tag -> {
-                    TagDTO tagDTO = tagMapper.convertToDTO(tag);
-                    tagDTO.setPath("/api/tags/" + tagDTO.getId());
-                    return tagDTO;
-                })
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Tag %s not found!", name)));
     }
 
     @Override
-    public TagDTO createNewTag(TagDTO tagDTO) {
-        checkIfNameIsAlreadyInUse(tagDTO);
+    public Tag createNewTag(Tag tag) {
+        checkIfNameIsAlreadyInUse(tag);
 
-        return saveAndReturn(tagMapper.convertToEntity(tagDTO));
+        return tagRepository.save(tag);
     }
 
     @Override
-    public TagDTO updateTagById(Integer id, TagDTO tagDTO) {
+    public Tag updateTagById(Integer id, Tag tag) {
 
         tagRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Tag %d not found!", id)));
 
-        checkIfNameIsAlreadyInUse(tagDTO);
+        checkIfNameIsAlreadyInUse(tag);
 
-        Tag tag = tagMapper.convertToEntity(tagDTO);
         tag.setId(id);
 
-        return saveAndReturn(tag);
+        return tagRepository.save(tag);
     }
 
     @Override
-    public TagDTO patchTagById(Integer id, TagDTO tagDTO) {
-        return tagRepository.findById(id).map(tag -> {
+    public Tag patchTagById(Integer id, Tag tag) {
+        return tagRepository.findById(id).map(savedEntity -> {
 
-            if (tagDTO.getName() != null) {
-                checkIfNameIsAlreadyInUse(tagDTO);
+            if (tag.getName() != null) {
+                checkIfNameIsAlreadyInUse(tag);
 
-                tag.setName(tagDTO.getName());
+                savedEntity.setName(tag.getName());
             }
 
-            if (tagDTO.getColor() != null)
-                tag.setColor(tagDTO.getColor());
+            if (tag.getColor() != null)
+                savedEntity.setColor(tag.getColor());
 
-            if (tagDTO.getTransactions() != null && tagDTO.getTransactions().size() != 0)
-                tag.setTransactions(tagDTO.getTransactions());
+            if (tag.getTransactions() != null && tag.getTransactions().size() != 0)
+                savedEntity.setTransactions(tag.getTransactions());
 
-            return saveAndReturn(tag);
+            return tagRepository.save(savedEntity);
 
         }).orElseThrow(() -> new ResourceNotFoundException(String.format("Tag %d not found!", id)));
     }
@@ -121,19 +98,9 @@ public class TagServiceImpl implements TagService {
     }
 
 
-
-    private TagDTO saveAndReturn (Tag tag) {
-        Tag savedTag = tagRepository.save(tag);
-
-        TagDTO returnDTO = tagMapper.convertToDTO(savedTag);
-        returnDTO.setPath("/api/tags/"+ returnDTO.getId());
-
-        return returnDTO;
-    }
-
-    private void checkIfNameIsAlreadyInUse(TagDTO tagDTO) {
-        tagRepository.findByName(tagDTO.getName()).ifPresent(tag -> {
-            throw new ResourceAlreadyExistsException(String.format("Tag %s already exists", tagDTO.getName()),
+    private void checkIfNameIsAlreadyInUse(Tag Tag) {
+        tagRepository.findByName(Tag.getName()).ifPresent(tag -> {
+            throw new ResourceAlreadyExistsException(String.format("Tag %s already exists", Tag.getName()),
                     "/api/tags/" + tag.getId());
         });
     }
