@@ -28,12 +28,11 @@ public class TransactionDTO {
 
     private String description;
 
-    private PaymentMethod paymentMethod;
-
     private Category category;
 
-    private Set<Tag> tags;
+    private PaymentMethod paymentMethod;
 
     private Vendor vendor;
 
+    private Set<Tag> tags;
 }
