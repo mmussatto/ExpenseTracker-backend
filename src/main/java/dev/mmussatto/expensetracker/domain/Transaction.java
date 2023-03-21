@@ -28,12 +28,14 @@ public class Transaction {
     @Lob
     private String description;
 
+    @ManyToOne
+    private Category category;
 
     @ManyToOne
     private PaymentMethod paymentMethod;
 
     @ManyToOne
-    private Category category;
+    private Vendor vendor;
 
     @ManyToMany
     @JoinTable(name = "transaction_tags",
@@ -41,17 +43,15 @@ public class Transaction {
             inverseJoinColumns = @JoinColumn(name = "tag_id"))
     private Set<Tag> tags = new HashSet<>();
 
-    @ManyToOne
-    private Vendor vendor;
 
-    public Transaction(Double amount, Timestamp date, String description, PaymentMethod paymentMethod,
-                       Category category, Set<Tag> tags, Vendor vendor) {
+    public Transaction(Double amount, Timestamp date, String description, Category category,
+                       PaymentMethod paymentMethod, Vendor vendor, Set<Tag> tags) {
         this.amount = amount;
         this.date = date;
         this.description = description;
-        this.paymentMethod = paymentMethod;
         this.category = category;
-        this.tags = tags;
+        this.paymentMethod = paymentMethod;
         this.vendor = vendor;
+        this.tags = tags;
     }
 }
