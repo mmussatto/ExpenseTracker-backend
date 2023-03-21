@@ -354,15 +354,6 @@ class TransactionServiceImplTest {
                 () -> transactionService.deleteTransactionById(ID));
     }
 
-    @Test
-    void getTagTransactionsByCategory() {
-
-        Integer categoryId = 1;
-
-        transactionService.getTransactionsByCategory(categoryId);
-
-        verify(categoryService, times(1)).getTransactionsById(categoryId);
-    }
 
     private static Transaction createTransactionEntity() {
         Transaction entity = new Transaction(AMOUNT, DATE, DESCRIPTION, CATEGORY,

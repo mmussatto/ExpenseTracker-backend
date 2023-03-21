@@ -120,11 +120,6 @@ public class TransactionServiceImpl implements TransactionService {
         transactionRepository.deleteById(id);
     }
 
-    @Override
-    public Set<Transaction> getTransactionsByCategory(Integer categoryId) {
-        return categoryService.getTransactionsById(categoryId);
-    }
-
 
     private void checkIfEntitiesExist(Transaction transaction) {
         Category category = categoryService.getCategoryById(transaction.getCategory().getId());

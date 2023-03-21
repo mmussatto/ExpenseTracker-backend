@@ -7,7 +7,6 @@ package dev.mmussatto.expensetracker.services;
 import dev.mmussatto.expensetracker.domain.Transaction;
 
 import java.util.List;
-import java.util.Set;
 
 public interface TransactionService {
 
@@ -24,5 +23,4 @@ public interface TransactionService {
 
     void deleteTransactionById (Integer id);
 
-    Set<Transaction> getTransactionsByCategory(Integer categoryId);
 }
