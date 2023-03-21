@@ -46,7 +46,7 @@ public class TransactionController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-//    @Validated(TransactionDTO.allFieldsValidation.class)
+    @Validated(TransactionDTO.allFieldsValidation.class)
     public TransactionDTO createNewTransaction (@Valid @RequestBody TransactionDTO transactionDTO) {
         Transaction entity = convertToEntity(transactionDTO);
         return convertToDTO(transactionService.createNewTransaction(entity));
@@ -54,7 +54,7 @@ public class TransactionController {
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-//    @Validated(TransactionDTO.allFieldsValidation.class)
+    @Validated(TransactionDTO.allFieldsValidation.class)
     public TransactionDTO updateTransactionById (@PathVariable final Integer id, @Valid @RequestBody TransactionDTO transactionDTO) {
         Transaction entity = convertToEntity(transactionDTO);
         return convertToDTO(transactionService.updateTransactionById(id, entity));
@@ -62,7 +62,7 @@ public class TransactionController {
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-//    @Validated(TransactionDTO.onlyIdValidation.class)
+    @Validated(TransactionDTO.onlyIdValidation.class)
     public TransactionDTO patchTransactionById (@PathVariable final Integer id, @Valid @RequestBody TransactionDTO transactionDTO) {
         Transaction entity = convertToEntity(transactionDTO);
         return convertToDTO(transactionService.patchTransactionById(id, entity));

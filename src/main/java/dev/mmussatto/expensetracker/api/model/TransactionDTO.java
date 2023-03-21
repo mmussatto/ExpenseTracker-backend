@@ -9,6 +9,9 @@ import dev.mmussatto.expensetracker.domain.Category;
 import dev.mmussatto.expensetracker.domain.PaymentMethod;
 import dev.mmussatto.expensetracker.domain.Tag;
 import dev.mmussatto.expensetracker.domain.Vendor;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Null;
 import lombok.Data;
 
 import java.sql.Timestamp;
@@ -17,22 +20,35 @@ import java.util.Set;
 @Data
 public class TransactionDTO {
 
+    // Validation Groups
+    public interface onlyIdValidation {}
+
+    public interface allFieldsValidation {}
+
+    @Null(message = "id field must be null", groups = {onlyIdValidation.class, allFieldsValidation.class})
     private Integer id;
 
     private String path;
 
+    @NotNull(message = "amount must not be blank", groups = allFieldsValidation.class)
     private Double amount;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
+    @NotNull(message = "date must not be blank", groups = allFieldsValidation.class)
     private Timestamp date;
 
+    @NotBlank(message = "description must not be blank", groups = allFieldsValidation.class)
     private String description;
 
+    @NotNull(message = "category must not be null",  groups = allFieldsValidation.class)
     private Category category;
 
+    @NotNull(message = "paymentMethod must not be null",  groups = allFieldsValidation.class)
     private PaymentMethod paymentMethod;
 
+    @NotNull(message = "vendor must not be null",  groups = allFieldsValidation.class)
     private Vendor vendor;
 
+    @NotNull(message = "tags must not be null",  groups = allFieldsValidation.class)
     private Set<Tag> tags;
 }
