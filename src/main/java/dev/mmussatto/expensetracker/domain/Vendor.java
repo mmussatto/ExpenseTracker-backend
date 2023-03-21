@@ -5,6 +5,8 @@
 package dev.mmussatto.expensetracker.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -15,6 +17,11 @@ import lombok.ToString;
 import java.util.HashSet;
 import java.util.Set;
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = OnlineStore.class, name = "Online Store"),
+        @JsonSubTypes.Type(value = PhysicalStore.class, name = "Physical Store")
+})
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(exclude = {"transactions"})
