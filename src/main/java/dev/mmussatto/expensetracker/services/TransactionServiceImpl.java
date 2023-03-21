@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
@@ -126,9 +127,17 @@ public class TransactionServiceImpl implements TransactionService {
 
 
     private void checkIfEntitiesExist(Transaction transaction) {
-        categoryService.getCategoryById(transaction.getCategory().getId());
-        paymentMethodService.getPaymentMethodById(transaction.getPaymentMethod().getId());
-        vendorService.getVendorById(transaction.getVendor().getId());
-        transaction.getTags().forEach(tag -> tagService.getTagById(tag.getId()));
+        Category category = categoryService.getCategoryById(transaction.getCategory().getId());
+        transaction.setCategory(category);
+
+        PaymentMethod paymentMethod = paymentMethodService.getPaymentMethodById(transaction.getPaymentMethod().getId());
+        transaction.setPaymentMethod(paymentMethod);
+
+        Vendor vendor = vendorService.getVendorById(transaction.getVendor().getId());
+        transaction.setVendor(vendor);
+
+        Set<Tag> tags = transaction.getTags().stream()
+                .map(tag -> tagService.getTagById(tag.getId())).collect(Collectors.toSet());
+        transaction.setTags(tags);
     }
 }
