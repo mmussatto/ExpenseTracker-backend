@@ -13,11 +13,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
 import java.util.Set;
 
 @Data
+@NoArgsConstructor
 public class TransactionDTO {
 
     // Validation Groups
@@ -51,4 +53,15 @@ public class TransactionDTO {
 
     @NotNull(message = "tags must not be null",  groups = allFieldsValidation.class)
     private Set<Tag> tags;
+
+    public TransactionDTO(Double amount, Timestamp date, String description, Category category,
+                       PaymentMethod paymentMethod, Vendor vendor, Set<Tag> tags) {
+        this.amount = amount;
+        this.date = date;
+        this.description = description;
+        this.category = category;
+        this.paymentMethod = paymentMethod;
+        this.vendor = vendor;
+        this.tags = tags;
+    }
 }
