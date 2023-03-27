@@ -4,7 +4,6 @@
 
 package dev.mmussatto.expensetracker.api.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import dev.mmussatto.expensetracker.domain.Category;
 import dev.mmussatto.expensetracker.domain.PaymentMethod;
 import dev.mmussatto.expensetracker.domain.Tag;
@@ -15,7 +14,7 @@ import jakarta.validation.constraints.Null;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Data
@@ -35,9 +34,9 @@ public class TransactionDTO {
     @NotNull(message = "amount must not be blank", groups = allFieldsValidation.class)
     private Double amount;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
+//    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @NotNull(message = "date must not be blank", groups = allFieldsValidation.class)
-    private Timestamp date;
+    private LocalDateTime date;
 
     @NotBlank(message = "description must not be blank", groups = allFieldsValidation.class)
     private String description;
@@ -54,7 +53,7 @@ public class TransactionDTO {
     @NotNull(message = "tags must not be null",  groups = allFieldsValidation.class)
     private Set<Tag> tags;
 
-    public TransactionDTO(Double amount, Timestamp date, String description, Category category,
+    public TransactionDTO(Double amount, LocalDateTime date, String description, Category category,
                        PaymentMethod paymentMethod, Vendor vendor, Set<Tag> tags) {
         this.amount = amount;
         this.date = date;

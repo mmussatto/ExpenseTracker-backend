@@ -8,7 +8,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -23,7 +23,7 @@ public class Transaction {
 
     private Double amount;
 
-    private Timestamp date;
+    private LocalDateTime date;
 
     @Lob
     private String description;
@@ -44,7 +44,7 @@ public class Transaction {
     private Set<Tag> tags = new HashSet<>();
 
 
-    public Transaction(Double amount, Timestamp date, String description, Category category,
+    public Transaction(Double amount, LocalDateTime date, String description, Category category,
                        PaymentMethod paymentMethod, Vendor vendor, Set<Tag> tags) {
         this.amount = amount;
         this.date = date;

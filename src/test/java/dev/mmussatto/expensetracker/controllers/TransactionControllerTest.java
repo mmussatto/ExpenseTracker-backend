@@ -142,8 +142,7 @@ class TransactionControllerTest {
                 .andExpect(jsonPath("$.id", equalTo(returnedDTO.getId())))
                 .andExpect(jsonPath("$.path", equalTo(returnedDTO.getPath())))
                 .andExpect(jsonPath("$.amount", equalTo(returnedDTO.getAmount())))
-                //TODO not working, date returned is two hours later than expected, probably timezones
-//                .andExpect(jsonPath("$.date", equalTo(returnedDTO.getDate().toString())))
+                .andExpect(jsonPath("$.date", equalTo(returnedDTO.getDate().toString())))
                 .andExpect(jsonPath("$.description", equalTo(returnedDTO.getDescription())));
 //                .andExpect(jsonPath("$.category").value(is(returnedDTO.getCategory())))
 //                .andExpect(jsonPath("$.paymentMethod", is(returnedDTO.getPaymentMethod().toString())))
@@ -195,8 +194,7 @@ class TransactionControllerTest {
                 .andExpect(jsonPath("$.id", equalTo(returnedDTO.getId())))
                 .andExpect(jsonPath("$.path", equalTo(returnedDTO.getPath())))
                 .andExpect(jsonPath("$.amount", equalTo(returnedDTO.getAmount())))
-                //TODO not working, date returned is two hours later than expected, probably timezones
-//                .andExpect(jsonPath("$.date", equalTo(returnedDTO.getDate().toString())))
+                .andExpect(jsonPath("$.date", equalTo(returnedDTO.getDate().toString())))
                 .andExpect(jsonPath("$.description", equalTo(returnedDTO.getDescription())));
 //                .andExpect(jsonPath("$.category").value(is(returnedDTO.getCategory())))
 //                .andExpect(jsonPath("$.paymentMethod", is(returnedDTO.getPaymentMethod().toString())))
@@ -304,8 +302,7 @@ class TransactionControllerTest {
                 .andExpect(jsonPath("$.id", equalTo(returnedDTO.getId())))
                 .andExpect(jsonPath("$.path", equalTo(returnedDTO.getPath())))
                 .andExpect(jsonPath("$.amount", equalTo(returnedDTO.getAmount())))
-                //TODO not working, date returned is two hours later than expected, probably timezones
-//                .andExpect(jsonPath("$.date", equalTo(returnedDTO.getDate().toString())))
+                .andExpect(jsonPath("$.date", equalTo(returnedDTO.getDate().toString())))
                 .andExpect(jsonPath("$.description", equalTo(returnedDTO.getDescription())));
 //                .andExpect(jsonPath("$.category").value(is(returnedDTO.getCategory())))
 //                .andExpect(jsonPath("$.paymentMethod", is(returnedDTO.getPaymentMethod().toString())))
@@ -399,7 +396,7 @@ class TransactionControllerTest {
         Tag tag2 = new Tag("Test Tag 2", Color.RED);
         tag2.setId(2);
 
-        Transaction entity = new Transaction(10.0, Timestamp.valueOf(LocalDateTime.now()),
+        Transaction entity = new Transaction(10.0, LocalDateTime.now(),
                 "Test Transaction Description", category ,
                 payment_method, vendor_os, Stream.of(tag1, tag2).collect(Collectors.toSet()));
         entity.setId(1);
@@ -423,7 +420,7 @@ class TransactionControllerTest {
         Tag tag2 = new Tag("Test Tag 2", Color.RED);
         tag2.setId(2);
 
-        return new TransactionDTO(10.0, Timestamp.valueOf("2022-02-22 05:12:12"),
+        return new TransactionDTO(10.0, LocalDateTime.now().withNano(0),
                 "Test Transaction Description", category, payment_method, vendor_os,
                 Stream.of(tag1, tag2).collect(Collectors.toSet()));
     }

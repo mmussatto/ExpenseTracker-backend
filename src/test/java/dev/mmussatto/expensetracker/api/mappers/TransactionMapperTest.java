@@ -9,7 +9,6 @@ import dev.mmussatto.expensetracker.domain.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,7 +20,7 @@ class TransactionMapperTest {
 
     public static final Integer ID = 1;
     public static final Double AMOUNT = 500.00;
-    public static final Timestamp TIME = Timestamp.valueOf(LocalDateTime.now());
+    public static final LocalDateTime TIME = LocalDateTime.now();
     public static final String DESCRIPTION = "TestDescription";
     public static final PaymentMethod PAYMENT = new PaymentMethod("TestPaymentMethod", PaymentType.CREDIT_CARD);
     public static final Category CATEGORY = new Category("TestCategory", Color.BLUE);

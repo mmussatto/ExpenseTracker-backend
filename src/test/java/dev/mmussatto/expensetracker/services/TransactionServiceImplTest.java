@@ -15,7 +15,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -49,7 +48,7 @@ class TransactionServiceImplTest {
     TagService tagService;
 
     private static final Double AMOUNT = 115.00;
-    private static final Timestamp DATE = Timestamp.valueOf(LocalDateTime.now());
+    private static final LocalDateTime DATE = LocalDateTime.now();
     private static final String DESCRIPTION = "Description";
     private static final Category CATEGORY = new Category("Test Category", Color.BLUE);
     private static final PaymentMethod PAYMENT_METHOD = new PaymentMethod("Test Payment Method", PaymentType.CASH);
@@ -205,7 +204,7 @@ class TransactionServiceImplTest {
         PaymentMethod modifiedPM = new PaymentMethod();
         modifiedPM.setId(123);
 
-        Transaction passedEntity = new Transaction(10.0, new Timestamp(1234), "Test Update", modifiedCategory,
+        Transaction passedEntity = new Transaction(10.0, LocalDateTime.now(), "Test Update", modifiedCategory,
                 PAYMENT_METHOD, VENDOR_PS, Stream.of(TAG2).collect(Collectors.toSet()));
 
         Transaction originalEntity = createTransactionEntity();
@@ -301,7 +300,7 @@ class TransactionServiceImplTest {
 
         Integer notFoundId = 123;
 
-        Transaction passedEntity = new Transaction(10.0, new Timestamp(1234), "Test Update",
+        Transaction passedEntity = new Transaction(10.0, LocalDateTime.now(), "Test Update",
                 CATEGORY, PAYMENT_METHOD, VENDOR_PS, Stream.of(TAG2).collect(Collectors.toSet()));
 
 
@@ -318,7 +317,7 @@ class TransactionServiceImplTest {
         Category modifiedCategory = new Category();
         modifiedCategory.setId(123);
 
-        Transaction passedEntity = new Transaction(10.0, new Timestamp(1234), "Test Update",
+        Transaction passedEntity = new Transaction(10.0, LocalDateTime.now(), "Test Update",
                 modifiedCategory, PAYMENT_METHOD, VENDOR_PS, Stream.of(TAG2).collect(Collectors.toSet()));
 
         Transaction originalEntity = createTransactionEntity();
