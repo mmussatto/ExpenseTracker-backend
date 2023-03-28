@@ -7,6 +7,7 @@ package dev.mmussatto.expensetracker.entities.vendor;
 import dev.mmussatto.expensetracker.entities.transaction.Transaction;
 import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStore;
 import dev.mmussatto.expensetracker.entities.vendor.physicalstore.PhysicalStore;
+import dev.mmussatto.expensetracker.exceptions.IncorrectVendorTypeException;
 import dev.mmussatto.expensetracker.exceptions.ResourceAlreadyExistsException;
 import dev.mmussatto.expensetracker.exceptions.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
@@ -57,7 +58,7 @@ public class VendorServiceImpl<V extends Vendor> implements VendorService<V> {
     @Override
     public V updateVendorById(Integer id, V vendor) {
 
-        vendorRepository.findById(id)
+        Vendor savedVendor = vendorRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Vendor '%d' not found!", id)));
 
         checkIfNameIsAlreadyInUse(vendor);
@@ -69,12 +70,20 @@ public class VendorServiceImpl<V extends Vendor> implements VendorService<V> {
 
         vendor.setId(id);
 
+        if(vendor.getClass() != savedVendor.getClass())
+            throw new IncorrectVendorTypeException(
+                    String.format("Incorrect type for vendor '%d'. Change type in request body or create new vendor", id));
+
         return vendorRepository.save(vendor);
     }
 
     @Override
     public V patchVendorById(Integer id, V vendor) {
         return vendorRepository.findById(id).map(savedVendor -> {
+
+            if(vendor.getClass() != savedVendor.getClass())
+                throw new IncorrectVendorTypeException(
+                        String.format("Incorrect type for vendor '%d'. Change type in request body or create new vendor", id));
 
             if (vendor.getName() != null) {
                 checkIfNameIsAlreadyInUse(vendor);

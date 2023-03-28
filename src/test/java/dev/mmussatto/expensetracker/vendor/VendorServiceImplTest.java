@@ -11,6 +11,7 @@ import dev.mmussatto.expensetracker.entities.vendor.VendorService;
 import dev.mmussatto.expensetracker.entities.vendor.VendorServiceImpl;
 import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStore;
 import dev.mmussatto.expensetracker.entities.vendor.physicalstore.PhysicalStore;
+import dev.mmussatto.expensetracker.exceptions.IncorrectVendorTypeException;
 import dev.mmussatto.expensetracker.exceptions.ResourceAlreadyExistsException;
 import dev.mmussatto.expensetracker.exceptions.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -229,6 +230,22 @@ class VendorServiceImplTest {
         when(vendorRepository.findByName(passedVendor.getName())).thenReturn(Optional.of(anotherSavedVendor));
 
         assertThrows(ResourceAlreadyExistsException.class,
+                () -> vendorService.updateVendorById(originalVendor.getId(), passedVendor));
+
+    }
+
+    @Test
+    void updateVendorById_IncorrectType() {
+
+        PhysicalStore passedVendor = new PhysicalStore("Test Update", "New Address");
+
+        OnlineStore originalVendor = createOnlineStore();
+
+
+        when(vendorRepository.findById(originalVendor.getId())).thenReturn(Optional.of(originalVendor));
+        when(vendorRepository.findByName(passedVendor.getName())).thenReturn(Optional.empty());
+
+        assertThrows(IncorrectVendorTypeException.class,
                 () -> vendorService.updateVendorById(originalVendor.getId(), passedVendor));
 
     }

@@ -62,8 +62,8 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     }
 
 
-    @ExceptionHandler(InvalidIdModificationException.class)
-    public ResponseEntity<Object> handleInvalidIdModification(InvalidIdModificationException exception, WebRequest request) {
+    @ExceptionHandler(IncorrectVendorTypeException.class)
+    public ResponseEntity<Object> handleInvalidIdModification(IncorrectVendorTypeException exception, WebRequest request) {
 
         Map<String, Object> responseBody = new LinkedHashMap<>();
         responseBody.put("timestamp", LocalDateTime.now()
@@ -71,6 +71,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         responseBody.put("status", HttpStatus.BAD_REQUEST.value());
         responseBody.put("error", HttpStatus.BAD_REQUEST.getReasonPhrase());
         responseBody.put("path", ((ServletWebRequest) request).getRequest().getRequestURI());
+        responseBody.put("message", exception.getMessage());
 
         return new ResponseEntity<>(responseBody, new HttpHeaders(), HttpStatus.BAD_REQUEST);
     }

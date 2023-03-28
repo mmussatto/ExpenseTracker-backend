@@ -12,6 +12,7 @@ import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStore;
 import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStoreDTO;
 import dev.mmussatto.expensetracker.entities.vendor.physicalstore.PhysicalStore;
 import dev.mmussatto.expensetracker.entities.vendor.physicalstore.PhysicalStoreDTO;
+import dev.mmussatto.expensetracker.exceptions.IncorrectVendorTypeException;
 import dev.mmussatto.expensetracker.exceptions.ResourceAlreadyExistsException;
 import dev.mmussatto.expensetracker.exceptions.ResourceNotFoundException;
 import jakarta.validation.ConstraintViolationException;
@@ -327,6 +328,26 @@ class VendorControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> assertThat(result.getResolvedException(),
                         instanceOf(ConstraintViolationException.class)));
+    }
+
+    @Test
+    void updateVendorById_IncorrectType() throws Exception{
+
+        int savedId = 1;
+
+        OnlineStoreDTO passedDto = new OnlineStoreDTO("PS Test Update", "www.testUpdate.com");
+
+        OnlineStore passedEntity = new OnlineStore(passedDto.getName(), passedDto.getUrl());
+
+
+        when(vendorService.updateVendorById(savedId, passedEntity)).thenThrow(IncorrectVendorTypeException.class);
+
+        mockMvc.perform(put("/api/vendors/{id}", savedId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(passedDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertThat(result.getResolvedException(),
+                        instanceOf(IncorrectVendorTypeException.class)));
     }
 
     @Test
