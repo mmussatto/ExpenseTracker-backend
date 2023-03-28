@@ -165,7 +165,10 @@ class TransactionServiceImplTest {
     @Test
     void updateTransactionById() {
 
-        Transaction passedEntity = new Transaction(10.0, DATE, "Test Update", new Category(),
+        Category updatedCategory = new Category("Updated Category", Color.BLUE);
+        updatedCategory.setId(123);
+
+        Transaction passedEntity = new Transaction(10.0, DATE, "Test Update", updatedCategory,
                 PAYMENT_METHOD, VENDOR_PS, Stream.of(TAG2).collect(Collectors.toSet()));
 
         Transaction originalEntity = createTransactionEntity();
@@ -175,6 +178,7 @@ class TransactionServiceImplTest {
                 passedEntity.getVendor(), passedEntity.getTags());
         updatedEntity.setId(originalEntity.getId());
 
+        when(categoryService.getCategoryById(updatedCategory.getId())).thenReturn(updatedCategory);
         when(paymentMethodService.getPaymentMethodById(PAYMENT_METHOD.getId())).thenReturn(PAYMENT_METHOD);
         when(vendorService.getVendorById(VENDOR_PS.getId())).thenReturn(VENDOR_PS);
         when(tagService.getTagById(TAG2.getId())).thenReturn(TAG2);
