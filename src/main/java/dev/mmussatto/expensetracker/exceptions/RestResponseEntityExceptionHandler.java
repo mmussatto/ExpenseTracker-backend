@@ -2,12 +2,9 @@
  * Created by murilo.mussatto on 01/03/2023
  */
 
-package dev.mmussatto.expensetracker.controllers.exceptions;
+package dev.mmussatto.expensetracker.exceptions;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
-import dev.mmussatto.expensetracker.services.exceptions.InvalidIdModificationException;
-import dev.mmussatto.expensetracker.services.exceptions.ResourceAlreadyExistsException;
-import dev.mmussatto.expensetracker.services.exceptions.ResourceNotFoundException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpHeaders;

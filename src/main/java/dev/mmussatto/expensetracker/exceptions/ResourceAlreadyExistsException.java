@@ -2,7 +2,7 @@
  * Created by murilo.mussatto on 01/03/2023
  */
 
-package dev.mmussatto.expensetracker.services.exceptions;
+package dev.mmussatto.expensetracker.exceptions;
 
 import lombok.Getter;
 
