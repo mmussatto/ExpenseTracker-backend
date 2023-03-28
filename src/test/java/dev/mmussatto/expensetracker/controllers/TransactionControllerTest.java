@@ -18,7 +18,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -28,6 +27,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -127,27 +127,20 @@ class TransactionControllerTest {
                 savedEntity.getVendor(), savedEntity.getTags());
         returnedDTO.setId(savedEntity.getId());
 
-        when(transactionMapper.convertToEntity(passedDTO)).thenReturn(toSaveEntity);
+        when(transactionMapper.convertToEntity(any())).thenReturn(toSaveEntity);
         when(transactionService.createNewTransaction(toSaveEntity)).thenReturn(savedEntity);
         when(transactionMapper.convertToDTO(savedEntity)).thenReturn(returnedDTO);
-
-//        objectMapper.configure(JsonGenerator.Feature.QUOTE_FIELD_NAMES, false);
-//        objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
-//        objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
 
         mockMvc.perform(post("/api/transactions")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(passedDTO)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", equalTo(returnedDTO.getId())))
-                .andExpect(jsonPath("$.path", equalTo(returnedDTO.getPath())))
-                .andExpect(jsonPath("$.amount", equalTo(returnedDTO.getAmount())))
-                .andExpect(jsonPath("$.date", equalTo(returnedDTO.getDate().toString())))
-                .andExpect(jsonPath("$.description", equalTo(returnedDTO.getDescription())));
-//                .andExpect(jsonPath("$.category").value(is(returnedDTO.getCategory())))
-//                .andExpect(jsonPath("$.paymentMethod", is(returnedDTO.getPaymentMethod().toString())))
-//                .andExpect(jsonPath("$.vendor", equalTo(returnedDTO.getVendor().toString())))
-//                .andExpect(jsonPath("$.tags", equalTo(returnedDTO.getTags().toString())));
+                .andExpect(result -> {
+                    String retString = result.getResponse().getContentAsString();
+                    TransactionDTO objFromJson = objectMapper.readValue(retString, TransactionDTO.class);
+                    assertEquals(returnedDTO, objFromJson);
+                })
+                .andDo(print());
     }
 
     @Test
@@ -191,15 +184,11 @@ class TransactionControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(passedDTO)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", equalTo(returnedDTO.getId())))
-                .andExpect(jsonPath("$.path", equalTo(returnedDTO.getPath())))
-                .andExpect(jsonPath("$.amount", equalTo(returnedDTO.getAmount())))
-                .andExpect(jsonPath("$.date", equalTo(returnedDTO.getDate().toString())))
-                .andExpect(jsonPath("$.description", equalTo(returnedDTO.getDescription())));
-//                .andExpect(jsonPath("$.category").value(is(returnedDTO.getCategory())))
-//                .andExpect(jsonPath("$.paymentMethod", is(returnedDTO.getPaymentMethod().toString())))
-//                .andExpect(jsonPath("$.vendor", equalTo(returnedDTO.getVendor().toString())))
-//                .andExpect(jsonPath("$.tags", equalTo(returnedDTO.getTags().toString())));
+                .andExpect(result -> {
+                    String retString = result.getResponse().getContentAsString();
+                    TransactionDTO objFromJson = objectMapper.readValue(retString, TransactionDTO.class);
+                    assertEquals(returnedDTO, objFromJson);
+                });
 
     }
 
@@ -299,15 +288,11 @@ class TransactionControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(passedDTO)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", equalTo(returnedDTO.getId())))
-                .andExpect(jsonPath("$.path", equalTo(returnedDTO.getPath())))
-                .andExpect(jsonPath("$.amount", equalTo(returnedDTO.getAmount())))
-                .andExpect(jsonPath("$.date", equalTo(returnedDTO.getDate().toString())))
-                .andExpect(jsonPath("$.description", equalTo(returnedDTO.getDescription())));
-//                .andExpect(jsonPath("$.category").value(is(returnedDTO.getCategory())))
-//                .andExpect(jsonPath("$.paymentMethod", is(returnedDTO.getPaymentMethod().toString())))
-//                .andExpect(jsonPath("$.vendor", equalTo(returnedDTO.getVendor().toString())))
-//                .andExpect(jsonPath("$.tags", equalTo(returnedDTO.getTags().toString())));
+                .andExpect(result -> {
+                    String retString = result.getResponse().getContentAsString();
+                    TransactionDTO objFromJson = objectMapper.readValue(retString, TransactionDTO.class);
+                    assertEquals(returnedDTO, objFromJson);
+                });
 
     }
 
@@ -396,7 +381,7 @@ class TransactionControllerTest {
         Tag tag2 = new Tag("Test Tag 2", Color.RED);
         tag2.setId(2);
 
-        Transaction entity = new Transaction(10.0, LocalDateTime.now(),
+        Transaction entity = new Transaction(10.0, LocalDateTime.now().withNano(0),
                 "Test Transaction Description", category ,
                 payment_method, vendor_os, Stream.of(tag1, tag2).collect(Collectors.toSet()));
         entity.setId(1);
