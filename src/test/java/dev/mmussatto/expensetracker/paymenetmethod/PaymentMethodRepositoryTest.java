@@ -2,10 +2,11 @@
  * Created by murilo.mussatto on 27/02/2023
  */
 
-package dev.mmussatto.expensetracker.repositories;
+package dev.mmussatto.expensetracker.paymenetmethod;
 
-import dev.mmussatto.expensetracker.domain.PaymentMethod;
-import dev.mmussatto.expensetracker.domain.PaymentType;
+import dev.mmussatto.expensetracker.entities.paymentmethod.PaymentMethod;
+import dev.mmussatto.expensetracker.entities.paymentmethod.PaymentMethodRepository;
+import dev.mmussatto.expensetracker.entities.paymentmethod.PaymentType;
 import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

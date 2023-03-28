@@ -2,12 +2,13 @@
  * Created by murilo.mussatto on 03/03/2023
  */
 
-package dev.mmussatto.expensetracker.api.mappers;
+package dev.mmussatto.expensetracker.paymenetmethod;
 
-import dev.mmussatto.expensetracker.api.model.PaymentMethodDTO;
-import dev.mmussatto.expensetracker.domain.PaymentMethod;
-import dev.mmussatto.expensetracker.domain.PaymentType;
-import dev.mmussatto.expensetracker.domain.Transaction;
+import dev.mmussatto.expensetracker.entities.paymentmethod.PaymentMethod;
+import dev.mmussatto.expensetracker.entities.paymentmethod.PaymentMethodDTO;
+import dev.mmussatto.expensetracker.entities.paymentmethod.PaymentMethodMapper;
+import dev.mmussatto.expensetracker.entities.paymentmethod.PaymentType;
+import dev.mmussatto.expensetracker.entities.transaction.Transaction;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;

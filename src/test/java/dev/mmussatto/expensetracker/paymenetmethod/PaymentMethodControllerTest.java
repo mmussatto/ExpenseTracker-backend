@@ -2,17 +2,13 @@
  * Created by murilo.mussatto on 07/03/2023
  */
 
-package dev.mmussatto.expensetracker.controllers;
+package dev.mmussatto.expensetracker.paymenetmethod;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.mmussatto.expensetracker.api.mappers.PaymentMethodMapper;
-import dev.mmussatto.expensetracker.api.model.PaymentMethodDTO;
-import dev.mmussatto.expensetracker.domain.PaymentMethod;
-import dev.mmussatto.expensetracker.domain.PaymentType;
-import dev.mmussatto.expensetracker.domain.Transaction;
-import dev.mmussatto.expensetracker.services.PaymentMethodService;
-import dev.mmussatto.expensetracker.services.exceptions.ResourceAlreadyExistsException;
-import dev.mmussatto.expensetracker.services.exceptions.ResourceNotFoundException;
+import dev.mmussatto.expensetracker.entities.paymentmethod.*;
+import dev.mmussatto.expensetracker.entities.transaction.Transaction;
+import dev.mmussatto.expensetracker.exceptions.ResourceAlreadyExistsException;
+import dev.mmussatto.expensetracker.exceptions.ResourceNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

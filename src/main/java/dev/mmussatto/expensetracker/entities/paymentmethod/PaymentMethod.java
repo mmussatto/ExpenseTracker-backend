@@ -2,9 +2,10 @@
  * Created by murilo.mussatto on 24/02/2023
  */
 
-package dev.mmussatto.expensetracker.domain;
+package dev.mmussatto.expensetracker.entities.paymentmethod;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import dev.mmussatto.expensetracker.entities.transaction.Transaction;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;

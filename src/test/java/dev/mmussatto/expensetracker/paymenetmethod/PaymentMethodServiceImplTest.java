@@ -2,14 +2,15 @@
  * Created by murilo.mussatto on 03/03/2023
  */
 
-package dev.mmussatto.expensetracker.services;
+package dev.mmussatto.expensetracker.paymenetmethod;
 
-import dev.mmussatto.expensetracker.domain.PaymentMethod;
-import dev.mmussatto.expensetracker.domain.PaymentType;
-import dev.mmussatto.expensetracker.domain.Transaction;
-import dev.mmussatto.expensetracker.repositories.PaymentMethodRepository;
-import dev.mmussatto.expensetracker.services.exceptions.ResourceAlreadyExistsException;
-import dev.mmussatto.expensetracker.services.exceptions.ResourceNotFoundException;
+import dev.mmussatto.expensetracker.entities.paymentmethod.PaymentMethod;
+import dev.mmussatto.expensetracker.entities.paymentmethod.PaymentMethodRepository;
+import dev.mmussatto.expensetracker.entities.paymentmethod.PaymentMethodServiceImpl;
+import dev.mmussatto.expensetracker.entities.paymentmethod.PaymentType;
+import dev.mmussatto.expensetracker.entities.transaction.Transaction;
+import dev.mmussatto.expensetracker.exceptions.ResourceAlreadyExistsException;
+import dev.mmussatto.expensetracker.exceptions.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
