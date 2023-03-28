@@ -128,21 +128,21 @@ public class VendorServiceImpl<V extends Vendor> implements VendorService<V> {
     private void checkIfAddressIsAlreadyInUse(PhysicalStore vendor) {
         vendorRepository.findByAddress(vendor.getAddress()).ifPresent(savedVendor -> {
             throw new ResourceAlreadyExistsException(String.format("Address '%s' already exists", vendor.getAddress()),
-                    "/api/tags/" + savedVendor.getId());
+                    "/api/vendors/" + savedVendor.getId());
         });
     }
 
     private void checkIfUrlIsAlreadyInUse(OnlineStore vendor) {
         vendorRepository.findByUrl(vendor.getUrl()).ifPresent(savedVendor -> {
             throw new ResourceAlreadyExistsException(String.format("Url '%s' already exists", vendor.getUrl()),
-                    "/api/tags/" + savedVendor.getId());
+                    "/api/vendors/" + savedVendor.getId());
         });
     }
 
     private void checkIfNameIsAlreadyInUse(V vendor) {
         vendorRepository.findByName(vendor.getName()).ifPresent(savedVendor -> {
             throw new ResourceAlreadyExistsException(String.format("Vendor '%s' already exists", vendor.getName()),
-                    "/api/tags/" + savedVendor.getId());
+                    "/api/vendors/" + savedVendor.getId());
         });
     }
 }
