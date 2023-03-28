@@ -2,9 +2,7 @@
  * Created by murilo.mussatto on 20/03/2023
  */
 
-package dev.mmussatto.expensetracker.services;
-
-import dev.mmussatto.expensetracker.domain.Transaction;
+package dev.mmussatto.expensetracker.entities.transaction;
 
 import java.util.List;
 

@@ -3,11 +3,24 @@
  */
 
 
-package dev.mmussatto.expensetracker.services;
+package dev.mmussatto.expensetracker.transaction;
 
-import dev.mmussatto.expensetracker.domain.*;
-import dev.mmussatto.expensetracker.repositories.TransactionRepository;
-import dev.mmussatto.expensetracker.services.exceptions.ResourceNotFoundException;
+import dev.mmussatto.expensetracker.entities.category.Category;
+import dev.mmussatto.expensetracker.entities.category.CategoryService;
+import dev.mmussatto.expensetracker.entities.helpers.Color;
+import dev.mmussatto.expensetracker.entities.paymentmethod.PaymentMethod;
+import dev.mmussatto.expensetracker.entities.paymentmethod.PaymentMethodService;
+import dev.mmussatto.expensetracker.entities.paymentmethod.PaymentType;
+import dev.mmussatto.expensetracker.entities.tag.Tag;
+import dev.mmussatto.expensetracker.entities.tag.TagService;
+import dev.mmussatto.expensetracker.entities.transaction.Transaction;
+import dev.mmussatto.expensetracker.entities.transaction.TransactionRepository;
+import dev.mmussatto.expensetracker.entities.transaction.TransactionServiceImpl;
+import dev.mmussatto.expensetracker.entities.vendor.Vendor;
+import dev.mmussatto.expensetracker.entities.vendor.VendorService;
+import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStore;
+import dev.mmussatto.expensetracker.entities.vendor.physicalstore.PhysicalStore;
+import dev.mmussatto.expensetracker.exceptions.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

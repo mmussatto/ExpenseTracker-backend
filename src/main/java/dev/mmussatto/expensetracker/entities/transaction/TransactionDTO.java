@@ -2,13 +2,13 @@
  * Created by murilo.mussatto on 28/02/2023
  */
 
-package dev.mmussatto.expensetracker.api.model;
+package dev.mmussatto.expensetracker.entities.transaction;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import dev.mmussatto.expensetracker.domain.Category;
-import dev.mmussatto.expensetracker.domain.PaymentMethod;
-import dev.mmussatto.expensetracker.domain.Tag;
-import dev.mmussatto.expensetracker.domain.Vendor;
+import dev.mmussatto.expensetracker.entities.category.Category;
+import dev.mmussatto.expensetracker.entities.paymentmethod.PaymentMethod;
+import dev.mmussatto.expensetracker.entities.tag.Tag;
+import dev.mmussatto.expensetracker.entities.vendor.Vendor;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;

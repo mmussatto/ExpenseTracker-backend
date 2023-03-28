@@ -2,14 +2,18 @@
  * Created by murilo.mussatto on 21/03/2023
  */
 
-package dev.mmussatto.expensetracker.controllers;
+package dev.mmussatto.expensetracker.transaction;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.mmussatto.expensetracker.api.mappers.TransactionMapper;
-import dev.mmussatto.expensetracker.api.model.TransactionDTO;
-import dev.mmussatto.expensetracker.domain.*;
-import dev.mmussatto.expensetracker.services.TransactionService;
-import dev.mmussatto.expensetracker.services.exceptions.ResourceNotFoundException;
+import dev.mmussatto.expensetracker.entities.category.Category;
+import dev.mmussatto.expensetracker.entities.helpers.Color;
+import dev.mmussatto.expensetracker.entities.paymentmethod.PaymentMethod;
+import dev.mmussatto.expensetracker.entities.paymentmethod.PaymentType;
+import dev.mmussatto.expensetracker.entities.tag.Tag;
+import dev.mmussatto.expensetracker.entities.transaction.*;
+import dev.mmussatto.expensetracker.entities.vendor.Vendor;
+import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStore;
+import dev.mmussatto.expensetracker.exceptions.ResourceNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

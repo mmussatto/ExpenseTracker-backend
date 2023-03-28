@@ -2,13 +2,9 @@
  * Created by murilo.mussatto on 21/03/2023
  */
 
-package dev.mmussatto.expensetracker.controllers;
+package dev.mmussatto.expensetracker.entities.transaction;
 
-import dev.mmussatto.expensetracker.api.mappers.TransactionMapper;
-import dev.mmussatto.expensetracker.api.model.ListDTO;
-import dev.mmussatto.expensetracker.api.model.TransactionDTO;
-import dev.mmussatto.expensetracker.domain.Transaction;
-import dev.mmussatto.expensetracker.services.TransactionService;
+import dev.mmussatto.expensetracker.entities.helpers.ListDTO;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;

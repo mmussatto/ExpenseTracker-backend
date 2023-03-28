@@ -2,11 +2,17 @@
  * Created by murilo.mussatto on 20/03/2023
  */
 
-package dev.mmussatto.expensetracker.services;
+package dev.mmussatto.expensetracker.entities.transaction;
 
-import dev.mmussatto.expensetracker.domain.*;
-import dev.mmussatto.expensetracker.repositories.TransactionRepository;
-import dev.mmussatto.expensetracker.services.exceptions.ResourceNotFoundException;
+import dev.mmussatto.expensetracker.entities.category.Category;
+import dev.mmussatto.expensetracker.entities.category.CategoryService;
+import dev.mmussatto.expensetracker.entities.paymentmethod.PaymentMethod;
+import dev.mmussatto.expensetracker.entities.paymentmethod.PaymentMethodService;
+import dev.mmussatto.expensetracker.entities.tag.Tag;
+import dev.mmussatto.expensetracker.entities.tag.TagService;
+import dev.mmussatto.expensetracker.entities.vendor.Vendor;
+import dev.mmussatto.expensetracker.entities.vendor.VendorService;
+import dev.mmussatto.expensetracker.exceptions.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

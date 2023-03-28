@@ -2,8 +2,12 @@
  * Created by murilo.mussatto on 27/02/2023
  */
 
-package dev.mmussatto.expensetracker.domain;
+package dev.mmussatto.expensetracker.entities.transaction;
 
+import dev.mmussatto.expensetracker.entities.category.Category;
+import dev.mmussatto.expensetracker.entities.paymentmethod.PaymentMethod;
+import dev.mmussatto.expensetracker.entities.tag.Tag;
+import dev.mmussatto.expensetracker.entities.vendor.Vendor;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
