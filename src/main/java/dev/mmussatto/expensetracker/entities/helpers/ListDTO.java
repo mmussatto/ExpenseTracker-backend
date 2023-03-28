@@ -2,7 +2,7 @@
  * Created by murilo.mussatto on 28/02/2023
  */
 
-package dev.mmussatto.expensetracker.api.model;
+package dev.mmussatto.expensetracker.entities.helpers;
 
 
 import lombok.Data;
