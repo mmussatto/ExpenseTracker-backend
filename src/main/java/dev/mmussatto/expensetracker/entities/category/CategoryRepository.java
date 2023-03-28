@@ -2,9 +2,8 @@
  * Created by murilo.mussatto on 27/02/2023
  */
 
-package dev.mmussatto.expensetracker.repositories;
+package dev.mmussatto.expensetracker.entities.category;
 
-import dev.mmussatto.expensetracker.domain.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

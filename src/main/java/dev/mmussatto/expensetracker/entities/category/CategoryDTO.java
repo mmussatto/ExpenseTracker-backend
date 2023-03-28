@@ -2,11 +2,11 @@
  * Created by murilo.mussatto on 28/02/2023
  */
 
-package dev.mmussatto.expensetracker.api.model;
+package dev.mmussatto.expensetracker.entities.category;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import dev.mmussatto.expensetracker.domain.Color;
-import dev.mmussatto.expensetracker.domain.Transaction;
+import dev.mmussatto.expensetracker.entities.helpers.Color;
+import dev.mmussatto.expensetracker.entities.transaction.Transaction;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;

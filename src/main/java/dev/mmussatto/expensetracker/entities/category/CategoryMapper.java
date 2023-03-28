@@ -2,10 +2,8 @@
  * Created by murilo.mussatto on 28/02/2023
  */
 
-package dev.mmussatto.expensetracker.api.mappers;
+package dev.mmussatto.expensetracker.entities.category;
 
-import dev.mmussatto.expensetracker.api.model.CategoryDTO;
-import dev.mmussatto.expensetracker.domain.Category;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 

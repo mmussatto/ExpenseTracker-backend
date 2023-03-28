@@ -2,10 +2,11 @@
  * Created by murilo.mussatto on 27/02/2023
  */
 
-package dev.mmussatto.expensetracker.repositories;
+package dev.mmussatto.expensetracker.category;
 
-import dev.mmussatto.expensetracker.domain.Category;
-import dev.mmussatto.expensetracker.domain.Color;
+import dev.mmussatto.expensetracker.entities.category.Category;
+import dev.mmussatto.expensetracker.entities.category.CategoryRepository;
+import dev.mmussatto.expensetracker.entities.helpers.Color;
 import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
