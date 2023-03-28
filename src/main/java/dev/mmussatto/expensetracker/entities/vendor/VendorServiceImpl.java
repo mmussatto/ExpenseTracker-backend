@@ -42,7 +42,14 @@ public class VendorServiceImpl<V extends Vendor> implements VendorService<V> {
 
     @Override
     public V createNewVendor(V vendor) {
+
         checkIfNameIsAlreadyInUse(vendor);
+
+        if (vendor instanceof OnlineStore)
+            checkIfUrlIsAlreadyInUse((OnlineStore) vendor);
+        else if (vendor instanceof PhysicalStore)
+            checkIfAddressIsAlreadyInUse((PhysicalStore) vendor);
+
 
         return vendorRepository.save(vendor);
     }
@@ -54,6 +61,11 @@ public class VendorServiceImpl<V extends Vendor> implements VendorService<V> {
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Vendor %d not found!", id)));
 
         checkIfNameIsAlreadyInUse(vendor);
+
+        if (vendor instanceof OnlineStore)
+            checkIfUrlIsAlreadyInUse((OnlineStore) vendor);
+        else if (vendor instanceof PhysicalStore)
+            checkIfAddressIsAlreadyInUse((PhysicalStore) vendor);
 
         vendor.setId(id);
 
@@ -73,12 +85,16 @@ public class VendorServiceImpl<V extends Vendor> implements VendorService<V> {
                     && ((PhysicalStore) vendor).getAddress() != null
                     && savedVendor instanceof PhysicalStore) {
 
+                checkIfAddressIsAlreadyInUse((PhysicalStore) vendor);
+
                 ((PhysicalStore) savedVendor).setAddress(((PhysicalStore) vendor).getAddress());
             }
 
             if (vendor instanceof OnlineStore
                     && ((OnlineStore) vendor).getUrl() != null
                     && savedVendor instanceof OnlineStore) {
+
+                checkIfUrlIsAlreadyInUse((OnlineStore) vendor);
 
                 ((OnlineStore) savedVendor).setUrl(((OnlineStore) vendor).getUrl());
             }
@@ -108,6 +124,20 @@ public class VendorServiceImpl<V extends Vendor> implements VendorService<V> {
     }
 
 
+
+    private void checkIfAddressIsAlreadyInUse(PhysicalStore vendor) {
+        vendorRepository.findByAddress(vendor.getAddress()).ifPresent(savedVendor -> {
+            throw new ResourceAlreadyExistsException(String.format("Address %s already exists", vendor.getAddress()),
+                    "/api/tags/" + savedVendor.getId());
+        });
+    }
+
+    private void checkIfUrlIsAlreadyInUse(OnlineStore vendor) {
+        vendorRepository.findByUrl(vendor.getUrl()).ifPresent(savedVendor -> {
+            throw new ResourceAlreadyExistsException(String.format("Url %s already exists", vendor.getUrl()),
+                    "/api/tags/" + savedVendor.getId());
+        });
+    }
 
     private void checkIfNameIsAlreadyInUse(V vendor) {
         vendorRepository.findByName(vendor.getName()).ifPresent(savedVendor -> {

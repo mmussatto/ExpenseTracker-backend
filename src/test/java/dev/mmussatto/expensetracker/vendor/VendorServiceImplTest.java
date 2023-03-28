@@ -148,6 +148,38 @@ class VendorServiceImplTest {
     }
 
     @Test
+    void createNewVendor_UrlAlreadyExists() {
+
+        OnlineStore passedVendor = new OnlineStore(NAME, URL);
+        passedVendor.getTransactions().add(TRANSACTION);
+
+        OnlineStore savedVendor = createOnlineStore();
+
+
+        when(vendorRepository.findByName(passedVendor.getName())).thenReturn(Optional.empty());
+        when(vendorRepository.findByUrl(passedVendor.getUrl())).thenReturn(Optional.of(savedVendor));
+
+
+        assertThrows(ResourceAlreadyExistsException.class, () -> vendorService.createNewVendor(passedVendor));
+    }
+
+    @Test
+    void createNewVendor_AddressAlreadyExists() {
+
+        PhysicalStore passedVendor = new PhysicalStore(NAME, ADDRESS);
+        passedVendor.getTransactions().add(TRANSACTION);
+
+        PhysicalStore savedVendor = createPhysicalStore();
+
+
+        when(vendorRepository.findByName(passedVendor.getName())).thenReturn(Optional.empty());
+        when(vendorRepository.findByAddress(passedVendor.getAddress())).thenReturn(Optional.of(savedVendor));
+
+
+        assertThrows(ResourceAlreadyExistsException.class, () -> vendorService.createNewVendor(passedVendor));
+    }
+
+    @Test
     void updateVendorById() {
 
         PhysicalStore passedVendor = new PhysicalStore("Test Update", "New Address");
