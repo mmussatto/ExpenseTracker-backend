@@ -2,12 +2,13 @@
  * Created by murilo.mussatto on 03/03/2023
  */
 
-package dev.mmussatto.expensetracker.api.mappers;
+package dev.mmussatto.expensetracker.tag;
 
-import dev.mmussatto.expensetracker.api.model.TagDTO;
-import dev.mmussatto.expensetracker.domain.Color;
-import dev.mmussatto.expensetracker.domain.Tag;
-import dev.mmussatto.expensetracker.domain.Transaction;
+import dev.mmussatto.expensetracker.entities.helpers.Color;
+import dev.mmussatto.expensetracker.entities.tag.Tag;
+import dev.mmussatto.expensetracker.entities.tag.TagDTO;
+import dev.mmussatto.expensetracker.entities.tag.TagMapper;
+import dev.mmussatto.expensetracker.entities.transaction.Transaction;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;

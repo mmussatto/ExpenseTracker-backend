@@ -2,17 +2,14 @@
  * Created by murilo.mussatto on 14/03/2023
  */
 
-package dev.mmussatto.expensetracker.controllers;
+package dev.mmussatto.expensetracker.tag;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.mmussatto.expensetracker.api.mappers.TagMapper;
-import dev.mmussatto.expensetracker.api.model.TagDTO;
-import dev.mmussatto.expensetracker.domain.Color;
-import dev.mmussatto.expensetracker.domain.Tag;
-import dev.mmussatto.expensetracker.domain.Transaction;
-import dev.mmussatto.expensetracker.services.TagService;
-import dev.mmussatto.expensetracker.services.exceptions.ResourceAlreadyExistsException;
-import dev.mmussatto.expensetracker.services.exceptions.ResourceNotFoundException;
+import dev.mmussatto.expensetracker.entities.helpers.Color;
+import dev.mmussatto.expensetracker.entities.tag.*;
+import dev.mmussatto.expensetracker.entities.transaction.Transaction;
+import dev.mmussatto.expensetracker.exceptions.ResourceAlreadyExistsException;
+import dev.mmussatto.expensetracker.exceptions.ResourceNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

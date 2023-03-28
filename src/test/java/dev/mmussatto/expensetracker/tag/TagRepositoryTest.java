@@ -2,16 +2,17 @@
  * Created by murilo.mussatto on 27/02/2023
  */
 
-package dev.mmussatto.expensetracker.repositories;
+package dev.mmussatto.expensetracker.tag;
 
-import dev.mmussatto.expensetracker.domain.Color;
-import dev.mmussatto.expensetracker.domain.Tag;
+import dev.mmussatto.expensetracker.entities.helpers.Color;
+import dev.mmussatto.expensetracker.entities.tag.Tag;
+import dev.mmussatto.expensetracker.entities.tag.TagRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DataJpaTest
 class TagRepositoryTest {
