@@ -31,13 +31,13 @@ public class VendorServiceImpl<V extends Vendor> implements VendorService<V> {
     @Override
     public V getVendorById(Integer id) {
         return vendorRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format("Vendor %d not found!", id)));
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("Vendor '%d' not found!", id)));
     }
 
     @Override
     public V getVendorByName(String name) {
         return vendorRepository.findByName(name)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format("Vendor %s not found!", name)));
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("Vendor '%s' not found!", name)));
     }
 
     @Override
@@ -58,7 +58,7 @@ public class VendorServiceImpl<V extends Vendor> implements VendorService<V> {
     public V updateVendorById(Integer id, V vendor) {
 
         vendorRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format("Vendor %d not found!", id)));
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("Vendor '%d' not found!", id)));
 
         checkIfNameIsAlreadyInUse(vendor);
 
@@ -103,14 +103,14 @@ public class VendorServiceImpl<V extends Vendor> implements VendorService<V> {
                 savedVendor.setTransactions(vendor.getTransactions());
 
             return vendorRepository.save(savedVendor);
-        }).orElseThrow(() -> new ResourceNotFoundException(String.format("Vendor %d not found!", id)));
+        }).orElseThrow(() -> new ResourceNotFoundException(String.format("Vendor '%d' not found!", id)));
     }
 
     @Override
     public void deleteVendorById(Integer id) {
 
         vendorRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format("Vendor %d not found!", id)));
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("Vendor '%d' not found!", id)));
 
         vendorRepository.deleteById(id);
     }
@@ -118,7 +118,7 @@ public class VendorServiceImpl<V extends Vendor> implements VendorService<V> {
     @Override
     public Set<Transaction> getTransactionsById(Integer id) {
         Vendor savedVendor =  vendorRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format("Vendor %d not found!", id)));
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("Vendor '%d' not found!", id)));
 
         return savedVendor.getTransactions();
     }
@@ -127,21 +127,21 @@ public class VendorServiceImpl<V extends Vendor> implements VendorService<V> {
 
     private void checkIfAddressIsAlreadyInUse(PhysicalStore vendor) {
         vendorRepository.findByAddress(vendor.getAddress()).ifPresent(savedVendor -> {
-            throw new ResourceAlreadyExistsException(String.format("Address %s already exists", vendor.getAddress()),
+            throw new ResourceAlreadyExistsException(String.format("Address '%s' already exists", vendor.getAddress()),
                     "/api/tags/" + savedVendor.getId());
         });
     }
 
     private void checkIfUrlIsAlreadyInUse(OnlineStore vendor) {
         vendorRepository.findByUrl(vendor.getUrl()).ifPresent(savedVendor -> {
-            throw new ResourceAlreadyExistsException(String.format("Url %s already exists", vendor.getUrl()),
+            throw new ResourceAlreadyExistsException(String.format("Url '%s' already exists", vendor.getUrl()),
                     "/api/tags/" + savedVendor.getId());
         });
     }
 
     private void checkIfNameIsAlreadyInUse(V vendor) {
         vendorRepository.findByName(vendor.getName()).ifPresent(savedVendor -> {
-            throw new ResourceAlreadyExistsException(String.format("Vendor %s already exists", vendor.getName()),
+            throw new ResourceAlreadyExistsException(String.format("Vendor '%s' already exists", vendor.getName()),
                     "/api/tags/" + savedVendor.getId());
         });
     }
