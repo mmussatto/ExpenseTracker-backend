@@ -356,12 +356,15 @@ class TagServiceImplTest {
 
     @Test
     void deleteTagById_NotFound() {
-        when(tagRepository.findById(ID)).thenReturn(Optional.of(new Tag()));
-        doNothing().when(tagRepository).deleteById(ID);
 
-        tagService.deleteTagById(ID);
+        Integer notFoundId = 123;
 
-        verify(tagRepository, times(1)).deleteById(ID);
+        when(tagRepository.findById(notFoundId)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> tagService.deleteTagById(notFoundId));
+
+        verify(tagRepository, times(1)).findById(notFoundId);
     }
 
     @Test
