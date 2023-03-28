@@ -2,11 +2,12 @@
  * Created by murilo.mussatto on 03/03/2023
  */
 
-package dev.mmussatto.expensetracker.api.mappers;
+package dev.mmussatto.expensetracker.vendor.onlinestore;
 
-import dev.mmussatto.expensetracker.api.model.OnlineStoreDTO;
-import dev.mmussatto.expensetracker.domain.OnlineStore;
-import dev.mmussatto.expensetracker.domain.Transaction;
+import dev.mmussatto.expensetracker.entities.transaction.Transaction;
+import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStore;
+import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStoreDTO;
+import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStoreMapper;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;

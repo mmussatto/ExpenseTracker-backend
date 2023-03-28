@@ -2,10 +2,11 @@
  * Created by murilo.mussatto on 27/02/2023
  */
 
-package dev.mmussatto.expensetracker.repositories;
+package dev.mmussatto.expensetracker.vendor;
 
-import dev.mmussatto.expensetracker.domain.OnlineStore;
-import dev.mmussatto.expensetracker.domain.PhysicalStore;
+import dev.mmussatto.expensetracker.entities.vendor.VendorRepository;
+import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStore;
+import dev.mmussatto.expensetracker.entities.vendor.physicalstore.PhysicalStore;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;

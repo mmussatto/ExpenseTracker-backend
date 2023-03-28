@@ -2,8 +2,9 @@
  * Created by murilo.mussatto on 28/02/2023
  */
 
-package dev.mmussatto.expensetracker.api.model;
+package dev.mmussatto.expensetracker.entities.vendor.physicalstore;
 
+import dev.mmussatto.expensetracker.entities.vendor.VendorDTO;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

@@ -2,15 +2,17 @@
  * Created by murilo.mussatto on 15/03/2023
  */
 
-package dev.mmussatto.expensetracker.services;
+package dev.mmussatto.expensetracker.vendor;
 
-import dev.mmussatto.expensetracker.domain.OnlineStore;
-import dev.mmussatto.expensetracker.domain.PhysicalStore;
-import dev.mmussatto.expensetracker.domain.Transaction;
-import dev.mmussatto.expensetracker.domain.Vendor;
-import dev.mmussatto.expensetracker.repositories.VendorRepository;
-import dev.mmussatto.expensetracker.services.exceptions.ResourceAlreadyExistsException;
-import dev.mmussatto.expensetracker.services.exceptions.ResourceNotFoundException;
+import dev.mmussatto.expensetracker.entities.transaction.Transaction;
+import dev.mmussatto.expensetracker.entities.vendor.Vendor;
+import dev.mmussatto.expensetracker.entities.vendor.VendorRepository;
+import dev.mmussatto.expensetracker.entities.vendor.VendorService;
+import dev.mmussatto.expensetracker.entities.vendor.VendorServiceImpl;
+import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStore;
+import dev.mmussatto.expensetracker.entities.vendor.physicalstore.PhysicalStore;
+import dev.mmussatto.expensetracker.exceptions.ResourceAlreadyExistsException;
+import dev.mmussatto.expensetracker.exceptions.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

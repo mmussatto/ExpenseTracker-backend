@@ -2,17 +2,18 @@
  * Created by murilo.mussatto on 15/03/2023
  */
 
-package dev.mmussatto.expensetracker.controllers;
+package dev.mmussatto.expensetracker.entities.vendor;
 
-import dev.mmussatto.expensetracker.api.mappers.OnlineStoreMapper;
-import dev.mmussatto.expensetracker.api.mappers.PhysicalStoreMapper;
-import dev.mmussatto.expensetracker.api.mappers.TransactionMapper;
-import dev.mmussatto.expensetracker.api.model.*;
-import dev.mmussatto.expensetracker.domain.OnlineStore;
-import dev.mmussatto.expensetracker.domain.PhysicalStore;
-import dev.mmussatto.expensetracker.domain.Transaction;
-import dev.mmussatto.expensetracker.domain.Vendor;
-import dev.mmussatto.expensetracker.services.VendorService;
+import dev.mmussatto.expensetracker.entities.helpers.ListDTO;
+import dev.mmussatto.expensetracker.entities.transaction.Transaction;
+import dev.mmussatto.expensetracker.entities.transaction.TransactionDTO;
+import dev.mmussatto.expensetracker.entities.transaction.TransactionMapper;
+import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStore;
+import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStoreDTO;
+import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStoreMapper;
+import dev.mmussatto.expensetracker.entities.vendor.physicalstore.PhysicalStore;
+import dev.mmussatto.expensetracker.entities.vendor.physicalstore.PhysicalStoreDTO;
+import dev.mmussatto.expensetracker.entities.vendor.physicalstore.PhysicalStoreMapper;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;

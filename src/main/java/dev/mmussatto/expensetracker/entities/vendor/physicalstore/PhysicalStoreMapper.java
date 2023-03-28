@@ -2,10 +2,8 @@
  * Created by murilo.mussatto on 28/02/2023
  */
 
-package dev.mmussatto.expensetracker.api.mappers;
+package dev.mmussatto.expensetracker.entities.vendor.physicalstore;
 
-import dev.mmussatto.expensetracker.api.model.PhysicalStoreDTO;
-import dev.mmussatto.expensetracker.domain.PhysicalStore;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 

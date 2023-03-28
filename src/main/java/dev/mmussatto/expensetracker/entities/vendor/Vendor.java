@@ -2,11 +2,14 @@
  * Created by murilo.mussatto on 24/02/2023
  */
 
-package dev.mmussatto.expensetracker.domain;
+package dev.mmussatto.expensetracker.entities.vendor;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import dev.mmussatto.expensetracker.entities.transaction.Transaction;
+import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStore;
+import dev.mmussatto.expensetracker.entities.vendor.physicalstore.PhysicalStore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;

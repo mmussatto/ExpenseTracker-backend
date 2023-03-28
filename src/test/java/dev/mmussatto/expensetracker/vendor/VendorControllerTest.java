@@ -2,17 +2,18 @@
  * Created by murilo.mussatto on 15/03/2023
  */
 
-package dev.mmussatto.expensetracker.controllers;
+package dev.mmussatto.expensetracker.vendor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.mmussatto.expensetracker.api.model.OnlineStoreDTO;
-import dev.mmussatto.expensetracker.api.model.PhysicalStoreDTO;
-import dev.mmussatto.expensetracker.domain.OnlineStore;
-import dev.mmussatto.expensetracker.domain.PhysicalStore;
-import dev.mmussatto.expensetracker.domain.Transaction;
-import dev.mmussatto.expensetracker.services.VendorService;
-import dev.mmussatto.expensetracker.services.exceptions.ResourceAlreadyExistsException;
-import dev.mmussatto.expensetracker.services.exceptions.ResourceNotFoundException;
+import dev.mmussatto.expensetracker.entities.transaction.Transaction;
+import dev.mmussatto.expensetracker.entities.vendor.VendorController;
+import dev.mmussatto.expensetracker.entities.vendor.VendorService;
+import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStore;
+import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStoreDTO;
+import dev.mmussatto.expensetracker.entities.vendor.physicalstore.PhysicalStore;
+import dev.mmussatto.expensetracker.entities.vendor.physicalstore.PhysicalStoreDTO;
+import dev.mmussatto.expensetracker.exceptions.ResourceAlreadyExistsException;
+import dev.mmussatto.expensetracker.exceptions.ResourceNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
