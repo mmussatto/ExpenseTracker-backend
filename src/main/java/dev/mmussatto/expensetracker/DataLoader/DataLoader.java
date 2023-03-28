@@ -4,8 +4,19 @@
 
 package dev.mmussatto.expensetracker.DataLoader;
 
-import dev.mmussatto.expensetracker.domain.*;
-import dev.mmussatto.expensetracker.repositories.*;
+import dev.mmussatto.expensetracker.entities.category.Category;
+import dev.mmussatto.expensetracker.entities.category.CategoryRepository;
+import dev.mmussatto.expensetracker.entities.helpers.Color;
+import dev.mmussatto.expensetracker.entities.paymentmethod.PaymentMethod;
+import dev.mmussatto.expensetracker.entities.paymentmethod.PaymentMethodRepository;
+import dev.mmussatto.expensetracker.entities.paymentmethod.PaymentType;
+import dev.mmussatto.expensetracker.entities.tag.Tag;
+import dev.mmussatto.expensetracker.entities.tag.TagRepository;
+import dev.mmussatto.expensetracker.entities.transaction.Transaction;
+import dev.mmussatto.expensetracker.entities.transaction.TransactionRepository;
+import dev.mmussatto.expensetracker.entities.vendor.VendorRepository;
+import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStore;
+import dev.mmussatto.expensetracker.entities.vendor.physicalstore.PhysicalStore;
 import jakarta.transaction.Transactional;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;

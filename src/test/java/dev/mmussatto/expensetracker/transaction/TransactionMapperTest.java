@@ -1,0 +1,118 @@
+/*
+ * Created by murilo.mussatto on 03/03/2023
+ */
+
+package dev.mmussatto.expensetracker.transaction;
+
+import dev.mmussatto.expensetracker.entities.category.Category;
+import dev.mmussatto.expensetracker.entities.helpers.Color;
+import dev.mmussatto.expensetracker.entities.paymentmethod.PaymentMethod;
+import dev.mmussatto.expensetracker.entities.paymentmethod.PaymentType;
+import dev.mmussatto.expensetracker.entities.tag.Tag;
+import dev.mmussatto.expensetracker.entities.transaction.Transaction;
+import dev.mmussatto.expensetracker.entities.transaction.TransactionDTO;
+import dev.mmussatto.expensetracker.entities.transaction.TransactionMapper;
+import dev.mmussatto.expensetracker.entities.vendor.Vendor;
+import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStore;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.time.LocalDateTime;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+class TransactionMapperTest {
+
+    public static final Integer ID = 1;
+    public static final Double AMOUNT = 500.00;
+    public static final LocalDateTime TIME = LocalDateTime.now();
+    public static final String DESCRIPTION = "TestDescription";
+    public static final PaymentMethod PAYMENT = new PaymentMethod("TestPaymentMethod", PaymentType.CREDIT_CARD);
+    public static final Category CATEGORY = new Category("TestCategory", Color.BLUE);
+    public static final Set<Tag> TAGS = Stream
+            .of(new Tag("TestTag1", Color.RED), new Tag("TestTag2", Color.GREEN))
+            .collect(Collectors.toSet());
+    public static final Vendor VENDOR = new OnlineStore("TestStore", "www.somewebsite.com");
+
+    TransactionMapper transactionMapper = TransactionMapper.INSTANCE;
+
+    Transaction testRelationships = new Transaction();
+
+
+    @BeforeEach
+    void setUp () {
+        testRelationships.setId(15);
+        PAYMENT.getTransactions().add(testRelationships);
+        CATEGORY.getTransactions().add(testRelationships);
+        TAGS.forEach(tag -> tag.getTransactions().add(testRelationships));
+        VENDOR.getTransactions().add(testRelationships);
+    }
+
+
+    @Test
+    void transactionToTransactionDTO() {
+
+        Transaction transaction = new Transaction();
+        transaction.setId(ID);
+        transaction.setAmount(AMOUNT);
+        transaction.setDate(TIME);
+        transaction.setDescription(DESCRIPTION);
+
+        PAYMENT.getTransactions().add(transaction);
+        transaction.setPaymentMethod(PAYMENT);
+
+        CATEGORY.getTransactions().add(transaction);
+        transaction.setCategory(CATEGORY);
+
+        TAGS.forEach(tag -> tag.getTransactions().add(transaction));
+        transaction.setTags(TAGS);
+
+        VENDOR.getTransactions().add(transaction);
+        transaction.setVendor(VENDOR);
+
+        TransactionDTO transactionDTO = transactionMapper.convertToDTO(transaction);
+
+
+        assertEquals(transaction.getId(), transactionDTO.getId());
+        assertEquals(transaction.getAmount(), transactionDTO.getAmount());
+        assertEquals(transaction.getDate(), transactionDTO.getDate());
+        assertEquals(transaction.getDescription(), transactionDTO.getDescription());
+        assertEquals(transaction.getPaymentMethod(), transactionDTO.getPaymentMethod());
+        assertEquals(transaction.getCategory(), transactionDTO.getCategory());
+        assertEquals(transaction.getTags(), transactionDTO.getTags());
+        assertEquals(transaction.getVendor(), transactionDTO.getVendor());
+
+    }
+
+
+    @Test
+    void transactionDTOToTransaction() {
+        TransactionDTO transactionDTO = new TransactionDTO();
+        transactionDTO.setId(ID);
+        transactionDTO.setAmount(AMOUNT);
+        transactionDTO.setDate(TIME);
+        transactionDTO.setDescription(DESCRIPTION);
+
+        transactionDTO.setPaymentMethod(PAYMENT);
+
+        transactionDTO.setCategory(CATEGORY);
+
+        transactionDTO.setTags(TAGS);
+
+        transactionDTO.setVendor(VENDOR);
+
+        Transaction transaction = transactionMapper.convertToEntity(transactionDTO);
+
+        assertEquals(transactionDTO.getId(), transaction.getId());
+        assertEquals(transactionDTO.getAmount(), transaction.getAmount());
+        assertEquals(transactionDTO.getDate(), transaction.getDate());
+        assertEquals(transactionDTO.getDescription(), transaction.getDescription());
+        assertEquals(transactionDTO.getPaymentMethod(), transaction.getPaymentMethod());
+        assertEquals(transactionDTO.getCategory(), transaction.getCategory());
+        assertEquals(transactionDTO.getTags(), transaction.getTags());
+        assertEquals(transactionDTO.getVendor(), transaction.getVendor());
+    }
+}
