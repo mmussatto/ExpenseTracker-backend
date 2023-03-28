@@ -4,6 +4,7 @@
 
 package dev.mmussatto.expensetracker.api.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import dev.mmussatto.expensetracker.domain.Category;
 import dev.mmussatto.expensetracker.domain.PaymentMethod;
 import dev.mmussatto.expensetracker.domain.Tag;
@@ -34,7 +35,7 @@ public class TransactionDTO {
     @NotNull(message = "amount must not be blank", groups = allFieldsValidation.class)
     private Double amount;
 
-//    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @NotNull(message = "date must not be blank", groups = allFieldsValidation.class)
     private LocalDateTime date;
 
