@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Tag(name = "Categories", description = "CRUD API for Category entity")
 @Validated
 @RestController
 @RequestMapping("/api/categories")
