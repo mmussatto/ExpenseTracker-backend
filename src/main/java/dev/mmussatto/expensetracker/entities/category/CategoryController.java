@@ -83,7 +83,7 @@ public class CategoryController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Category created", useReturnTypeSchema = true),
             @ApiResponse(responseCode = "400", description = "Invalid body supplied", content = @Content),
-            @ApiResponse(responseCode = "409", description = "Category already exists", content = @Content)
+            @ApiResponse(responseCode = "409", description = "Name supplied is already in use", content = @Content)
     })
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -141,7 +141,7 @@ public class CategoryController {
     //Categories' Transactions
     @Operation(summary = "Get all transactions from a category")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Category updated", useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "200", description = "Found the category's transactions", useReturnTypeSchema = true),
             @ApiResponse(responseCode = "404", description = "Category not found", content = @Content)
     })
     @GetMapping("/{id}/transactions")
