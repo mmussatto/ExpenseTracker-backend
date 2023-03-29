@@ -30,6 +30,9 @@ public class CategoryDTO {
     @Null(message = "id field must be null", groups = {onlyIdValidation.class, allFieldsValidation.class})
     private Integer id;
 
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+    private String path;
+
     @NotBlank(message = "name must not be blank", groups = allFieldsValidation.class)
     private String name;
 
@@ -40,7 +43,6 @@ public class CategoryDTO {
     @JsonIgnore
     private Set<Transaction> transactions = new HashSet<>();
 
-    private String path;
 
     public CategoryDTO(String name, Color color) {
         this.name = name;
