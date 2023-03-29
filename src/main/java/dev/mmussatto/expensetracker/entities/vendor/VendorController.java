@@ -8,12 +8,6 @@ import dev.mmussatto.expensetracker.entities.helpers.ListDTO;
 import dev.mmussatto.expensetracker.entities.transaction.Transaction;
 import dev.mmussatto.expensetracker.entities.transaction.TransactionDTO;
 import dev.mmussatto.expensetracker.entities.transaction.TransactionMapper;
-import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStore;
-import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStoreDTO;
-import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStoreMapper;
-import dev.mmussatto.expensetracker.entities.vendor.physicalstore.PhysicalStore;
-import dev.mmussatto.expensetracker.entities.vendor.physicalstore.PhysicalStoreDTO;
-import dev.mmussatto.expensetracker.entities.vendor.physicalstore.PhysicalStoreMapper;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -30,8 +24,11 @@ public class VendorController {
 
     private final VendorService<Vendor> vendorService;
 
-    public VendorController(VendorService<Vendor> vendorService) {
+    private final VendorMapper vendorMapper;
+
+    public VendorController(VendorService<Vendor> vendorService, VendorMapper vendorMapper) {
         this.vendorService = vendorService;
+        this.vendorMapper = vendorMapper;
     }
 
     @GetMapping
@@ -117,14 +114,7 @@ public class VendorController {
 
 
     private VendorDTO getVendorDTO(Vendor vendor) {
-        VendorDTO vendorDTO = null;
-
-        //Convert using the correct mapper
-        if (vendor instanceof OnlineStore) {
-            vendorDTO = OnlineStoreMapper.INSTANCE.convertToDTO((OnlineStore) vendor);
-        } else if (vendor instanceof PhysicalStore) {
-            vendorDTO = PhysicalStoreMapper.INSTANCE.convertToDTO((PhysicalStore) vendor);
-        }
+        VendorDTO vendorDTO = vendorMapper.convertToDTO(vendor);
 
         //Set Path
         if (vendorDTO != null) {
@@ -135,15 +125,6 @@ public class VendorController {
     }
 
     private Vendor getVendor(VendorDTO vendorDTO) {
-        Vendor vendor = null;
-
-        //Convert using the correct mapper
-        if (vendorDTO instanceof OnlineStoreDTO) {
-            vendor = OnlineStoreMapper.INSTANCE.convertToEntity((OnlineStoreDTO) vendorDTO);
-        } else if (vendorDTO instanceof PhysicalStoreDTO) {
-            vendor = PhysicalStoreMapper.INSTANCE.convertToEntity((PhysicalStoreDTO) vendorDTO);
-        }
-
-        return vendor;
+        return vendorMapper.convertToEntity(vendorDTO);
     }
 }

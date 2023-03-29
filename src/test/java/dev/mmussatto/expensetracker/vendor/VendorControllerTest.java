@@ -6,8 +6,7 @@ package dev.mmussatto.expensetracker.vendor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.mmussatto.expensetracker.entities.transaction.Transaction;
-import dev.mmussatto.expensetracker.entities.vendor.VendorController;
-import dev.mmussatto.expensetracker.entities.vendor.VendorService;
+import dev.mmussatto.expensetracker.entities.vendor.*;
 import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStore;
 import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStoreDTO;
 import dev.mmussatto.expensetracker.entities.vendor.physicalstore.PhysicalStore;
@@ -43,6 +42,9 @@ class VendorControllerTest {
     @MockBean
     private VendorService vendorService;
 
+    @MockBean
+    private VendorMapper vendorMapper;
+
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -71,7 +73,11 @@ class VendorControllerTest {
         OnlineStore onlineStore = new OnlineStore("OS Test", "www.test.com");
         onlineStore.setId(1);
 
+        OnlineStoreDTO returnedDto = new OnlineStoreDTO(onlineStore.getName(), onlineStore.getUrl());
+        returnedDto.setId(onlineStore.getId());
+
         when(vendorService.getVendorById(onlineStore.getId())).thenReturn(onlineStore);
+        when(vendorMapper.convertToDTO(any(Vendor.class))).thenReturn(returnedDto);
 
         mockMvc.perform(get("/api/vendors/{id}", onlineStore.getId())
                         .contentType(MediaType.APPLICATION_JSON))
@@ -89,7 +95,11 @@ class VendorControllerTest {
         PhysicalStore physicalStore = new PhysicalStore("PS Test", "Test St.");
         physicalStore.setId(2);
 
+        PhysicalStoreDTO returnedDto = new PhysicalStoreDTO(physicalStore.getName(), physicalStore.getAddress());
+        returnedDto.setId(physicalStore.getId());
+
         when(vendorService.getVendorById(physicalStore.getId())).thenReturn(physicalStore);
+        when(vendorMapper.convertToDTO(any(Vendor.class))).thenReturn(returnedDto);
 
         mockMvc.perform(get("/api/vendors/{id}", physicalStore.getId())
                         .contentType(MediaType.APPLICATION_JSON))
@@ -121,7 +131,11 @@ class VendorControllerTest {
         PhysicalStore physicalStore = new PhysicalStore("PS Test", "Test St.");
         physicalStore.setId(2);
 
+        PhysicalStoreDTO returnedDto = new PhysicalStoreDTO(physicalStore.getName(), physicalStore.getAddress());
+        returnedDto.setId(physicalStore.getId());
+
         when(vendorService.getVendorByName(physicalStore.getName())).thenReturn(physicalStore);
+        when(vendorMapper.convertToDTO(any(Vendor.class))).thenReturn(returnedDto);
 
         mockMvc.perform(get("/api/vendors/name/{name}", physicalStore.getName())
                         .contentType(MediaType.APPLICATION_JSON))
@@ -159,9 +173,10 @@ class VendorControllerTest {
 
         PhysicalStoreDTO returnedDto = new PhysicalStoreDTO(passedDto.getName(), passedDto.getAddress());
         returnedDto.setId(returnedEntity.getId());
-        returnedDto.setPath("/api/vendors/" + returnedDto.getId());
 
+        when(vendorMapper.convertToEntity(any(VendorDTO.class))).thenReturn(passedEntity);
         when(vendorService.createNewVendor(passedEntity)).thenReturn(returnedEntity);
+        when(vendorMapper.convertToDTO(any(Vendor.class))).thenReturn(returnedDto);
 
         mockMvc.perform(post("/api/vendors")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -188,7 +203,9 @@ class VendorControllerTest {
         returnedDto.setId(returnedEntity.getId());
         returnedDto.setPath("/api/vendors/" + returnedDto.getId());
 
+        when(vendorMapper.convertToEntity(any(VendorDTO.class))).thenReturn(passedEntity);
         when(vendorService.createNewVendor(passedEntity)).thenReturn(returnedEntity);
+        when(vendorMapper.convertToDTO(any(Vendor.class))).thenReturn(returnedDto);
 
         mockMvc.perform(post("/api/vendors")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -222,7 +239,7 @@ class VendorControllerTest {
 
         OnlineStore passedEntity = new OnlineStore(passedDto.getName(), passedDto.getUrl());
 
-
+        when(vendorMapper.convertToEntity(any(VendorDTO.class))).thenReturn(passedEntity);
         when(vendorService.createNewVendor(passedEntity)).thenThrow(ResourceAlreadyExistsException.class);
 
         mockMvc.perform(post("/api/vendors")
@@ -249,7 +266,9 @@ class VendorControllerTest {
         returnedDto.setId(returnedEntity.getId());
         returnedDto.setPath("/api/vendors/" + returnedDto.getId());
 
+        when(vendorMapper.convertToEntity(any(VendorDTO.class))).thenReturn(passedEntity);
         when(vendorService.updateVendorById(savedId, passedEntity)).thenReturn(returnedEntity);
+        when(vendorMapper.convertToDTO(any(Vendor.class))).thenReturn(returnedDto);
 
         mockMvc.perform(put("/api/vendors/{id}", savedId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -272,6 +291,7 @@ class VendorControllerTest {
         OnlineStore passedEntity = new OnlineStore(passedDto.getName(), passedDto.getUrl());
 
 
+        when(vendorMapper.convertToEntity(any(VendorDTO.class))).thenReturn(passedEntity);
         when(vendorService.updateVendorById(notFoundId, passedEntity)).thenThrow(ResourceNotFoundException.class);
 
         mockMvc.perform(put("/api/vendors/{id}", notFoundId)
@@ -306,6 +326,7 @@ class VendorControllerTest {
         OnlineStore passedEntity = new OnlineStore(passedDto.getName(), passedDto.getUrl());
 
 
+        when(vendorMapper.convertToEntity(any(VendorDTO.class))).thenReturn(passedEntity);
         when(vendorService.updateVendorById(savedId, passedEntity)).thenThrow(ResourceAlreadyExistsException.class);
 
         mockMvc.perform(put("/api/vendors/{id}", savedId)
@@ -340,6 +361,7 @@ class VendorControllerTest {
         OnlineStore passedEntity = new OnlineStore(passedDto.getName(), passedDto.getUrl());
 
 
+        when(vendorMapper.convertToEntity(any(VendorDTO.class))).thenReturn(passedEntity);
         when(vendorService.updateVendorById(savedId, passedEntity)).thenThrow(IncorrectVendorTypeException.class);
 
         mockMvc.perform(put("/api/vendors/{id}", savedId)
@@ -366,7 +388,9 @@ class VendorControllerTest {
         returnedDto.setId(returnedEntity.getId());
         returnedDto.setPath("/api/vendors/" + returnedDto.getId());
 
+        when(vendorMapper.convertToEntity(any(VendorDTO.class))).thenReturn(passedEntity);
         when(vendorService.patchVendorById(savedId, passedEntity)).thenReturn(returnedEntity);
+        when(vendorMapper.convertToDTO(any(Vendor.class))).thenReturn(returnedDto);
 
         mockMvc.perform(patch("/api/vendors/{id}", savedId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -389,6 +413,7 @@ class VendorControllerTest {
         OnlineStore passedEntity = new OnlineStore(passedDto.getName(), passedDto.getUrl());
 
 
+        when(vendorMapper.convertToEntity(any(VendorDTO.class))).thenReturn(passedEntity);
         when(vendorService.patchVendorById(notFoundId, passedEntity)).thenThrow(ResourceNotFoundException.class);
 
         mockMvc.perform(patch("/api/vendors/{id}", notFoundId)
@@ -422,6 +447,7 @@ class VendorControllerTest {
 
         OnlineStore passedEntity = new OnlineStore(passedDto.getName(), passedDto.getUrl());
 
+        when(vendorMapper.convertToEntity(any(VendorDTO.class))).thenReturn(passedEntity);
         when(vendorService.patchVendorById(savedId, passedEntity)).thenThrow(ResourceAlreadyExistsException.class);
 
         mockMvc.perform(patch("/api/vendors/{id}", savedId)
