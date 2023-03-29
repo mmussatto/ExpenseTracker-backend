@@ -10,7 +10,6 @@ import dev.mmussatto.expensetracker.entities.transaction.TransactionDTO;
 import dev.mmussatto.expensetracker.entities.transaction.TransactionMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
@@ -57,9 +56,7 @@ public class CategoryController {
 
     @Operation(summary = "Get a category by its id")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Found the category",
-                    content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = CategoryDTO.class)) }),
+            @ApiResponse(responseCode = "200", description = "Found the category", useReturnTypeSchema = true),
             @ApiResponse(responseCode = "400", description = "Invalid id supplied", content = @Content),
             @ApiResponse(responseCode = "404", description = "Category not found", content = @Content)
     })
@@ -72,9 +69,7 @@ public class CategoryController {
 
     @Operation(summary = "Get a category by its name")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Found the category",
-                    content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = CategoryDTO.class)) }),
+            @ApiResponse(responseCode = "200", description = "Found the category", useReturnTypeSchema = true),
             @ApiResponse(responseCode = "400", description = "Invalid name supplied", content = @Content),
             @ApiResponse(responseCode = "404", description = "Category not found", content = @Content)
     })
@@ -86,9 +81,7 @@ public class CategoryController {
 
     @Operation(summary = "Create category")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Category created",
-                    content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = CategoryDTO.class)) }),
+            @ApiResponse(responseCode = "201", description = "Category created", useReturnTypeSchema = true),
             @ApiResponse(responseCode = "400", description = "Invalid body supplied", content = @Content),
             @ApiResponse(responseCode = "409", description = "Category already exists", content = @Content)
     })
@@ -103,9 +96,7 @@ public class CategoryController {
 
     @Operation(summary = "Update category")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Category updated",
-                    content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = CategoryDTO.class)) }),
+            @ApiResponse(responseCode = "200", description = "Category updated", useReturnTypeSchema = true),
             @ApiResponse(responseCode = "400", description = "Invalid body supplied", content = @Content),
             @ApiResponse(responseCode = "404", description = "Category not found", content = @Content),
             @ApiResponse(responseCode = "409", description = "Name supplied is already in use", content = @Content)
@@ -121,9 +112,7 @@ public class CategoryController {
 
     @Operation(summary = "Patch category")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Category patched",
-                    content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = CategoryDTO.class)) }),
+            @ApiResponse(responseCode = "200", description = "Category patched", useReturnTypeSchema = true),
             @ApiResponse(responseCode = "400", description = "Invalid body supplied", content = @Content),
             @ApiResponse(responseCode = "404", description = "Category not found", content = @Content),
             @ApiResponse(responseCode = "409", description = "Name supplied is already in use", content = @Content)
@@ -139,7 +128,7 @@ public class CategoryController {
 
     @Operation(summary = "Delete category")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Category deleted", content =  @Content),
+            @ApiResponse(responseCode = "204", description = "Category deleted", useReturnTypeSchema = true),
             @ApiResponse(responseCode = "404", description = "Category not found", content = @Content)
     })
     @DeleteMapping("/{id}")
