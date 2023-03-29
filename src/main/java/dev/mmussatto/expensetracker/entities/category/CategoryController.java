@@ -8,6 +8,11 @@ import dev.mmussatto.expensetracker.entities.helpers.ListDTO;
 import dev.mmussatto.expensetracker.entities.transaction.Transaction;
 import dev.mmussatto.expensetracker.entities.transaction.TransactionDTO;
 import dev.mmussatto.expensetracker.entities.transaction.TransactionMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -30,7 +35,12 @@ public class CategoryController {
         this.categoryMapper = categoryMapper;
     }
 
-    //Categories
+
+
+    @Operation(summary = "Get all categories")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Found the categories", useReturnTypeSchema = true)
+    })
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public ListDTO<CategoryDTO> getAllCategories () {
@@ -44,18 +54,44 @@ public class CategoryController {
         return new ListDTO<>(list);
     }
 
+
+    @Operation(summary = "Get a category by its id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Found the category",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = CategoryDTO.class)) }),
+            @ApiResponse(responseCode = "400", description = "Invalid id supplied", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Category not found", content = @Content)
+    })
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public CategoryDTO getCategoryById (@PathVariable Integer id) {
         return convertToDTO(categoryService.getCategoryById(id));
     }
 
+
+    @Operation(summary = "Get a category by its name")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Found the category",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = CategoryDTO.class)) }),
+            @ApiResponse(responseCode = "400", description = "Invalid name supplied", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Category not found", content = @Content)
+    })
     @GetMapping("/name/{name}")
     @ResponseStatus(HttpStatus.OK)
     public CategoryDTO getCategoryByName (@PathVariable final String name) {
         return convertToDTO(categoryService.getCategoryByName(name));
     }
 
+    @Operation(summary = "Create category")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Category created",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = CategoryDTO.class)) }),
+            @ApiResponse(responseCode = "400", description = "Invalid body supplied", content = @Content),
+            @ApiResponse(responseCode = "409", description = "Category already exists", content = @Content)
+    })
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Validated(CategoryDTO.allFieldsValidation.class)
@@ -64,6 +100,16 @@ public class CategoryController {
         return convertToDTO(categoryService.createNewCategory(entity));
     }
 
+
+    @Operation(summary = "Update category")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Category updated",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = CategoryDTO.class)) }),
+            @ApiResponse(responseCode = "400", description = "Invalid body supplied", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Category not found", content = @Content),
+            @ApiResponse(responseCode = "409", description = "Name supplied is already in use", content = @Content)
+    })
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Validated(CategoryDTO.allFieldsValidation.class)
@@ -72,6 +118,16 @@ public class CategoryController {
         return convertToDTO(categoryService.updateCategoryById(id, entity));
     }
 
+
+    @Operation(summary = "Patch category")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Category patched",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = CategoryDTO.class)) }),
+            @ApiResponse(responseCode = "400", description = "Invalid body supplied", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Category not found", content = @Content),
+            @ApiResponse(responseCode = "409", description = "Name supplied is already in use", content = @Content)
+    })
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Validated(CategoryDTO.onlyIdValidation.class)
@@ -80,6 +136,12 @@ public class CategoryController {
         return convertToDTO(categoryService.patchCategoryById(id, entity));
     }
 
+
+    @Operation(summary = "Delete category")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Category deleted", content =  @Content),
+            @ApiResponse(responseCode = "404", description = "Category not found", content = @Content)
+    })
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCategoryById (@PathVariable final Integer id) {
@@ -88,6 +150,11 @@ public class CategoryController {
 
 
     //Categories' Transactions
+    @Operation(summary = "Get all transactions from a category")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Category updated", useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "404", description = "Category not found", content = @Content)
+    })
     @GetMapping("/{id}/transactions")
     @ResponseStatus(HttpStatus.OK)
     public ListDTO<TransactionDTO> getCategoryTransactionsById (@PathVariable final Integer id) {
@@ -101,6 +168,8 @@ public class CategoryController {
                 }).collect(Collectors.toList()));
     }
 
+
+    //Mappers
     private CategoryDTO convertToDTO(Category category) {
         CategoryDTO dto = categoryMapper.convertToDTO(category);
         dto.setPath("/api/categories/" + dto.getId());
