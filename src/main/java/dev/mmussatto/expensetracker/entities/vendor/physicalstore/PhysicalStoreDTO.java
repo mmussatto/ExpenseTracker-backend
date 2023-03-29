@@ -8,18 +8,20 @@ import dev.mmussatto.expensetracker.entities.vendor.VendorDTO;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-@NoArgsConstructor
 public class PhysicalStoreDTO extends VendorDTO {
 
     @NotBlank(message = "address must not be null",  groups = VendorDTO.allFieldsValidation.class)
     private String address;
 
     public PhysicalStoreDTO(String name, String address) {
-        super(name);
+        super(name, "Physical Store");
         this.address = address;
+    }
+
+    public PhysicalStoreDTO() {
+        setType("Physical Store");
     }
 }

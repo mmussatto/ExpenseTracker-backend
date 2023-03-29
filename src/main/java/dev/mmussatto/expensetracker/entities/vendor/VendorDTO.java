@@ -20,7 +20,7 @@ import java.util.Set;
 
 @Data
 @NoArgsConstructor
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", include = JsonTypeInfo.As.EXISTING_PROPERTY, visible = true)
 @JsonSubTypes({
         @JsonSubTypes.Type(value = OnlineStoreDTO.class, name = "Online Store"),
         @JsonSubTypes.Type(value = PhysicalStoreDTO.class, name = "Physical Store")
@@ -37,6 +37,8 @@ public abstract class VendorDTO {
 
     private String path;
 
+    private String type;
+
     @NotBlank(message = "name must not be blank", groups = allFieldsValidation.class)
     private String name;
 
@@ -44,7 +46,8 @@ public abstract class VendorDTO {
     @JsonIgnore //for transactions, use the /transactions endpoint (returns a TransactionDTO)
     private Set<Transaction> transactions;
 
-    public VendorDTO(String name) {
+    public VendorDTO(String name, String type) {
         this.name = name;
+        this.type = type;
     }
 }

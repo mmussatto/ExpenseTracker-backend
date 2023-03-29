@@ -8,18 +8,20 @@ import dev.mmussatto.expensetracker.entities.vendor.VendorDTO;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-@NoArgsConstructor
 public class OnlineStoreDTO extends VendorDTO {
 
     @NotBlank(message = "url must not be null",  groups = VendorDTO.allFieldsValidation.class)
     private String url;
 
     public OnlineStoreDTO(String name, String url) {
-        super(name);
+        super(name, "Online Store");
         this.url = url;
+    }
+
+    public OnlineStoreDTO() {
+        setType("Online Store");
     }
 }
