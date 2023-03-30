@@ -8,6 +8,11 @@ import dev.mmussatto.expensetracker.entities.helpers.ListDTO;
 import dev.mmussatto.expensetracker.entities.transaction.Transaction;
 import dev.mmussatto.expensetracker.entities.transaction.TransactionDTO;
 import dev.mmussatto.expensetracker.entities.transaction.TransactionMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -17,6 +22,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Tag(name = "Payment Methods", description = "CRUD API for Payment Method entity")
 @Validated
 @RestController
 @RequestMapping("/api/payment-methods")
@@ -30,6 +36,11 @@ public class PaymentMethodController {
         this.paymentMethodMapper = paymentMethodMapper;
     }
 
+
+    @Operation(summary = "Get all payment methods")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Found the payment methods", useReturnTypeSchema = true)
+    })
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public ListDTO<PaymentMethodDTO> getAllPaymentMethods () {
@@ -41,18 +52,39 @@ public class PaymentMethodController {
         return new ListDTO<>(list);
     }
 
+
+    @Operation(summary = "Get a payment method by its id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Found the payment method", useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "400", description = "Invalid id supplied", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Payment method not found", content = @Content)
+    })
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public PaymentMethodDTO getPaymentMethodById (@PathVariable final Integer id) {
         return convertToDTO(paymentMethodService.getPaymentMethodById(id));
     }
 
+
+    @Operation(summary = "Get a payment method by its name")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Found the payment method", useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "400", description = "Invalid id supplied", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Payment method not found", content = @Content)
+    })
     @GetMapping("/name/{name}")
     @ResponseStatus(HttpStatus.OK)
     public PaymentMethodDTO getPaymentMethodByName (@PathVariable final String name) {
         return convertToDTO(paymentMethodService.getPaymentMethodByName(name));
     }
 
+
+    @Operation(summary = "Create payment method")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Payment method created", useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "400", description = "Invalid body supplied", content = @Content),
+            @ApiResponse(responseCode = "409", description = "Name supplied is already in use", content = @Content)
+    })
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Validated(PaymentMethodDTO.allFieldsValidation.class)
@@ -61,6 +93,14 @@ public class PaymentMethodController {
         return convertToDTO(paymentMethodService.createNewPaymentMethod(entity));
     }
 
+
+    @Operation(summary = "Update payment method")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Payment method updated", useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "400", description = "Invalid body supplied", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Payment method not found", content = @Content),
+            @ApiResponse(responseCode = "409", description = "Name supplied is already in use", content = @Content)
+    })
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Validated(PaymentMethodDTO.allFieldsValidation.class)
@@ -71,6 +111,13 @@ public class PaymentMethodController {
     }
 
 
+    @Operation(summary = "Patch payment method")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Payment method patched", useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "400", description = "Invalid body supplied", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Payment method not found", content = @Content),
+            @ApiResponse(responseCode = "409", description = "Name supplied is already in use", content = @Content)
+    })
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Validated(PaymentMethodDTO.onlyIdValidation.class)
@@ -80,12 +127,24 @@ public class PaymentMethodController {
         return convertToDTO(paymentMethodService.patchPaymentMethodById(id, entity));
     }
 
+
+    @Operation(summary = "Delete payment method")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Payment method deleted", useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "404", description = "Payment method not found", content = @Content)
+    })
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deletePaymentMethodById (@PathVariable final Integer id) {
         paymentMethodService.deletePaymentMethodById(id);
     }
 
+
+    @Operation(summary = "Get all transactions from a payment method")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Found the payment method's transactions", useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "404", description = "Payment method not found", content = @Content)
+    })
     @GetMapping("/{id}/transactions")
     @ResponseStatus(HttpStatus.OK)
     public ListDTO<TransactionDTO> getPaymentMethodTransactionsById (@PathVariable final Integer id) {
@@ -101,6 +160,7 @@ public class PaymentMethodController {
     }
 
 
+    //Helpers
     private PaymentMethodDTO convertToDTO (PaymentMethod entity) {
         PaymentMethodDTO paymentMethodDTO = paymentMethodMapper.convertToDTO(entity);
         paymentMethodDTO.setPath("/api/payment-methods/" + paymentMethodDTO.getId());
