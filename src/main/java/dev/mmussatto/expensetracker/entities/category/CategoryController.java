@@ -81,6 +81,7 @@ public class CategoryController {
         return convertToDTO(categoryService.getCategoryByName(name));
     }
 
+
     @Operation(summary = "Create category")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Category created", useReturnTypeSchema = true),
