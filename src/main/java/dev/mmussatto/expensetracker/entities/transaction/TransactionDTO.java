@@ -9,6 +9,7 @@ import dev.mmussatto.expensetracker.entities.category.Category;
 import dev.mmussatto.expensetracker.entities.paymentmethod.PaymentMethod;
 import dev.mmussatto.expensetracker.entities.tag.Tag;
 import dev.mmussatto.expensetracker.entities.vendor.Vendor;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
@@ -27,9 +28,11 @@ public class TransactionDTO {
 
     public interface allFieldsValidation {}
 
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     @Null(message = "id field must be null", groups = {onlyIdValidation.class, allFieldsValidation.class})
     private Integer id;
 
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     private String path;
 
     @NotNull(message = "amount must not be blank", groups = allFieldsValidation.class)
