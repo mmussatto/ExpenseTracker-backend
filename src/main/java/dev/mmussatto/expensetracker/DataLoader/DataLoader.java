@@ -151,14 +151,14 @@ public class DataLoader implements CommandLineRunner {
         tagSet.forEach(tag -> tag.getTransactions().add(t1));
         playstationStore.getTransactions().add(t1);
 
-        Transaction t2 = new Transaction(10.76, LocalDateTime.now().withNano(0), "Avatar",
+        Transaction t2 = new Transaction(10.76, LocalDateTime.of(2023, 4, 24, 8, 30, 30).withNano(0), "Avatar",
                 recreationCategory, debNubank, cinemark, Stream.of(moviesTag).collect(Collectors.toSet()) );
         debNubank.getTransactions().add(t2);
         recreationCategory.getTransactions().add(t2);
         moviesTag.getTransactions().add(t2);
         cinemark.getTransactions().add(t2);
 
-        Transaction t3 = new Transaction(10.76, LocalDateTime.now().withNano(0), "Top Gun: Maverick",
+        Transaction t3 = new Transaction(10.76, LocalDateTime.of(2023, 10, 3, 15, 45, 30).withNano(0), "Top Gun: Maverick",
                 recreationCategory, debNubank, cinemark, Stream.of(moviesTag, happyTag).collect(Collectors.toSet()) );
         debNubank.getTransactions().add(t3);
         recreationCategory.getTransactions().add(t3);
