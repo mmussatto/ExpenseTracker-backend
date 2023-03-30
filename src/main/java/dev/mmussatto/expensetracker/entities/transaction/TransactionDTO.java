@@ -38,6 +38,7 @@ public class TransactionDTO {
     @NotNull(message = "amount must not be blank", groups = allFieldsValidation.class)
     private Double amount;
 
+    @Schema(type = "string", example = "2023-04-24T08:30:00", pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @NotNull(message = "date must not be blank", groups = allFieldsValidation.class)
     private LocalDateTime date;
