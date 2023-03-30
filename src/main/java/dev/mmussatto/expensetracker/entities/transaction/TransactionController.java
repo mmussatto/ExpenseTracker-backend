@@ -5,6 +5,11 @@
 package dev.mmussatto.expensetracker.entities.transaction;
 
 import dev.mmussatto.expensetracker.entities.helpers.ListDTO;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -12,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.stream.Collectors;
 
+@Tag(name = "Transactions", description = "CRUD API for Transaction entity")
 @RestController
 @Validated
 @RequestMapping ("/api/transactions")
@@ -25,6 +31,11 @@ public class TransactionController {
         this.transactionMapper = transactionMapper;
     }
 
+
+    @Operation(summary = "Get all transactions")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Found the transactions", useReturnTypeSchema = true)
+    })
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public ListDTO<TransactionDTO> getAllTransactions () {
@@ -34,12 +45,25 @@ public class TransactionController {
                 .collect(Collectors.toList()));
     }
 
+
+    @Operation(summary = "Get a transaction by its id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Found the transaction", useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "400", description = "Invalid id supplied", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Transaction not found", content = @Content)
+    })
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public TransactionDTO getTransactionById (@PathVariable final Integer id) {
         return convertToDTO(transactionService.getTransactionById(id));
     }
 
+
+    @Operation(summary = "Create transaction")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Transaction created", useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "400", description = "Invalid body supplied", content = @Content)
+    })
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Validated(TransactionDTO.allFieldsValidation.class)
@@ -48,6 +72,13 @@ public class TransactionController {
         return convertToDTO(transactionService.createNewTransaction(entity));
     }
 
+
+    @Operation(summary = "Update transaction")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Transaction updated", useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "400", description = "Invalid body supplied", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Transaction not found", content = @Content)
+    })
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Validated(TransactionDTO.allFieldsValidation.class)
@@ -56,6 +87,13 @@ public class TransactionController {
         return convertToDTO(transactionService.updateTransactionById(id, entity));
     }
 
+
+    @Operation(summary = "Patch transaction")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Transaction patched", useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "400", description = "Invalid body supplied", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Transaction not found", content = @Content)
+    })
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Validated(TransactionDTO.onlyIdValidation.class)
@@ -64,6 +102,12 @@ public class TransactionController {
         return convertToDTO(transactionService.patchTransactionById(id, entity));
     }
 
+
+    @Operation(summary = "Delete transaction")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Transaction deleted", useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "404", description = "Transaction not found", content = @Content)
+    })
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteTransactionById (@PathVariable final Integer id) {
@@ -71,6 +115,8 @@ public class TransactionController {
     }
 
 
+
+    //Mappers
     private TransactionDTO convertToDTO (Transaction entity) {
         TransactionDTO dto = transactionMapper.convertToDTO(entity);
         dto.setPath("/api/transactions/" + dto.getId());
