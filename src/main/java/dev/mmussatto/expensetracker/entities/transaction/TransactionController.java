@@ -5,12 +5,14 @@
 package dev.mmussatto.expensetracker.entities.transaction;
 
 import dev.mmussatto.expensetracker.entities.helpers.ListDTO;
+import dev.mmussatto.expensetracker.entities.helpers.PageDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -43,6 +45,35 @@ public class TransactionController {
                 .stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList()));
+    }
+
+
+    @GetMapping(params = {"page", "size"})
+    @ResponseStatus(HttpStatus.OK)
+    public PageDTO<TransactionDTO> getPaginatedTransactions (@RequestParam("page") int page, @RequestParam("size") int size) {
+
+        Page<Transaction> paginatedTransactions = transactionService.getPaginated(page, size);
+
+        PageDTO<TransactionDTO> returnPage = new PageDTO<>();
+
+        returnPage.setContent(paginatedTransactions.getContent()
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList()));
+
+        returnPage.setPageNo(paginatedTransactions.getNumber());
+        returnPage.setPageSize(paginatedTransactions.getSize());
+        returnPage.setTotalElements(paginatedTransactions.getTotalElements());
+        returnPage.setTotalPages(paginatedTransactions.getTotalPages());
+
+        if(paginatedTransactions.getNumber() != paginatedTransactions.getTotalPages()-1)
+            returnPage.setNextPage(String.format("/api/transactions?page=%d&size=%d", paginatedTransactions.getNumber()+1, paginatedTransactions.getSize()));
+
+
+        if (paginatedTransactions.getNumber() != 0)
+            returnPage.setPreviousPage(String.format("/api/transactions?page=%d&size=%d", paginatedTransactions.getNumber()-1, paginatedTransactions.getSize()));
+
+        return returnPage;
     }
 
 
