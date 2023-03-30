@@ -7,6 +7,7 @@ package dev.mmussatto.expensetracker.entities.tag;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import dev.mmussatto.expensetracker.entities.helpers.Color;
 import dev.mmussatto.expensetracker.entities.transaction.Transaction;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
@@ -26,9 +27,11 @@ public class TagDTO {
 
     public interface allFieldsValidation {}
 
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     @Null(message = "id field must be null", groups = {onlyIdValidation.class, allFieldsValidation.class})
     private Integer id;
 
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     private String path;
 
     @NotBlank(message = "name must not be blank", groups = allFieldsValidation.class)
