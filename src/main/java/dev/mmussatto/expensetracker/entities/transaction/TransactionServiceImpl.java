@@ -13,6 +13,10 @@ import dev.mmussatto.expensetracker.entities.tag.TagService;
 import dev.mmussatto.expensetracker.entities.vendor.Vendor;
 import dev.mmussatto.expensetracker.entities.vendor.VendorService;
 import dev.mmussatto.expensetracker.exceptions.ResourceNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -124,6 +128,19 @@ public class TransactionServiceImpl implements TransactionService {
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Transaction %d not found!", id)));
 
         transactionRepository.deleteById(id);
+    }
+
+    @Override
+    public Page<Transaction> getPaginated(int page, int size) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("date"));
+
+        Page<Transaction> pagedResult = transactionRepository.findAll(pageable);
+
+        if(pagedResult.hasContent())
+            return pagedResult;
+        else
+            throw new RuntimeException("page with no content");
     }
 
 
