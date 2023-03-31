@@ -11,7 +11,6 @@ import java.util.List;
 @Data
 public class PageDTO<T> {
 
-    private List<T> content;
 
     private int pageNo;
     private int pageSize;
@@ -20,4 +19,5 @@ public class PageDTO<T> {
     private String nextPage;
     private String previousPage;
 
+    private List<T> content;
 }
