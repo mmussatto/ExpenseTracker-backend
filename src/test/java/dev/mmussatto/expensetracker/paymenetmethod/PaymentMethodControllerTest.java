@@ -14,10 +14,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.*;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
@@ -26,11 +28,15 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(PaymentMethodController.class)
 class PaymentMethodControllerTest {
+
+    public static final int DEFAULT_PAGE = 0;
+    public static final int DEFAULT_SIZE = 1;
 
     @Autowired
     private MockMvc mockMvc;
@@ -394,18 +400,30 @@ class PaymentMethodControllerTest {
         t2.setAmount(123.00);
         t2.setDescription("Test Transaction 2");
 
-        PaymentMethodDTO paymentMethodDTO = new PaymentMethodDTO();
-        paymentMethodDTO.setId(1);
-        paymentMethodDTO.getTransactions().addAll(Arrays.asList(t1, t2));
+        List<Transaction> transactions = Arrays.asList(t1, t2);
 
-        when(paymentMethodService.getPaymentMethodTransactionsById(paymentMethodDTO.getId()))
-                .thenReturn(paymentMethodDTO.getTransactions());
+        Integer paymentMethodId = 1;
 
-        mockMvc.perform(get("/api/payment-methods/{id}/transactions", paymentMethodDTO.getId())
+        Pageable pageable = PageRequest.of(DEFAULT_PAGE, DEFAULT_SIZE, Sort.by("date"));
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), transactions.size());
+
+        Page<Transaction> pagedTransactions = new PageImpl<Transaction>(
+                transactions.subList(start, end), pageable, transactions.size());
+
+        when(paymentMethodService.getPaymentMethodTransactionsById(paymentMethodId, DEFAULT_PAGE, DEFAULT_SIZE))
+                .thenReturn(pagedTransactions);
+
+        mockMvc.perform(get("/api/payment-methods/{id}/transactions", paymentMethodId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.numberOfItems", equalTo(2)))
-                .andExpect(jsonPath("$.items", hasSize(2)));
+                .andExpect(jsonPath("$.pageNo", equalTo(DEFAULT_PAGE)))
+                .andExpect(jsonPath("$.pageSize", equalTo(DEFAULT_SIZE)))
+                .andExpect(jsonPath("$.totalElements", equalTo(transactions.size())))
+                .andExpect(jsonPath("$.nextPage", equalTo("/api/payment-methods/1/transactions?page=1&size=1")))
+                .andExpect(jsonPath("$.previousPage", equalTo(null)))
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andDo(print());
     }
 
     @Test
@@ -413,7 +431,7 @@ class PaymentMethodControllerTest {
 
         Integer notFoundId = 123;
 
-        when(paymentMethodService.getPaymentMethodTransactionsById(notFoundId))
+        when(paymentMethodService.getPaymentMethodTransactionsById(notFoundId, DEFAULT_PAGE, DEFAULT_SIZE))
                 .thenThrow(ResourceNotFoundException.class);
 
         mockMvc.perform(get("/api/payment-methods/{id}/transactions", notFoundId)
