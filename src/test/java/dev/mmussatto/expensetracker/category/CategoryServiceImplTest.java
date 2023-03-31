@@ -440,7 +440,7 @@ class CategoryServiceImplTest {
     }
 
     @Test
-    void getTransactionsById() {
+    void getTransactionsByCategoryId() {
 
         //Create transactions
         Transaction t1 = new Transaction();
@@ -479,7 +479,7 @@ class CategoryServiceImplTest {
     }
 
     @Test
-    void getTransactionsById_NotFound() {
+    void getTransactionsByCategoryId_NotFound() {
 
         Integer notFoundId = 123;
 
