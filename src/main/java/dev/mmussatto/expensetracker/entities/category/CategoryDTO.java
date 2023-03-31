@@ -15,8 +15,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -41,7 +41,7 @@ public class CategoryDTO {
 
     @ToString.Exclude
     @JsonIgnore
-    private Set<Transaction> transactions = new HashSet<>();
+    private List<Transaction> transactions = new ArrayList<>();
 
 
     public CategoryDTO(String name, Color color) {
