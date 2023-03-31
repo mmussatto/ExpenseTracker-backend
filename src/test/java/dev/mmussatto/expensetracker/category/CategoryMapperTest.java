@@ -11,7 +11,7 @@ import dev.mmussatto.expensetracker.entities.helpers.Color;
 import dev.mmussatto.expensetracker.entities.transaction.Transaction;
 import org.junit.jupiter.api.Test;
 
-import java.util.Set;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -22,8 +22,7 @@ class CategoryMapperTest {
     public static final Integer ID = 1;
     public static final String NAME = "Test";
     public static final Color COLOR = Color.BLUE;
-    public static final Set<Transaction> TRANSACTIONS = Stream.of(new Transaction(), new Transaction())
-            .collect(Collectors.toSet());
+    public static final List<Transaction> TRANSACTIONS = Stream.of(new Transaction(), new Transaction()).collect(Collectors.toList());
 
     CategoryMapper categoryMapper = CategoryMapper.INSTANCE;
 

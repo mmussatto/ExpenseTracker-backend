@@ -17,8 +17,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -39,7 +42,8 @@ class CategoryServiceImplTest {
     public static final String NAME = "Test";
     public static final Color COLOR = Color.BLUE;
     public static final Transaction TRANSACTION = new Transaction();
-
+    public static final int DEFAULT_PAGE = 0;
+    public static final int DEFAULT_SIZE = 1;
 
     @BeforeAll
     static void initializeTransaction() {
@@ -437,6 +441,8 @@ class CategoryServiceImplTest {
 
     @Test
     void getTransactionsById() {
+
+        //Create transactions
         Transaction t1 = new Transaction();
         t1.setId(1);
         t1.setAmount(53.00);
@@ -447,45 +453,40 @@ class CategoryServiceImplTest {
         t2.setAmount(123.00);
         t2.setDescription("Test Transaction 2");
 
-        Set<Transaction> transactions = new HashSet<>(Arrays.asList(t1, t2));
+        List<Transaction> transactions = Arrays.asList(t1, t2);
 
+        //Create category returned by the repository
         Category category = new Category(NAME, COLOR);
         category.setId(ID);
         t1.setCategory(category);
         t2.setCategory(category);
         category.setTransactions(transactions);
 
+        //Create page returned by the service
+        Pageable pageable = PageRequest.of(DEFAULT_PAGE, DEFAULT_SIZE, Sort.by("date"));
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), transactions.size());
+
+        Page<Transaction> pagedTransactions = new PageImpl<Transaction>(
+                transactions.subList(start, end), pageable, transactions.size());
+
         when(categoryRepository.findById(category.getId())).thenReturn(Optional.of(category));
 
-        Set<Transaction> returnTransactions = categoryService.getTransactionsById(category.getId());
+        Page<Transaction> returnPagedTransactions = categoryService.getTransactionsById(category.getId(), DEFAULT_PAGE, DEFAULT_SIZE);
 
-        assertEquals(category.getTransactions().size(), returnTransactions.size());
-        assertEquals(category.getTransactions(), returnTransactions);
+        assertEquals(DEFAULT_SIZE, returnPagedTransactions.getContent().size(), "Wrong number of transactions");
+        assertEquals(pagedTransactions, returnPagedTransactions);
     }
 
     @Test
     void getTransactionsById_NotFound() {
-        Transaction t1 = new Transaction();
-        t1.setId(1);
-        t1.setAmount(53.00);
-        t1.setDescription("Test Transaction 1");
 
-        Transaction t2 = new Transaction();
-        t2.setId(2);
-        t2.setAmount(123.00);
-        t2.setDescription("Test Transaction 2");
+        Integer notFoundId = 123;
 
-        Set<Transaction> transactions = new HashSet<>(Arrays.asList(t1, t2));
+        when(categoryRepository.findById(notFoundId)).thenReturn(Optional.empty());
 
-        Category category = new Category(NAME, COLOR);
-        category.setId(ID);
-        t1.setCategory(category);
-        t2.setCategory(category);
-        category.setTransactions(transactions);
-
-        when(categoryRepository.findById(category.getId())).thenReturn(Optional.empty());
-
-        assertThrows(ResourceNotFoundException.class, () -> categoryService.getTransactionsById(category.getId()));
+        assertThrows(ResourceNotFoundException.class, () ->
+                categoryService.getTransactionsById(notFoundId, DEFAULT_PAGE, DEFAULT_SIZE));
     }
 
 
