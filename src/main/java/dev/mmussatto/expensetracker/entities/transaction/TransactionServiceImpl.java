@@ -135,12 +135,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("date"));
 
-        Page<Transaction> pagedResult = transactionRepository.findAll(pageable);
-
-        if(pagedResult.hasContent())
-            return pagedResult;
-        else
-            throw new RuntimeException("page with no content");
+        return transactionRepository.findAll(pageable);
     }
 
 
