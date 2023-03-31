@@ -4,7 +4,6 @@
 
 package dev.mmussatto.expensetracker.entities.transaction;
 
-import dev.mmussatto.expensetracker.entities.helpers.ListDTO;
 import dev.mmussatto.expensetracker.entities.helpers.PageDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -34,23 +33,14 @@ public class TransactionController {
     }
 
 
-    @Operation(summary = "Get all transactions")
+    @Operation(summary = "Get all transactions with paging")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Found the transactions", useReturnTypeSchema = true)
+            @ApiResponse(responseCode = "200", description = "Found the transactions page", useReturnTypeSchema = true)
     })
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public ListDTO<TransactionDTO> getAllTransactions () {
-        return new ListDTO<>(transactionService.getAllTransactions()
-                .stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList()));
-    }
-
-
-    @GetMapping(params = {"page", "size"})
-    @ResponseStatus(HttpStatus.OK)
-    public PageDTO<TransactionDTO> getPaginatedTransactions (@RequestParam("page") int page, @RequestParam("size") int size) {
+    public PageDTO<TransactionDTO> getPaginatedTransactions (@RequestParam(value = "page", defaultValue = "0", required = false) int page,
+                                                             @RequestParam(value = "size", defaultValue = "1", required = false) int size) {
 
         Page<Transaction> paginatedTransactions = transactionService.getPaginated(page, size);
 
@@ -66,12 +56,13 @@ public class TransactionController {
         returnPage.setTotalElements(paginatedTransactions.getTotalElements());
         returnPage.setTotalPages(paginatedTransactions.getTotalPages());
 
-        if(paginatedTransactions.getNumber() != paginatedTransactions.getTotalPages()-1)
-            returnPage.setNextPage(String.format("/api/transactions?page=%d&size=%d", paginatedTransactions.getNumber()+1, paginatedTransactions.getSize()));
+        if (paginatedTransactions.hasNext())
+            returnPage.setNextPage(String.format("/api/transactions?page=%d&size=%d",
+                    paginatedTransactions.getNumber()+1, paginatedTransactions.getSize()));
 
-
-        if (paginatedTransactions.getNumber() != 0)
-            returnPage.setPreviousPage(String.format("/api/transactions?page=%d&size=%d", paginatedTransactions.getNumber()-1, paginatedTransactions.getSize()));
+        if (paginatedTransactions.hasPrevious())
+            returnPage.setPreviousPage(String.format("/api/transactions?page=%d&size=%d",
+                    paginatedTransactions.getNumber()-1, paginatedTransactions.getSize()));
 
         return returnPage;
     }
