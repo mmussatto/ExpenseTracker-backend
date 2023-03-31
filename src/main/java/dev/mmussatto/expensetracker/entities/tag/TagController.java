@@ -5,6 +5,7 @@
 package dev.mmussatto.expensetracker.entities.tag;
 
 import dev.mmussatto.expensetracker.entities.helpers.ListDTO;
+import dev.mmussatto.expensetracker.entities.helpers.PageDTO;
 import dev.mmussatto.expensetracker.entities.transaction.Transaction;
 import dev.mmussatto.expensetracker.entities.transaction.TransactionDTO;
 import dev.mmussatto.expensetracker.entities.transaction.TransactionMapper;
@@ -13,11 +14,11 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @io.swagger.v3.oas.annotations.tags.Tag(name = "Tags", description = "CRUD API for Tag entity")
@@ -143,16 +144,37 @@ public class TagController {
     })
     @GetMapping("/{id}/transactions")
     @ResponseStatus(HttpStatus.OK)
-    public ListDTO<TransactionDTO> getPaymentMethodTransactionsById (@PathVariable final Integer id) {
-        Set<Transaction> transactions = tagService.getTagTransactionsById(id);
+    public PageDTO<TransactionDTO> getTransactionsByTagId(@PathVariable final Integer id,
+                                                          @RequestParam(value = "page", defaultValue = "0", required = false) int page,
+                                                          @RequestParam(value = "size", defaultValue = "1", required = false) int size) {
 
-        //Convert to dto
-        return new ListDTO<>(transactions.stream()
+        Page<Transaction> paginatedTransactions = tagService.getTransactionsByTagId(id, page, size);
+
+        PageDTO<TransactionDTO> returnPage = new PageDTO<>();
+
+        returnPage.setContent(paginatedTransactions.getContent()
+                .stream()
                 .map(transaction -> {
-                    TransactionDTO transactionDTO = TransactionMapper.INSTANCE.convertToDTO(transaction);
-                    transactionDTO.setPath("/api/transactions/" + transactionDTO.getId());
-                    return transactionDTO;
-                }).collect(Collectors.toList()));
+                    TransactionDTO dto = TransactionMapper.INSTANCE.convertToDTO(transaction);
+                    dto.setPath("/api/transactions/" + dto.getId());
+                    return dto;
+                })
+                .collect(Collectors.toList()));
+
+        returnPage.setPageNo(paginatedTransactions.getNumber());
+        returnPage.setPageSize(paginatedTransactions.getSize());
+        returnPage.setTotalElements(paginatedTransactions.getTotalElements());
+        returnPage.setTotalPages(paginatedTransactions.getTotalPages());
+
+        if (paginatedTransactions.hasNext())
+            returnPage.setNextPage(String.format("/api/tags/%d/transactions?page=%d&size=%d",
+                    id, paginatedTransactions.getNumber()+1, paginatedTransactions.getSize()));
+
+        if (paginatedTransactions.hasPrevious())
+            returnPage.setPreviousPage(String.format("/api/tags/%d/transactions?page=%d&size=%d",
+                    id, paginatedTransactions.getNumber()-1, paginatedTransactions.getSize()));
+
+        return returnPage;
     }
 
 

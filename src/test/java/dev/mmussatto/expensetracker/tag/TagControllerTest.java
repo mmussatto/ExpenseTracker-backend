@@ -15,10 +15,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.*;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
@@ -26,11 +28,16 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(TagController.class)
 class TagControllerTest {
+
+    public static final int DEFAULT_PAGE = 0;
+    public static final int DEFAULT_SIZE = 1;
+
 
     @Autowired
     private MockMvc mockMvc;
@@ -416,6 +423,7 @@ class TagControllerTest {
 
     @Test
     void getPaymentMethodTransactionsById() throws Exception {
+
         Transaction t1 = new Transaction();
         t1.setId(1);
         t1.setAmount(53.00);
@@ -426,24 +434,37 @@ class TagControllerTest {
         t2.setAmount(123.00);
         t2.setDescription("Test Transaction 2");
 
-        TagDTO tagDTO = new TagDTO();
-        tagDTO.setId(1);
-        tagDTO.getTransactions().addAll(Arrays.asList(t1, t2));
+        List<Transaction> transactions = Arrays.asList(t1, t2);
 
-        when(tagService.getTagTransactionsById(tagDTO.getId())).thenReturn(tagDTO.getTransactions());
+        Integer tagId = 1;
 
-        mockMvc.perform(get("/api/tags/{id}/transactions", tagDTO.getId())
+        Pageable pageable = PageRequest.of(DEFAULT_PAGE, DEFAULT_SIZE, Sort.by("date"));
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), transactions.size());
+
+        Page<Transaction> pagedTransactions = new PageImpl<Transaction>(
+                transactions.subList(start, end), pageable, transactions.size());
+
+
+        when(tagService.getTransactionsByTagId(tagId, DEFAULT_PAGE, DEFAULT_SIZE)).thenReturn(pagedTransactions);
+
+        mockMvc.perform(get("/api/tags/{id}/transactions", tagId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.numberOfItems", equalTo(2)))
-                .andExpect(jsonPath("$.items", hasSize(2)));
+                .andExpect(jsonPath("$.pageNo", equalTo(DEFAULT_PAGE)))
+                .andExpect(jsonPath("$.pageSize", equalTo(DEFAULT_SIZE)))
+                .andExpect(jsonPath("$.totalElements", equalTo(transactions.size())))
+                .andExpect(jsonPath("$.nextPage", equalTo("/api/tags/1/transactions?page=1&size=1")))
+                .andExpect(jsonPath("$.previousPage", equalTo(null)))
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andDo(print());
     }
 
     @Test
     void getPaymentMethodTransactionsById_NotFound() throws Exception {
         Integer notFoundId = 123;
 
-        when(tagService.getTagTransactionsById(notFoundId)).thenThrow(ResourceNotFoundException.class);
+        when(tagService.getTransactionsByTagId(notFoundId, DEFAULT_PAGE, DEFAULT_SIZE)).thenThrow(ResourceNotFoundException.class);
 
         mockMvc.perform(get("/api/tags/{id}/transactions", notFoundId)
                         .contentType(MediaType.APPLICATION_JSON))

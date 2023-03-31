@@ -14,8 +14,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @EqualsAndHashCode(exclude = {"transactions"})
@@ -37,7 +37,7 @@ public class Tag {
     @ManyToMany(mappedBy = "tags")
     @ToString.Exclude
     @JsonIgnore
-    private Set<Transaction> transactions = new HashSet<>();
+    private List<Transaction> transactions = new ArrayList<>();
 
     public Tag(String name, Color color) {
         this.name = name;
