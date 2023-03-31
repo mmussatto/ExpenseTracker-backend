@@ -7,10 +7,10 @@ package dev.mmussatto.expensetracker.entities.paymentmethod;
 import dev.mmussatto.expensetracker.entities.transaction.Transaction;
 import dev.mmussatto.expensetracker.exceptions.ResourceAlreadyExistsException;
 import dev.mmussatto.expensetracker.exceptions.ResourceNotFoundException;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Set;
 
 @Service
 public class PaymentMethodServiceImpl implements PaymentMethodService {
@@ -91,12 +91,18 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
     }
 
     @Override
-    public Set<Transaction> getPaymentMethodTransactionsById(Integer id) {
+    public Page<Transaction> getPaymentMethodTransactionsById(Integer id, int page, int size) {
 
         PaymentMethod paymentMethod = paymentMethodRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Payment Method " + id + " not found!"));
 
-        return paymentMethod.getTransactions();
+        List<Transaction>  transactions = paymentMethod.getTransactions();
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("date"));
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), transactions.size());
+
+        return new PageImpl<Transaction>(transactions.subList(start, end), pageable, transactions.size());
     }
 
 

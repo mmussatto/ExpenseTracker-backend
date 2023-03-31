@@ -5,9 +5,9 @@
 package dev.mmussatto.expensetracker.entities.paymentmethod;
 
 import dev.mmussatto.expensetracker.entities.transaction.Transaction;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
-import java.util.Set;
 
 public interface PaymentMethodService {
 
@@ -25,5 +25,5 @@ public interface PaymentMethodService {
 
     void deletePaymentMethodById (Integer id);
 
-    Set<Transaction> getPaymentMethodTransactionsById(Integer id);
+    Page<Transaction> getPaymentMethodTransactionsById(Integer id, int page, int size);
 }
