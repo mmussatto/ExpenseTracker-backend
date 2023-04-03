@@ -1,12 +1,13 @@
 /*
+ * Created by murilo.mussatto on 03/04/2023
+ */
+
+/*
  * Created by murilo.mussatto on 03/03/2023
  */
 
-package dev.mmussatto.expensetracker.category;
+package dev.mmussatto.expensetracker.entities.category;
 
-import dev.mmussatto.expensetracker.entities.category.Category;
-import dev.mmussatto.expensetracker.entities.category.CategoryDTO;
-import dev.mmussatto.expensetracker.entities.category.CategoryMapper;
 import dev.mmussatto.expensetracker.entities.helpers.Color;
 import dev.mmussatto.expensetracker.entities.transaction.Transaction;
 import org.junit.jupiter.api.Test;

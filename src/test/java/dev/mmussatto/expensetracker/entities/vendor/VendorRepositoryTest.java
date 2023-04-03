@@ -2,9 +2,8 @@
  * Created by murilo.mussatto on 27/02/2023
  */
 
-package dev.mmussatto.expensetracker.vendor;
+package dev.mmussatto.expensetracker.entities.vendor;
 
-import dev.mmussatto.expensetracker.entities.vendor.VendorRepository;
 import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStore;
 import dev.mmussatto.expensetracker.entities.vendor.physicalstore.PhysicalStore;
 import org.junit.jupiter.api.Test;

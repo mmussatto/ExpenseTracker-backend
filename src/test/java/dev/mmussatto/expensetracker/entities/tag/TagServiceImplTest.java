@@ -2,13 +2,9 @@
  * Created by murilo.mussatto on 14/03/2023
  */
 
-package dev.mmussatto.expensetracker.tag;
+package dev.mmussatto.expensetracker.entities.tag;
 
 import dev.mmussatto.expensetracker.entities.helpers.Color;
-import dev.mmussatto.expensetracker.entities.tag.Tag;
-import dev.mmussatto.expensetracker.entities.tag.TagRepository;
-import dev.mmussatto.expensetracker.entities.tag.TagService;
-import dev.mmussatto.expensetracker.entities.tag.TagServiceImpl;
 import dev.mmussatto.expensetracker.entities.transaction.Transaction;
 import dev.mmussatto.expensetracker.exceptions.ResourceAlreadyExistsException;
 import dev.mmussatto.expensetracker.exceptions.ResourceNotFoundException;

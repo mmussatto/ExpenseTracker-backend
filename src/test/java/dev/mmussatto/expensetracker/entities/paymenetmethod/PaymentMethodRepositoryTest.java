@@ -2,7 +2,7 @@
  * Created by murilo.mussatto on 27/02/2023
  */
 
-package dev.mmussatto.expensetracker.paymenetmethod;
+package dev.mmussatto.expensetracker.entities.paymenetmethod;
 
 import dev.mmussatto.expensetracker.entities.paymentmethod.PaymentMethod;
 import dev.mmussatto.expensetracker.entities.paymentmethod.PaymentMethodRepository;

@@ -2,13 +2,9 @@
  * Created by murilo.mussatto on 15/03/2023
  */
 
-package dev.mmussatto.expensetracker.vendor;
+package dev.mmussatto.expensetracker.entities.vendor;
 
 import dev.mmussatto.expensetracker.entities.transaction.Transaction;
-import dev.mmussatto.expensetracker.entities.vendor.Vendor;
-import dev.mmussatto.expensetracker.entities.vendor.VendorRepository;
-import dev.mmussatto.expensetracker.entities.vendor.VendorService;
-import dev.mmussatto.expensetracker.entities.vendor.VendorServiceImpl;
 import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStore;
 import dev.mmussatto.expensetracker.entities.vendor.physicalstore.PhysicalStore;
 import dev.mmussatto.expensetracker.exceptions.IncorrectVendorTypeException;

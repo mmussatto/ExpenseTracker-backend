@@ -2,7 +2,7 @@
  * Created by murilo.mussatto on 07/03/2023
  */
 
-package dev.mmussatto.expensetracker.paymenetmethod;
+package dev.mmussatto.expensetracker.entities.paymenetmethod;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.mmussatto.expensetracker.entities.paymentmethod.*;

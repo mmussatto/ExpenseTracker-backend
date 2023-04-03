@@ -3,7 +3,7 @@
  */
 
 
-package dev.mmussatto.expensetracker.transaction;
+package dev.mmussatto.expensetracker.entities.transaction;
 
 import dev.mmussatto.expensetracker.entities.category.Category;
 import dev.mmussatto.expensetracker.entities.category.CategoryService;
@@ -13,9 +13,6 @@ import dev.mmussatto.expensetracker.entities.paymentmethod.PaymentMethodService;
 import dev.mmussatto.expensetracker.entities.paymentmethod.PaymentType;
 import dev.mmussatto.expensetracker.entities.tag.Tag;
 import dev.mmussatto.expensetracker.entities.tag.TagService;
-import dev.mmussatto.expensetracker.entities.transaction.Transaction;
-import dev.mmussatto.expensetracker.entities.transaction.TransactionRepository;
-import dev.mmussatto.expensetracker.entities.transaction.TransactionServiceImpl;
 import dev.mmussatto.expensetracker.entities.vendor.Vendor;
 import dev.mmussatto.expensetracker.entities.vendor.VendorService;
 import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStore;

@@ -2,11 +2,8 @@
  * Created by murilo.mussatto on 28/02/2023
  */
 
-package dev.mmussatto.expensetracker.category;
+package dev.mmussatto.expensetracker.entities.category;
 
-import dev.mmussatto.expensetracker.entities.category.Category;
-import dev.mmussatto.expensetracker.entities.category.CategoryRepository;
-import dev.mmussatto.expensetracker.entities.category.CategoryServiceImpl;
 import dev.mmussatto.expensetracker.entities.helpers.Color;
 import dev.mmussatto.expensetracker.entities.transaction.Transaction;
 import dev.mmussatto.expensetracker.exceptions.ResourceAlreadyExistsException;

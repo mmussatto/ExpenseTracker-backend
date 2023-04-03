@@ -2,11 +2,10 @@
  * Created by murilo.mussatto on 15/03/2023
  */
 
-package dev.mmussatto.expensetracker.vendor;
+package dev.mmussatto.expensetracker.entities.vendor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.mmussatto.expensetracker.entities.transaction.Transaction;
-import dev.mmussatto.expensetracker.entities.vendor.*;
 import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStore;
 import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStoreDTO;
 import dev.mmussatto.expensetracker.entities.vendor.physicalstore.PhysicalStore;

@@ -1,11 +1,14 @@
 /*
+ * Created by murilo.mussatto on 03/04/2023
+ */
+
+/*
  * Created by murilo.mussatto on 01/03/2023
  */
 
-package dev.mmussatto.expensetracker.category;
+package dev.mmussatto.expensetracker.entities.category;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.mmussatto.expensetracker.entities.category.*;
 import dev.mmussatto.expensetracker.entities.helpers.Color;
 import dev.mmussatto.expensetracker.entities.transaction.Transaction;
 import dev.mmussatto.expensetracker.exceptions.ResourceAlreadyExistsException;

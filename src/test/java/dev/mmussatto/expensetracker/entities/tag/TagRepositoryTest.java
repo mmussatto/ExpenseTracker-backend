@@ -2,11 +2,9 @@
  * Created by murilo.mussatto on 27/02/2023
  */
 
-package dev.mmussatto.expensetracker.tag;
+package dev.mmussatto.expensetracker.entities.tag;
 
 import dev.mmussatto.expensetracker.entities.helpers.Color;
-import dev.mmussatto.expensetracker.entities.tag.Tag;
-import dev.mmussatto.expensetracker.entities.tag.TagRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
