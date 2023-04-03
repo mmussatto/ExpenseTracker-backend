@@ -472,7 +472,7 @@ class CategoryServiceImplTest {
 
         when(categoryRepository.findById(category.getId())).thenReturn(Optional.of(category));
 
-        Page<Transaction> returnPagedTransactions = categoryService.getTransactionsById(category.getId(), DEFAULT_PAGE, DEFAULT_SIZE);
+        Page<Transaction> returnPagedTransactions = categoryService.getTransactionsByCategoryId(category.getId(), DEFAULT_PAGE, DEFAULT_SIZE);
 
         assertEquals(DEFAULT_SIZE, returnPagedTransactions.getContent().size(), "Wrong number of transactions");
         assertEquals(pagedTransactions, returnPagedTransactions);
@@ -486,7 +486,7 @@ class CategoryServiceImplTest {
         when(categoryRepository.findById(notFoundId)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () ->
-                categoryService.getTransactionsById(notFoundId, DEFAULT_PAGE, DEFAULT_SIZE));
+                categoryService.getTransactionsByCategoryId(notFoundId, DEFAULT_PAGE, DEFAULT_SIZE));
     }
 
 

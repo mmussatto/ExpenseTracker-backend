@@ -399,7 +399,7 @@ class CategoryControllerTest {
     }
 
     @Test
-    void getCategoryTransactionsById() throws Exception {
+    void getTransactionsByCategoryId() throws Exception {
 
         Transaction t1 = new Transaction();
         t1.setId(1);
@@ -423,7 +423,7 @@ class CategoryControllerTest {
                 transactions.subList(start, end), pageable, transactions.size());
 
 
-        when(categoryService.getTransactionsById(categoryId, DEFAULT_PAGE, DEFAULT_SIZE)).thenReturn(pagedTransactions);
+        when(categoryService.getTransactionsByCategoryId(categoryId, DEFAULT_PAGE, DEFAULT_SIZE)).thenReturn(pagedTransactions);
 
         mockMvc.perform(get("/api/categories/{id}/transactions", categoryId)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -438,11 +438,11 @@ class CategoryControllerTest {
     }
 
     @Test
-    void getCategoryTransactionsById_NotFound() throws Exception {
+    void getTransactionsByCategoryId_NotFound() throws Exception {
 
         Integer notFoundID = 123;
 
-        when(categoryService.getTransactionsById(notFoundID, DEFAULT_PAGE, DEFAULT_SIZE))
+        when(categoryService.getTransactionsByCategoryId(notFoundID, DEFAULT_PAGE, DEFAULT_SIZE))
                 .thenThrow(ResourceNotFoundException.class);
 
         mockMvc.perform(get("/api/categories/{id}/transactions", notFoundID)
