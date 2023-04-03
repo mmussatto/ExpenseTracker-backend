@@ -17,8 +17,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes({
@@ -42,7 +42,7 @@ public abstract class Vendor {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "vendor")
     @ToString.Exclude
     @JsonIgnore
-    private Set<Transaction> transactions = new HashSet<>();
+    private List<Transaction> transactions = new ArrayList<>();
 
     public Vendor(String name) {
         this.name = name;

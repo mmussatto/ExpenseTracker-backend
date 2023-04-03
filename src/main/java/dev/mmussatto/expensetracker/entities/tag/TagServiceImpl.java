@@ -7,10 +7,10 @@ package dev.mmussatto.expensetracker.entities.tag;
 import dev.mmussatto.expensetracker.entities.transaction.Transaction;
 import dev.mmussatto.expensetracker.exceptions.ResourceAlreadyExistsException;
 import dev.mmussatto.expensetracker.exceptions.ResourceNotFoundException;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Set;
 
 @Service
 public class TagServiceImpl implements TagService {
@@ -88,11 +88,17 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public Set<Transaction> getTagTransactionsById(Integer id) {
+    public Page<Transaction> getTransactionsByTagId(Integer id, int page, int size) {
         Tag tag = tagRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Tag %d not found!", id)));
 
-        return tag.getTransactions();
+        List<Transaction>  transactions = tag.getTransactions();
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("date"));
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), transactions.size());
+
+        return new PageImpl<Transaction>(transactions.subList(start, end), pageable, transactions.size());
     }
 
 

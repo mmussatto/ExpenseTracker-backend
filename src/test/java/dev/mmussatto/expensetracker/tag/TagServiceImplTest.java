@@ -17,8 +17,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -36,6 +39,9 @@ class TagServiceImplTest {
     public static final String NAME = "Test";
     public static final Color COLOR = Color.BLUE;
     public static final Transaction TRANSACTION = new Transaction();
+    public static final int DEFAULT_PAGE = 0;
+    public static final int DEFAULT_SIZE = 1;
+
 
     @BeforeEach
     void setUp() {
@@ -370,8 +376,9 @@ class TagServiceImplTest {
     }
 
     @Test
-    void getTagTransactionsById() {
+    void getTransactionsByTagId() {
 
+        //Create transactions
         Transaction t1 = new Transaction();
         t1.setId(1);
         t1.setAmount(53.00);
@@ -382,20 +389,45 @@ class TagServiceImplTest {
         t2.setAmount(123.00);
         t2.setDescription("Test Transaction 2");
 
-        Set<Transaction> transactions = new HashSet<>(Arrays.asList(t1, t2));
+        List<Transaction> transactions = Arrays.asList(t1, t2);
 
+        //Create tag returned by the repository
         Tag tag = new Tag(NAME, COLOR);
         tag.setId(ID);
         t1.getTags().add(tag);
         t2.getTags().add(tag);
         tag.setTransactions(transactions);
 
+        //Create page returned by the service
+        Pageable pageable = PageRequest.of(DEFAULT_PAGE, DEFAULT_SIZE, Sort.by("date"));
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), transactions.size());
+
+        Page<Transaction> pagedTransactions = new PageImpl<Transaction>(
+                transactions.subList(start, end), pageable, transactions.size());
+
+
+
         when(tagRepository.findById(tag.getId())).thenReturn(Optional.of(tag));
 
-        Set<Transaction> returnedSet = tagService.getTagTransactionsById(tag.getId());
+        Page<Transaction> returnPagedTransactions = tagService.getTransactionsByTagId(tag.getId(), DEFAULT_PAGE, DEFAULT_SIZE);
 
-        assertEquals(transactions, returnedSet);
+        assertEquals(DEFAULT_SIZE, returnPagedTransactions.getContent().size(), "Wrong number of transactions");
+        assertEquals(pagedTransactions, returnPagedTransactions);
     }
+
+    @Test
+    void getTransactionsByTagId_NotFound() {
+
+        Integer notFoundId = 123;
+
+        when(tagRepository.findById(notFoundId)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () ->
+                tagService.getTransactionsByTagId(notFoundId, DEFAULT_PAGE, DEFAULT_SIZE));
+    }
+
+
 
     private static Tag createTagEntity() {
         Tag tag = new Tag(NAME, COLOR);

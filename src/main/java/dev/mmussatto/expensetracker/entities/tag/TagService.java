@@ -5,9 +5,9 @@
 package dev.mmussatto.expensetracker.entities.tag;
 
 import dev.mmussatto.expensetracker.entities.transaction.Transaction;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
-import java.util.Set;
 
 public interface TagService {
 
@@ -25,5 +25,5 @@ public interface TagService {
 
     void deleteTagById (Integer id);
 
-    Set<Transaction> getTagTransactionsById(Integer id);
+    Page<Transaction> getTransactionsByTagId(Integer id, int page, int size);
 }

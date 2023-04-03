@@ -14,8 +14,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -40,7 +40,7 @@ public class PaymentMethodDTO {
 
     @ToString.Exclude
     @JsonIgnore //for transactions, use the /transactions endpoint (returns a TransactionDTO)
-    private Set<Transaction> transactions = new HashSet<>();
+    private List<Transaction> transactions = new ArrayList<>();
 
 
     public PaymentMethodDTO(String name, PaymentType type) {

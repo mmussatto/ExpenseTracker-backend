@@ -7,10 +7,10 @@ package dev.mmussatto.expensetracker.entities.category;
 import dev.mmussatto.expensetracker.entities.transaction.Transaction;
 import dev.mmussatto.expensetracker.exceptions.ResourceAlreadyExistsException;
 import dev.mmussatto.expensetracker.exceptions.ResourceNotFoundException;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Set;
 
 @Service
 public class CategoryServiceImpl implements CategoryService {
@@ -90,11 +90,17 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Set<Transaction> getTransactionsById(Integer id) {
+    public Page<Transaction> getTransactionsByCategoryId(Integer id, int page, int size) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category " + id + " not found!"));
 
-        return  category.getTransactions();
+        List<Transaction>  transactions = category.getTransactions();
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("date"));
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), transactions.size());
+
+        return new PageImpl<Transaction>(transactions.subList(start, end), pageable, transactions.size());
     }
 
     private void checkIfNameIsAlreadyInUse(Category category) {

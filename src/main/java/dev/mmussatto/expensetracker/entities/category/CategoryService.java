@@ -5,9 +5,9 @@
 package dev.mmussatto.expensetracker.entities.category;
 
 import dev.mmussatto.expensetracker.entities.transaction.Transaction;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
-import java.util.Set;
 
 public interface CategoryService {
 
@@ -25,5 +25,5 @@ public interface CategoryService {
 
     void deleteCategoryById (Integer id);
 
-    Set<Transaction> getTransactionsById(Integer id);
+    Page<Transaction> getTransactionsByCategoryId(Integer id, int page, int size);
 }

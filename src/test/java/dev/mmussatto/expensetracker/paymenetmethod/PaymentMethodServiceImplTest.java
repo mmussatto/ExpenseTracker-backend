@@ -17,8 +17,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -37,6 +40,9 @@ class PaymentMethodServiceImplTest {
     public static final String NAME = "Test";
     public static final PaymentType TYPE = PaymentType.CREDIT_CARD;
     public static final Transaction TRANSACTION = new Transaction();
+    public static final int DEFAULT_PAGE = 0;
+    public static final int DEFAULT_SIZE = 1;
+
 
     @BeforeAll
     static void initializeTransaction() {
@@ -390,6 +396,7 @@ class PaymentMethodServiceImplTest {
     @Test
     void getPaymentMethodTransactionsById() {
 
+        //Create Transactions
         Transaction t1 = new Transaction();
         t1.setId(1);
         t1.setAmount(53.00);
@@ -400,19 +407,30 @@ class PaymentMethodServiceImplTest {
         t2.setAmount(123.00);
         t2.setDescription("Test Transaction 2");
 
-        Set<Transaction> transactions = new HashSet<>(Arrays.asList(t1, t2));
+        List<Transaction> transactions = Arrays.asList(t1, t2);
 
+        //Create payment-method returned by the repository
         PaymentMethod paymentMethod = new PaymentMethod(NAME, TYPE);
         paymentMethod.setId(ID);
         t1.setPaymentMethod(paymentMethod);
         t2.setPaymentMethod(paymentMethod);
         paymentMethod.setTransactions(transactions);
 
+        //Create page returned by the service
+        Pageable pageable = PageRequest.of(DEFAULT_PAGE, DEFAULT_SIZE, Sort.by("date"));
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), transactions.size());
+
+        Page<Transaction> pagedTransactions = new PageImpl<Transaction>(
+                transactions.subList(start, end), pageable, transactions.size());
+
+
         when(paymentMethodRepository.findById(paymentMethod.getId())).thenReturn(Optional.of(paymentMethod));
 
-        Set<Transaction> returnedSet = paymentMethodService.getPaymentMethodTransactionsById(paymentMethod.getId());
+        Page<Transaction> returnPagedTransactions = paymentMethodService.getPaymentMethodTransactionsById(paymentMethod.getId(), DEFAULT_PAGE, DEFAULT_SIZE);
 
-        assertEquals(transactions, returnedSet);
+        assertEquals(DEFAULT_SIZE, returnPagedTransactions.getContent().size(), "Wrong number of transactions");
+        assertEquals(pagedTransactions, returnPagedTransactions);
     }
 
     @Test
@@ -423,7 +441,7 @@ class PaymentMethodServiceImplTest {
         when(paymentMethodRepository.findById(notFoundId)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
-                () -> paymentMethodService.getPaymentMethodTransactionsById(notFoundId));
+                () -> paymentMethodService.getPaymentMethodTransactionsById(notFoundId, DEFAULT_PAGE, DEFAULT_SIZE));
     }
 
 

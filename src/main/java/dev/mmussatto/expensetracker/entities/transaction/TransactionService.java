@@ -4,6 +4,8 @@
 
 package dev.mmussatto.expensetracker.entities.transaction;
 
+import org.springframework.data.domain.Page;
+
 import java.util.List;
 
 public interface TransactionService {
@@ -21,4 +23,5 @@ public interface TransactionService {
 
     void deleteTransactionById (Integer id);
 
+    Page<Transaction> getPaginated(int page, int size);
 }

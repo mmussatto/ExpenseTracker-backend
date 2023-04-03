@@ -13,8 +13,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -36,7 +36,7 @@ public class PaymentMethod {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "paymentMethod")
     @ToString.Exclude
     @JsonIgnore
-    private Set<Transaction> transactions = new HashSet<>();
+    private List<Transaction> transactions = new ArrayList<>();
 
     public PaymentMethod(String name, PaymentType type) {
         this.name = name;
