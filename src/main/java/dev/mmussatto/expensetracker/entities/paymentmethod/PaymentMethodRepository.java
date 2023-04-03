@@ -11,6 +11,4 @@ import java.util.Optional;
 public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Integer> {
 
     Optional<PaymentMethod> findByName (String name);
-
-    void deleteByName (String name);
 }

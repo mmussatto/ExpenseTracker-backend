@@ -13,7 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DataJpaTest
 class PaymentMethodRepositoryTest {
@@ -37,16 +38,6 @@ class PaymentMethodRepositoryTest {
         PaymentMethod test = paymentMethodRepository.findByName("Test 1").get();
 
         assertEquals(t1.getId(), test.getId());
-    }
-
-    @Test
-    void deleteByName() {
-        PaymentMethod t1 = new PaymentMethod("Test 1", PaymentType.CASH);
-        testEntityManager.persist(t1);
-
-        paymentMethodRepository.deleteByName(t1.getName());
-
-        assertFalse(paymentMethodRepository.findByName(t1.getName()).isPresent());
     }
 
     @Test
