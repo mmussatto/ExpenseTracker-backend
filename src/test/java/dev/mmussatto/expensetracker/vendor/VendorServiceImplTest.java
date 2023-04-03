@@ -19,8 +19,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -39,6 +42,8 @@ class VendorServiceImplTest {
     public static final String URL = "www.test.com";
     public static final String ADDRESS = "Test St. 123";
     public static final Transaction TRANSACTION = new Transaction();
+    public static final int DEFAULT_PAGE = 0;
+    public static final int DEFAULT_SIZE = 1;
 
     @BeforeEach
     void setUp() {
@@ -396,7 +401,7 @@ class VendorServiceImplTest {
 
 
     @Test
-    void getTransactionsById() {
+    void getTransactionsByVendorId() {
 
         Transaction t1 = new Transaction();
         t1.setId(1);
@@ -408,7 +413,7 @@ class VendorServiceImplTest {
         t2.setAmount(123.00);
         t2.setDescription("Test Transaction 2");
 
-        Set<Transaction> transactions = new HashSet<>(Arrays.asList(t1, t2));
+        List<Transaction> transactions = Arrays.asList(t1, t2);
 
         PhysicalStore physicalStore = new PhysicalStore(NAME, ADDRESS);
         physicalStore.setId(ID);
@@ -416,11 +421,31 @@ class VendorServiceImplTest {
         t2.setVendor(physicalStore);
         physicalStore.setTransactions(transactions);
 
+        //Create page returned by the service
+        Pageable pageable = PageRequest.of(DEFAULT_PAGE, DEFAULT_SIZE, Sort.by("date"));
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), transactions.size());
+
+        Page<Transaction> pagedTransactions = new PageImpl<Transaction>(
+                transactions.subList(start, end), pageable, transactions.size());
+
         when(vendorRepository.findById(physicalStore.getId())).thenReturn(Optional.of(physicalStore));
 
-        Set<Transaction> returnedSet = vendorService.getTransactionsById(physicalStore.getId());
+        Page<Transaction> returnPagedTransactions = vendorService.getTransactionsByVendorId(physicalStore.getId(), DEFAULT_PAGE, DEFAULT_SIZE);
 
-        assertEquals(transactions, returnedSet);
+        assertEquals(DEFAULT_SIZE, returnPagedTransactions.getContent().size(), "Wrong number of transactions");
+        assertEquals(pagedTransactions, returnPagedTransactions);
+    }
+
+    @Test
+    void getTransactionsByVendorId_NotFound() {
+
+        Integer notFoundId = 123;
+
+        when(vendorRepository.findById(notFoundId)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () ->
+                vendorService.getTransactionsByVendorId(notFoundId, DEFAULT_PAGE, DEFAULT_SIZE));
     }
 
     private OnlineStore createOnlineStore() {
