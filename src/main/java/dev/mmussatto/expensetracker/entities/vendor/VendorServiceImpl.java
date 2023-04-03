@@ -10,10 +10,10 @@ import dev.mmussatto.expensetracker.entities.vendor.physicalstore.PhysicalStore;
 import dev.mmussatto.expensetracker.exceptions.IncorrectVendorTypeException;
 import dev.mmussatto.expensetracker.exceptions.ResourceAlreadyExistsException;
 import dev.mmussatto.expensetracker.exceptions.ResourceNotFoundException;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Set;
 
 @Service
 public class VendorServiceImpl<V extends Vendor> implements VendorService<V> {
@@ -125,11 +125,17 @@ public class VendorServiceImpl<V extends Vendor> implements VendorService<V> {
     }
 
     @Override
-    public Set<Transaction> getTransactionsById(Integer id) {
+    public Page<Transaction> getTransactionsByVendorId(Integer id, int page, int size) {
         Vendor savedVendor =  vendorRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Vendor '%d' not found!", id)));
 
-        return savedVendor.getTransactions();
+        List<Transaction>  transactions = savedVendor.getTransactions();
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("date"));
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), transactions.size());
+
+        return new PageImpl<Transaction>(transactions.subList(start, end), pageable, transactions.size());
     }
 
 

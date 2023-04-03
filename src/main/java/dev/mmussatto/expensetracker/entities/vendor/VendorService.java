@@ -5,9 +5,9 @@
 package dev.mmussatto.expensetracker.entities.vendor;
 
 import dev.mmussatto.expensetracker.entities.transaction.Transaction;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
-import java.util.Set;
 
 public interface VendorService<V extends Vendor> {
 
@@ -25,5 +25,5 @@ public interface VendorService<V extends Vendor> {
 
     void deleteVendorById (Integer id);
 
-    Set<Transaction> getTransactionsById(Integer id);
+    Page<Transaction> getTransactionsByVendorId(Integer id, int page, int size);
 }

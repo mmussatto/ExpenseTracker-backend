@@ -17,7 +17,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -47,7 +48,7 @@ public abstract class VendorDTO {
 
     @ToString.Exclude
     @JsonIgnore //for transactions, use the /transactions endpoint (returns a TransactionDTO)
-    private Set<Transaction> transactions;
+    private List<Transaction> transactions = new ArrayList<>();
 
     public VendorDTO(String name, String type) {
         this.name = name;
