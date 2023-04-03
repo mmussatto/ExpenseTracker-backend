@@ -47,4 +47,36 @@ class VendorRepositoryTest {
         assertEquals(os1.getId(), osTest.getId());
         assertEquals(ps1.getId(), psTest.getId());
     }
+
+    @Test
+    void findByUrl() {
+        OnlineStore os1 = new OnlineStore("Test 1", "https://test1.com");
+        testEntityManager.persist(os1);
+
+        OnlineStore os2 = new OnlineStore("Test 2", "https://www.test2.com.br/");
+        testEntityManager.persist(os2);
+
+
+        OnlineStore osTest = onlineStoreStoreRepository.findByUrl(os1.getUrl()).get();
+
+
+        assertEquals(os1.getId(), osTest.getId());
+        assertEquals(os1.getName(), osTest.getName());
+    }
+
+    @Test
+    void findByAddress() {
+
+        PhysicalStore ps1 = new PhysicalStore("Test 3", "Av. Test 3, 1515");
+        testEntityManager.persist(ps1);
+
+        PhysicalStore ps2 = new PhysicalStore("Test 4", "Av. Test 4, 1616");
+        testEntityManager.persist(ps2);
+
+        PhysicalStore psTest = physicalStoreStoreRepository.findByAddress(ps1.getAddress()).get();
+
+        assertEquals(ps1.getId(), psTest.getId());
+        assertEquals(ps1.getName(), psTest.getName());
+
+    }
 }
