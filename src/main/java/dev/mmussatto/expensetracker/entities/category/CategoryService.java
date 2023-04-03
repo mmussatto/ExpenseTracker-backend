@@ -25,5 +25,5 @@ public interface CategoryService {
 
     void deleteCategoryById (Integer id);
 
-    Page<Transaction> getTransactionsById(Integer id, int page, int size);
+    Page<Transaction> getTransactionsByCategoryId(Integer id, int page, int size);
 }

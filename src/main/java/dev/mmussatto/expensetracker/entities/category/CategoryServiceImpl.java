@@ -90,7 +90,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Page<Transaction> getTransactionsById(Integer id, int page, int size) {
+    public Page<Transaction> getTransactionsByCategoryId(Integer id, int page, int size) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category " + id + " not found!"));
 

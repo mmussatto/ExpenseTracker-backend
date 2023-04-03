@@ -153,7 +153,8 @@ public class CategoryController {
     public PageDTO<TransactionDTO> getTransactionsByCategoryId(@PathVariable final Integer id,
                                                                @RequestParam(value = "page", defaultValue = "0", required = false) int page,
                                                                @RequestParam(value = "size", defaultValue = "1", required = false) int size) {
-        Page<Transaction> paginatedTransactions = categoryService.getTransactionsById(id, page, size);
+
+        Page<Transaction> paginatedTransactions = categoryService.getTransactionsByCategoryId(id, page, size);
 
         PageDTO<TransactionDTO> returnPage = new PageDTO<>();
 
