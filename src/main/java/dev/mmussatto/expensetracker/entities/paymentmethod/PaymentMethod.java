@@ -42,4 +42,8 @@ public class PaymentMethod {
         this.name = name;
         this.type = type;
     }
+
+    public PaymentMethod(Integer id) {
+        this.id = id;
+    }
 }

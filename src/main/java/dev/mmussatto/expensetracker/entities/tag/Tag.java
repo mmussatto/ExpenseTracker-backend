@@ -43,4 +43,8 @@ public class Tag {
         this.name = name;
         this.color = color;
     }
+
+    public Tag(Integer id) {
+        this.id = id;
+    }
 }

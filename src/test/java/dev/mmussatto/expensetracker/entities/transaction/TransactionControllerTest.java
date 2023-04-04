@@ -11,6 +11,7 @@ import dev.mmussatto.expensetracker.entities.paymentmethod.PaymentMethod;
 import dev.mmussatto.expensetracker.entities.paymentmethod.PaymentType;
 import dev.mmussatto.expensetracker.entities.tag.Tag;
 import dev.mmussatto.expensetracker.entities.vendor.Vendor;
+import dev.mmussatto.expensetracker.entities.vendor.defaultvendor.DefaultVendor;
 import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStore;
 import dev.mmussatto.expensetracker.exceptions.ResourceNotFoundException;
 import jakarta.validation.ConstraintViolationException;
@@ -24,7 +25,9 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -96,6 +99,8 @@ class TransactionControllerTest {
                 .andExpect(jsonPath("$.nextPage", equalTo("/api/transactions?page=1&size=1")))
                 .andExpect(jsonPath("$.previousPage", equalTo(null)))
                 .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].path", equalTo("/api/transactions/1")))
+
                 .andDo(print());
     }
 
@@ -135,15 +140,17 @@ class TransactionControllerTest {
     @Test
     void createNewTransaction() throws Exception {
 
-        TransactionDTO passedDTO = createTransactionDTO();
+        RequestTransactionDTO requestDTO = createRequestTransactionDTO();
 
-        Transaction toSaveEntity = new Transaction(passedDTO.getAmount(), passedDTO.getDate(),
-                passedDTO.getDescription(), passedDTO.getCategory(), passedDTO.getPaymentMethod(),
-                passedDTO.getVendor(), passedDTO.getTags());
+        Transaction toSaveEntity = convertRequestToEntity(requestDTO);
+
+        //Implemented code will search repo and get the correct vendor
+        Vendor vendor_os = new OnlineStore("Test Online Store", "www.test.com");
+        vendor_os.setId(toSaveEntity.getVendor().getId());
 
         Transaction savedEntity = new Transaction(toSaveEntity.getAmount(), toSaveEntity.getDate(),
                 toSaveEntity.getDescription(), toSaveEntity.getCategory(), toSaveEntity.getPaymentMethod(),
-                toSaveEntity.getVendor(), toSaveEntity.getTags());
+                vendor_os, toSaveEntity.getTags());
         savedEntity.setId(1);
 
         TransactionDTO returnedDTO = new TransactionDTO(savedEntity.getAmount(), savedEntity.getDate(),
@@ -151,13 +158,13 @@ class TransactionControllerTest {
                 savedEntity.getVendor(), savedEntity.getTags());
         returnedDTO.setId(savedEntity.getId());
 
-        when(transactionMapper.convertToEntity(any())).thenReturn(toSaveEntity);
+        when(transactionMapper.convertRequestToEntity(requestDTO)).thenReturn(toSaveEntity);
         when(transactionService.createNewTransaction(toSaveEntity)).thenReturn(savedEntity);
         when(transactionMapper.convertToDTO(savedEntity)).thenReturn(returnedDTO);
 
         mockMvc.perform(post("/api/transactions")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(passedDTO)))
+                        .content(objectMapper.writeValueAsString(requestDTO)))
                 .andExpect(status().isCreated())
                 .andExpect(result -> {
                     String retString = result.getResponse().getContentAsString();
@@ -184,15 +191,17 @@ class TransactionControllerTest {
     @Test
     void updateTransactionById() throws Exception {
 
-        TransactionDTO passedDTO = createTransactionDTO();
+        RequestTransactionDTO requestDTO = createRequestTransactionDTO();
 
-        Transaction toUpdateEntity = new Transaction(passedDTO.getAmount(), passedDTO.getDate(),
-                passedDTO.getDescription(), passedDTO.getCategory(), passedDTO.getPaymentMethod(),
-                passedDTO.getVendor(), passedDTO.getTags());
+        Transaction toUpdateEntity = convertRequestToEntity(requestDTO);
+
+        //Implemented code will search repo and get the correct vendor
+        Vendor vendor_os = new OnlineStore("Test Online Store", "www.test.com");
+        vendor_os.setId(toUpdateEntity.getVendor().getId());
 
         Transaction updatedEntity = new Transaction(toUpdateEntity.getAmount(), toUpdateEntity.getDate(),
                 toUpdateEntity.getDescription(), toUpdateEntity.getCategory(), toUpdateEntity.getPaymentMethod(),
-                toUpdateEntity.getVendor(), toUpdateEntity.getTags());
+                vendor_os, toUpdateEntity.getTags());
         updatedEntity.setId(1);
 
         TransactionDTO returnedDTO = new TransactionDTO(updatedEntity.getAmount(), updatedEntity.getDate(),
@@ -200,13 +209,13 @@ class TransactionControllerTest {
                 updatedEntity.getVendor(), updatedEntity.getTags());
         returnedDTO.setId(updatedEntity.getId());
 
-        when(transactionMapper.convertToEntity(passedDTO)).thenReturn(toUpdateEntity);
+        when(transactionMapper.convertRequestToEntity(requestDTO)).thenReturn(toUpdateEntity);
         when(transactionService.updateTransactionById(returnedDTO.getId(), toUpdateEntity)).thenReturn(updatedEntity);
         when(transactionMapper.convertToDTO(updatedEntity)).thenReturn(returnedDTO);
 
         mockMvc.perform(put("/api/transactions/{id}", returnedDTO.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(passedDTO)))
+                        .content(objectMapper.writeValueAsString(requestDTO)))
                 .andExpect(status().isOk())
                 .andExpect(result -> {
                     String retString = result.getResponse().getContentAsString();
@@ -221,19 +230,17 @@ class TransactionControllerTest {
 
         Integer notFoundId = 123;
 
-        TransactionDTO passedDTO = createTransactionDTO();
+        RequestTransactionDTO requestDTO = createRequestTransactionDTO();
 
-        Transaction toUpdateEntity = new Transaction(passedDTO.getAmount(), passedDTO.getDate(),
-                passedDTO.getDescription(), passedDTO.getCategory(), passedDTO.getPaymentMethod(),
-                passedDTO.getVendor(), passedDTO.getTags());
+        Transaction toUpdateEntity = convertRequestToEntity(requestDTO);
 
 
-        when(transactionMapper.convertToEntity(passedDTO)).thenReturn(toUpdateEntity);
+        when(transactionMapper.convertRequestToEntity(requestDTO)).thenReturn(toUpdateEntity);
         when(transactionService.updateTransactionById(notFoundId, toUpdateEntity)).thenThrow(ResourceNotFoundException.class);
 
         mockMvc.perform(put("/api/transactions/{id}", notFoundId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(passedDTO)))
+                        .content(objectMapper.writeValueAsString(requestDTO)))
                 .andExpect(status().isNotFound())
                 .andExpect(result -> assertThat(result.getResolvedException(),
                         instanceOf(ResourceNotFoundException.class)));
@@ -288,15 +295,17 @@ class TransactionControllerTest {
     @Test
     void patchTransactionById() throws Exception {
 
-        TransactionDTO passedDTO = createTransactionDTO();
+        RequestTransactionDTO requestDTO = createRequestTransactionDTO();
 
-        Transaction toPatchEntity = new Transaction(passedDTO.getAmount(), passedDTO.getDate(),
-                passedDTO.getDescription(), passedDTO.getCategory(), passedDTO.getPaymentMethod(),
-                passedDTO.getVendor(), passedDTO.getTags());
+        Transaction toPatchEntity = convertRequestToEntity(requestDTO);
+
+        //Implemented code will search repo and get the correct vendor
+        Vendor vendor_os = new OnlineStore("Test Online Store", "www.test.com");
+        vendor_os.setId(toPatchEntity.getVendor().getId());
 
         Transaction patchedEntity = new Transaction(toPatchEntity.getAmount(), toPatchEntity.getDate(),
                 toPatchEntity.getDescription(), toPatchEntity.getCategory(), toPatchEntity.getPaymentMethod(),
-                toPatchEntity.getVendor(), toPatchEntity.getTags());
+                vendor_os, toPatchEntity.getTags());
         patchedEntity.setId(1);
 
         TransactionDTO returnedDTO = new TransactionDTO(patchedEntity.getAmount(), patchedEntity.getDate(),
@@ -304,13 +313,13 @@ class TransactionControllerTest {
                 patchedEntity.getVendor(), patchedEntity.getTags());
         returnedDTO.setId(patchedEntity.getId());
 
-        when(transactionMapper.convertToEntity(passedDTO)).thenReturn(toPatchEntity);
+        when(transactionMapper.convertRequestToEntity(requestDTO)).thenReturn(toPatchEntity);
         when(transactionService.patchTransactionById(returnedDTO.getId(), toPatchEntity)).thenReturn(patchedEntity);
         when(transactionMapper.convertToDTO(patchedEntity)).thenReturn(returnedDTO);
 
         mockMvc.perform(patch("/api/transactions/{id}", returnedDTO.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(passedDTO)))
+                        .content(objectMapper.writeValueAsString(requestDTO)))
                 .andExpect(status().isOk())
                 .andExpect(result -> {
                     String retString = result.getResponse().getContentAsString();
@@ -325,39 +334,22 @@ class TransactionControllerTest {
 
         Integer notFoundId = 123;
 
-        TransactionDTO passedDTO = createTransactionDTO();
+        RequestTransactionDTO requestDTO = createRequestTransactionDTO();
 
-        Transaction toUpdateEntity = new Transaction(passedDTO.getAmount(), passedDTO.getDate(),
-                passedDTO.getDescription(), passedDTO.getCategory(), passedDTO.getPaymentMethod(),
-                passedDTO.getVendor(), passedDTO.getTags());
+        Transaction toUpdateEntity = convertRequestToEntity(requestDTO);
 
 
-        when(transactionMapper.convertToEntity(passedDTO)).thenReturn(toUpdateEntity);
+        when(transactionMapper.convertRequestToEntity(requestDTO)).thenReturn(toUpdateEntity);
         when(transactionService.patchTransactionById(notFoundId, toUpdateEntity)).thenThrow(ResourceNotFoundException.class);
 
         mockMvc.perform(patch("/api/transactions/{id}", notFoundId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(passedDTO)))
+                        .content(objectMapper.writeValueAsString(requestDTO)))
                 .andExpect(status().isNotFound())
                 .andExpect(result -> assertThat(result.getResolvedException(),
                         instanceOf(ResourceNotFoundException.class)));
     }
 
-    @Test
-    void patchTransactionById_BodyIdNotNull() throws Exception {
-
-        Integer notFoundId = 123;
-
-        TransactionDTO passedDTO = createTransactionDTO();
-        passedDTO.setId(1);
-
-        mockMvc.perform(patch("/api/transactions/{id}", notFoundId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(passedDTO)))
-                .andExpect(status().isBadRequest())
-                .andExpect(result -> assertThat(result.getResolvedException(),
-                        instanceOf(ConstraintViolationException.class)));
-    }
 
     @Test
     void deleteTransactionById() throws Exception {
@@ -388,7 +380,7 @@ class TransactionControllerTest {
     }
 
 
-
+    // -------------------- Helpers ---------------------------
     private static Transaction createTransactionEntity() {
 
         Category category = new Category("Test Category", Color.BLUE);
@@ -432,5 +424,25 @@ class TransactionControllerTest {
         return new TransactionDTO(10.0, LocalDateTime.now().withNano(0),
                 "Test Transaction Description", category, payment_method, vendor_os,
                 Stream.of(tag1, tag2).collect(Collectors.toSet()));
+    }
+
+    private RequestTransactionDTO createRequestTransactionDTO() {
+
+        return new RequestTransactionDTO(10.0, LocalDateTime.now().withNano(0),
+                "Test Transaction Description", 1, 1, 1,
+                Stream.of(1, 2).collect(Collectors.toSet()));
+    }
+
+    private static Transaction convertRequestToEntity(RequestTransactionDTO requestDTO) {
+        Set<Tag> tags = new HashSet<>();
+        for (Integer tagId : requestDTO.getTagIds()) {
+            tags.add(new Tag(tagId));
+        }
+
+        Transaction toUpdateEntity = new Transaction(requestDTO.getAmount(), requestDTO.getDate(),
+                requestDTO.getDescription(), new Category(requestDTO.getCategoryId()),
+                new PaymentMethod(requestDTO.getPaymentMethodId()), new DefaultVendor(requestDTO.getVendorId()), tags);
+        toUpdateEntity.setId(1);
+        return toUpdateEntity;
     }
 }
