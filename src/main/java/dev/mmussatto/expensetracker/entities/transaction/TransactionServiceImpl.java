@@ -101,7 +101,7 @@ public class TransactionServiceImpl implements TransactionService {
                 savedEntity.setCategory(category);
             }
 
-            if (!transaction.getTags().isEmpty()) {
+            if (transaction.getTags() != null) {
                 savedEntity.getTags().clear();
 
                 transaction.getTags().forEach(transactionTag -> {
