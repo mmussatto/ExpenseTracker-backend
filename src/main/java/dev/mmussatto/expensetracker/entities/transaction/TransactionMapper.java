@@ -14,6 +14,8 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 
+import java.util.Set;
+
 @Mapper
 public interface TransactionMapper {
 
@@ -41,6 +43,9 @@ public interface TransactionMapper {
 
     @Mapping(target = "id", source = "tagId")
     Tag mapTags (Integer tagId);
+
+    @Mapping(target = "tag.id", source = "tagIds")
+    Set<Tag> mapTagSet (Set<Integer> tagIds);
 
     @Named("mapVendorWithIdAndType")
     default Vendor mapVendor (RequestTransactionDTO source) {
