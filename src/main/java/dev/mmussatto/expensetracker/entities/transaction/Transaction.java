@@ -58,4 +58,8 @@ public class Transaction {
         this.vendor = vendor;
         this.tags = tags;
     }
+
+    public Transaction(Integer id) {
+        this.id = id;
+    }
 }
