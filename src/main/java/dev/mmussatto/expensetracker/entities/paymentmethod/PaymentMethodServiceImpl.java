@@ -73,9 +73,6 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
             if (paymentMethod.getType() != null)
                 savedEntity.setType(paymentMethod.getType());
 
-            if (paymentMethod.getTransactions() != null && paymentMethod.getTransactions().size() != 0)
-                savedEntity.setTransactions(paymentMethod.getTransactions());
-
             return paymentMethodRepository.save(savedEntity);
 
         }).orElseThrow(() -> new ResourceNotFoundException("Payment Method " + id + " not found!"));

@@ -73,9 +73,6 @@ public class CategoryServiceImpl implements CategoryService {
             if (category.getColor() != null)
                 savedCategory.setColor(category.getColor());
 
-            if (category.getTransactions() != null && category.getTransactions().size() != 0)
-                savedCategory.setTransactions(category.getTransactions());
-
             return categoryRepository.save(savedCategory);
 
         }).orElseThrow(() -> new ResourceNotFoundException("Category " + id + " not found!"));

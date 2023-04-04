@@ -71,9 +71,6 @@ public class TagServiceImpl implements TagService {
             if (tag.getColor() != null)
                 savedEntity.setColor(tag.getColor());
 
-            if (tag.getTransactions() != null && tag.getTransactions().size() != 0)
-                savedEntity.setTransactions(tag.getTransactions());
-
             return tagRepository.save(savedEntity);
 
         }).orElseThrow(() -> new ResourceNotFoundException(String.format("Tag %d not found!", id)));
