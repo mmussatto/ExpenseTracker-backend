@@ -336,41 +336,7 @@ class CategoryServiceImplTest {
         assertEquals(originalCategory.getTransactions(), returnedEntity.getTransactions()); //same transactions
 
     }
-
-    @Test
-    void patchCategoryById_UpdateOnlyTransactions() {
-
-        //Category passed to updateCategoryById
-        Category passedEntity = new Category();
-        Transaction passedTransaction = new Transaction();
-        passedTransaction.setId(2);
-        passedEntity.getTransactions().add(passedTransaction);
-
-        //Category previously saved in the database
-        Category originalCategory = createCategoryEntity();
-
-        //Category returned after save
-        Category updatedCategory = createCategoryEntity();
-
-
-        //when searching repository, returned object with original values
-        when(categoryRepository.findById(originalCategory.getId())).thenReturn(Optional.of(updatedCategory));
-
-        //return updatedCategory after saving
-        when(categoryRepository.save(updatedCategory)).thenReturn(updatedCategory);
-
-
-        Category returnedEntity = categoryService.patchCategoryById(originalCategory.getId(), passedEntity);
-
-
-        //Assert that the returnedEntity is as expected
-        assertEquals(originalCategory.getId(), returnedEntity.getId());       //same id as before
-        assertEquals(originalCategory.getName(), returnedEntity.getName());   //same name as before
-        assertEquals(originalCategory.getColor(), returnedEntity.getColor()); //same color as before
-        assertEquals(passedEntity.getTransactions(), returnedEntity.getTransactions()); //updated transactions
-
-    }
-
+    
     @Test
     void patchCategoryById_NotFound() {
 

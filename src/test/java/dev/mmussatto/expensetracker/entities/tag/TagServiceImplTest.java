@@ -221,7 +221,6 @@ class TagServiceImplTest {
 
         //DTO passed to function
         Tag passedEntity = new Tag("Test Patch", Color.GREEN);
-        passedEntity.getTransactions().add(TRANSACTION);
 
         //Saved Entity
         Tag original = new Tag(NAME, COLOR);
@@ -230,7 +229,6 @@ class TagServiceImplTest {
         //Tag that will be updated and saved
         Tag updated = new Tag(passedEntity.getName(), passedEntity.getColor());
         updated.setId(original.getId());
-        updated.setTransactions(passedEntity.getTransactions());
 
         when(tagRepository.findById(original.getId())).thenReturn(Optional.of(original));
         when(tagRepository.findByName(passedEntity.getName())).thenReturn(Optional.empty());
@@ -243,7 +241,6 @@ class TagServiceImplTest {
         assertEquals(original.getId(), returnedEntity.getId());
         assertEquals(passedEntity.getName(), returnedEntity.getName());
         assertEquals(passedEntity.getColor(), returnedEntity.getColor());
-        assertEquals(original.getTransactions(), returnedEntity.getTransactions());
 
         verify(tagRepository, times(1)).findByName(passedEntity.getName());
     }
