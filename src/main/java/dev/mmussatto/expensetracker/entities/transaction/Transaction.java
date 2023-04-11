@@ -29,7 +29,7 @@ public class Transaction {
 
     private LocalDateTime date;
 
-    @Lob
+    @Column(columnDefinition="TEXT")
     private String description;
 
     @ManyToOne
