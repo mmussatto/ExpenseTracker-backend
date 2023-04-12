@@ -4,7 +4,6 @@
 
 package dev.mmussatto.expensetracker.entities.paymentmethod;
 
-import dev.mmussatto.expensetracker.entities.helpers.ListDTO;
 import dev.mmussatto.expensetracker.entities.helpers.PageDTO;
 import dev.mmussatto.expensetracker.entities.transaction.Transaction;
 import dev.mmussatto.expensetracker.entities.transaction.TransactionDTO;
@@ -44,13 +43,12 @@ public class PaymentMethodController {
     })
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public ListDTO<PaymentMethodDTO> getAllPaymentMethods () {
-        List<PaymentMethodDTO> list = paymentMethodService.getAllPaymentMethods()
+    public List<PaymentMethodDTO> getAllPaymentMethods () {
+
+        return paymentMethodService.getAllPaymentMethods()
                 .stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
-
-        return new ListDTO<>(list);
     }
 
 

@@ -4,7 +4,6 @@
 
 package dev.mmussatto.expensetracker.entities.category;
 
-import dev.mmussatto.expensetracker.entities.helpers.ListDTO;
 import dev.mmussatto.expensetracker.entities.helpers.PageDTO;
 import dev.mmussatto.expensetracker.entities.transaction.Transaction;
 import dev.mmussatto.expensetracker.entities.transaction.TransactionDTO;
@@ -45,15 +44,12 @@ public class CategoryController {
     })
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public ListDTO<CategoryDTO> getAllCategories () {
+    public List<CategoryDTO> getAllCategories () {
 
-        //Convert to DTO
-        List<CategoryDTO> list = categoryService.getAllCategories()
+        return categoryService.getAllCategories()
                 .stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
-
-        return new ListDTO<>(list);
     }
 
 

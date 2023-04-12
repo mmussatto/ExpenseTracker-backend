@@ -4,7 +4,6 @@
 
 package dev.mmussatto.expensetracker.entities.tag;
 
-import dev.mmussatto.expensetracker.entities.helpers.ListDTO;
 import dev.mmussatto.expensetracker.entities.helpers.PageDTO;
 import dev.mmussatto.expensetracker.entities.transaction.Transaction;
 import dev.mmussatto.expensetracker.entities.transaction.TransactionDTO;
@@ -19,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 @io.swagger.v3.oas.annotations.tags.Tag(name = "Tags", description = "CRUD API for Tag entity")
@@ -43,11 +43,12 @@ public class TagController {
     })
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public ListDTO<TagDTO> getAllTags () {
-        return new ListDTO<>(tagService.getAllTags()
+    public List<TagDTO> getAllTags () {
+
+        return tagService.getAllTags()
                 .stream()
                 .map(this::convertToDTO)
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList());
     }
 
 

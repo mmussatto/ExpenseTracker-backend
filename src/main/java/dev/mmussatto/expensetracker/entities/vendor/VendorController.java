@@ -4,7 +4,6 @@
 
 package dev.mmussatto.expensetracker.entities.vendor;
 
-import dev.mmussatto.expensetracker.entities.helpers.ListDTO;
 import dev.mmussatto.expensetracker.entities.helpers.PageDTO;
 import dev.mmussatto.expensetracker.entities.transaction.Transaction;
 import dev.mmussatto.expensetracker.entities.transaction.TransactionDTO;
@@ -45,14 +44,12 @@ public class VendorController {
     })
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public ListDTO<VendorDTO> getAllVendors () {
-        //Convert List to DTO
-        List<VendorDTO>  list = vendorService.getAllVendors()
+    public List<VendorDTO> getAllVendors () {
+
+        return vendorService.getAllVendors()
                 .stream()
                 .map(this::getVendorDTO)
                 .collect(Collectors.toList());
-
-        return new ListDTO<>(list);
     }
 
 
