@@ -45,11 +45,15 @@ public class TransactionController {
                                                              @RequestParam(value = "year", required = false)  Integer year) {
 
         Page<Transaction> paginatedTransactions;
+        String pageURI = "/api/transactions?";
+        String previousPageURI;
 
         if(month != null && year != null) {
             paginatedTransactions = transactionService.getTransactionsByMonth(page, size, year, month);
+            pageURI = pageURI.concat("year=" + year + "&month=" + month + "&");
         } else if (year != null) {
             paginatedTransactions = transactionService.getTransactionsByYear(page, size, year);
+            pageURI = pageURI.concat("year=" + year + "&");
         } else {
             paginatedTransactions = transactionService.getPaginated(page, size);
         }
@@ -68,12 +72,12 @@ public class TransactionController {
         returnPage.setTotalPages(paginatedTransactions.getTotalPages());
 
         if (paginatedTransactions.hasNext())
-            returnPage.setNextPage(String.format("/api/transactions?page=%d&size=%d",
-                    paginatedTransactions.getNumber()+1, paginatedTransactions.getSize()));
+            returnPage.setNextPage(pageURI.concat(String.format("page=%d&size=%d",
+                    paginatedTransactions.getNumber()+1, paginatedTransactions.getSize())));
 
         if (paginatedTransactions.hasPrevious())
-            returnPage.setPreviousPage(String.format("/api/transactions?page=%d&size=%d",
-                    paginatedTransactions.getNumber()-1, paginatedTransactions.getSize()));
+            returnPage.setPreviousPage(pageURI.concat(String.format("page=%d&size=%d",
+                    paginatedTransactions.getNumber()-1, paginatedTransactions.getSize())));
 
         return returnPage;
     }
