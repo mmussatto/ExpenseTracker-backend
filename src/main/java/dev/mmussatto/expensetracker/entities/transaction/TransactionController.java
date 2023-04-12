@@ -40,9 +40,20 @@ public class TransactionController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public PageDTO<TransactionDTO> getPaginatedTransactions (@RequestParam(value = "page", defaultValue = "0", required = false) int page,
-                                                             @RequestParam(value = "size", defaultValue = "1", required = false) int size) {
+                                                             @RequestParam(value = "size", defaultValue = "1", required = false) int size,
+                                                             @RequestParam(value = "month", required = false)  Integer month,
+                                                             @RequestParam(value = "year", required = false)  Integer year) {
 
-        Page<Transaction> paginatedTransactions = transactionService.getPaginated(page, size);
+        Page<Transaction> paginatedTransactions;
+
+        if(month != null && year != null) {
+            paginatedTransactions = transactionService.getTransactionsByMonth(page, size, year, month);
+        } else if (year != null) {
+            paginatedTransactions = transactionService.getTransactionsByYear(page, size, year);
+        } else {
+            paginatedTransactions = transactionService.getPaginated(page, size);
+        }
+
 
         PageDTO<TransactionDTO> returnPage = new PageDTO<>();
 
@@ -136,40 +147,6 @@ public class TransactionController {
         transactionService.deleteTransactionById(id);
     }
 
-
-
-
-    @GetMapping("/month/{month}")
-    @ResponseStatus(HttpStatus.OK)
-    public PageDTO<TransactionDTO> getTransactionsByMonth (@PathVariable final String month,
-                                                           @RequestParam(value = "page", defaultValue = "0", required = false) int page,
-                                                           @RequestParam(value = "size", defaultValue = "10", required = false) int size) {
-
-
-        Page<Transaction> paginatedTransactions = transactionService.getTransactionsByMonth(page, size, month);
-
-        PageDTO<TransactionDTO> returnPage = new PageDTO<>();
-
-        returnPage.setContent(paginatedTransactions.getContent()
-                .stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList()));
-
-        returnPage.setPageNo(paginatedTransactions.getNumber());
-        returnPage.setPageSize(paginatedTransactions.getSize());
-        returnPage.setTotalElements(paginatedTransactions.getTotalElements());
-        returnPage.setTotalPages(paginatedTransactions.getTotalPages());
-
-        if (paginatedTransactions.hasNext())
-            returnPage.setNextPage(String.format("/api/transactions/month/%s?page=%d&size=%d",
-                    month, paginatedTransactions.getNumber()+1, paginatedTransactions.getSize()));
-
-        if (paginatedTransactions.hasPrevious())
-            returnPage.setPreviousPage(String.format("/api/transactions/month/%s?page=%d&size=%d",
-                    month, paginatedTransactions.getNumber()-1, paginatedTransactions.getSize()));
-
-        return returnPage;
-    }
 
 
     //Mappers
