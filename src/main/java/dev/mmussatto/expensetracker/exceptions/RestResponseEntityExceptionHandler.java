@@ -97,7 +97,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     }
 
     @ExceptionHandler(InvalidMonthException.class)
-    public ResponseEntity<Object> handleIllegalArgumentException(InvalidMonthException exception, WebRequest request) {
+    public ResponseEntity<Object> handleInvalidMonthException(InvalidMonthException exception, WebRequest request) {
 
         Map<String, Object> responseBody = new LinkedHashMap<>();
         responseBody.put("timestamp", LocalDateTime.now()
