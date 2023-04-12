@@ -96,6 +96,22 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         return new ResponseEntity<>(responseBody, new HttpHeaders(), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(InvalidMonthException.class)
+    public ResponseEntity<Object> handleIllegalArgumentException(InvalidMonthException exception, WebRequest request) {
+
+        Map<String, Object> responseBody = new LinkedHashMap<>();
+        responseBody.put("timestamp", LocalDateTime.now()
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss")));
+        responseBody.put("status", HttpStatus.BAD_REQUEST.value());
+        responseBody.put("error", HttpStatus.BAD_REQUEST.getReasonPhrase());
+        responseBody.put("path", ((ServletWebRequest) request).getRequest().getRequestURI());
+
+        responseBody.put("message", "Invalid Month. The value must be one of: [January, February, March, April, May, June, July, August, September, October, November, December].");
+
+
+        return new ResponseEntity<>(responseBody, new HttpHeaders(), HttpStatus.BAD_REQUEST);
+    }
+
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
