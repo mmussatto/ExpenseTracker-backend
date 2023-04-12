@@ -106,7 +106,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         responseBody.put("error", HttpStatus.BAD_REQUEST.getReasonPhrase());
         responseBody.put("path", ((ServletWebRequest) request).getRequest().getRequestURI());
 
-        responseBody.put("message", "Invalid Month. The value must be one of: [January, February, March, April, May, June, July, August, September, October, November, December].");
+        responseBody.put("message", exception.getMessage());
 
 
         return new ResponseEntity<>(responseBody, new HttpHeaders(), HttpStatus.BAD_REQUEST);
