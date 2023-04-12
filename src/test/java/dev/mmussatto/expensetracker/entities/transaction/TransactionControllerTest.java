@@ -45,8 +45,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(TransactionController.class)
 class TransactionControllerTest {
 
-    public static final int DEFAULT_PAGE = 0;
-    public static final int DEFAULT_SIZE = 1;
+    private static final int DEFAULT_PAGE = 0;
+    private static final int DEFAULT_SIZE = 1;
 
     @Autowired
     private MockMvc mockMvc;
@@ -99,9 +99,88 @@ class TransactionControllerTest {
                 .andExpect(jsonPath("$.nextPage", equalTo("/api/transactions?page=1&size=1")))
                 .andExpect(jsonPath("$.previousPage", equalTo(null)))
                 .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.content[0].path", equalTo("/api/transactions/1")))
+                .andExpect(jsonPath("$.content[0].path", equalTo("/api/transactions/1")));
+    }
 
-                .andDo(print());
+    @Test
+    void getTransactionsByYear() throws Exception {
+        Transaction t1 = new Transaction();
+        t1.setId(1);
+        Transaction t2 = new Transaction();
+        t2.setId(2);
+        List<Transaction> transactions = Arrays.asList(t1, t2);
+
+        TransactionDTO dto1 = new TransactionDTO();
+        dto1.setId(t1.getId());
+        TransactionDTO dto2 = new TransactionDTO();
+        dto2.setId(t2.getId());
+        List<TransactionDTO>  transactionDTOs = Arrays.asList(dto1, dto2);
+
+        Pageable pageable = PageRequest.of(DEFAULT_PAGE, DEFAULT_SIZE, Sort.by("date"));
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), transactions.size());
+
+        Page<Transaction> pagedTransactions = new PageImpl<Transaction>(
+                transactions.subList(start, end), pageable, transactions.size());
+
+        when(transactionService.getTransactionsByYear(DEFAULT_PAGE, DEFAULT_SIZE, 2023)).thenReturn(pagedTransactions);
+        when(transactionMapper.convertToDTO(t1)).thenReturn(dto1);
+        when(transactionMapper.convertToDTO(t2)).thenReturn(dto2);
+
+        mockMvc.perform(get("/api/transactions")
+                        .param("year", "2023")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.pageNo", equalTo(DEFAULT_PAGE)))
+                .andExpect(jsonPath("$.pageSize", equalTo(DEFAULT_SIZE)))
+                .andExpect(jsonPath("$.totalElements", equalTo(transactions.size())))
+                .andExpect(jsonPath("$.nextPage", equalTo("/api/transactions?year=2023&page=1&size=1")))
+                .andExpect(jsonPath("$.previousPage", equalTo(null)))
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].path", equalTo("/api/transactions/1")));
+
+        verify(transactionService).getTransactionsByYear(DEFAULT_PAGE, DEFAULT_SIZE, 2023);
+    }
+
+    @Test
+    void getTransactionsByMonth() throws Exception {
+        Transaction t1 = new Transaction();
+        t1.setId(1);
+        Transaction t2 = new Transaction();
+        t2.setId(2);
+        List<Transaction> transactions = Arrays.asList(t1, t2);
+
+        TransactionDTO dto1 = new TransactionDTO();
+        dto1.setId(t1.getId());
+        TransactionDTO dto2 = new TransactionDTO();
+        dto2.setId(t2.getId());
+        List<TransactionDTO>  transactionDTOs = Arrays.asList(dto1, dto2);
+
+        Pageable pageable = PageRequest.of(DEFAULT_PAGE, DEFAULT_SIZE, Sort.by("date"));
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), transactions.size());
+
+        Page<Transaction> pagedTransactions = new PageImpl<Transaction>(
+                transactions.subList(start, end), pageable, transactions.size());
+
+        when(transactionService.getTransactionsByMonth(DEFAULT_PAGE, DEFAULT_SIZE, 2023, 4)).thenReturn(pagedTransactions);
+        when(transactionMapper.convertToDTO(t1)).thenReturn(dto1);
+        when(transactionMapper.convertToDTO(t2)).thenReturn(dto2);
+
+        mockMvc.perform(get("/api/transactions")
+                        .param("year", "2023")
+                        .param("month", "4")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.pageNo", equalTo(DEFAULT_PAGE)))
+                .andExpect(jsonPath("$.pageSize", equalTo(DEFAULT_SIZE)))
+                .andExpect(jsonPath("$.totalElements", equalTo(transactions.size())))
+                .andExpect(jsonPath("$.nextPage", equalTo("/api/transactions?year=2023&month=4&page=1&size=1")))
+                .andExpect(jsonPath("$.previousPage", equalTo(null)))
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].path", equalTo("/api/transactions/1")));
+
+        verify(transactionService).getTransactionsByMonth(DEFAULT_PAGE, DEFAULT_SIZE, 2023, 4);
     }
 
     @Test
