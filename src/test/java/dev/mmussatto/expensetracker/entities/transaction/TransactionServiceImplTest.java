@@ -24,6 +24,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -66,6 +67,8 @@ class TransactionServiceImplTest {
     private static final Vendor VENDOR_PS = new PhysicalStore("Test Physical Store", "Test St.");
     private static final Tag TAG1 = new Tag("Test Tag 1", Color.BLUE);
     private static final Tag TAG2 = new Tag("Test Tag 2", Color.RED);
+    private static final int DEFAULT_PAGE = 0;
+    private static final int DEFAULT_SIZE = 1;
 
 
     @BeforeAll
@@ -367,7 +370,98 @@ class TransactionServiceImplTest {
                 () -> transactionService.deleteTransactionById(ID));
     }
 
+    @Test
+    void getPaginated() {
+        Transaction t1 = new Transaction(AMOUNT, DATE, DESCRIPTION, CATEGORY,
+                PAYMENT_METHOD, VENDOR_OS, Stream.of(TAG1, TAG2).collect(Collectors.toSet()));
+        t1.setId(1);
 
+        Transaction t2 = new Transaction(AMOUNT, DATE, DESCRIPTION, CATEGORY,
+                PAYMENT_METHOD, VENDOR_PS, Stream.of(TAG1).collect(Collectors.toSet()));
+        t2.setId(2);
+
+        List<Transaction> transactions = Arrays.asList(t1, t2);
+
+        Pageable pageable = PageRequest.of(DEFAULT_PAGE, DEFAULT_SIZE, Sort.by("date"));
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), transactions.size());
+
+        Page<Transaction> pagedTransactions = new PageImpl<Transaction>(
+                transactions.subList(start, end), pageable, transactions.size());
+
+        when(transactionRepository.findAll(pageable)).thenReturn(pagedTransactions);
+
+        Page<Transaction> returnedList = transactionService.getPaginated(DEFAULT_PAGE, DEFAULT_SIZE);
+
+        assertEquals(pagedTransactions, returnedList);
+    }
+
+    @Test
+    void getTransactionsByMonth() {
+        int year = 2023;
+        int month = 4;
+
+        Transaction t1 = new Transaction(AMOUNT, DATE, DESCRIPTION, CATEGORY,
+                PAYMENT_METHOD, VENDOR_OS, Stream.of(TAG1, TAG2).collect(Collectors.toSet()));
+        t1.setId(1);
+
+        Transaction t2 = new Transaction(AMOUNT, DATE, DESCRIPTION, CATEGORY,
+                PAYMENT_METHOD, VENDOR_PS, Stream.of(TAG1).collect(Collectors.toSet()));
+        t2.setId(2);
+
+        List<Transaction> transactions = Arrays.asList(t1, t2);
+
+        Pageable pageable = PageRequest.of(DEFAULT_PAGE, DEFAULT_SIZE, Sort.by("date"));
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), transactions.size());
+
+        Page<Transaction> pagedTransactions = new PageImpl<Transaction>(
+                transactions.subList(start, end), pageable, transactions.size());
+
+        LocalDateTime from = LocalDateTime.of(year, month, 1, 0, 0, 0).withNano(0);
+        LocalDateTime to = LocalDateTime.of(year, month, 30, 23, 59, 59).withNano(0);
+
+        when(transactionRepository.findByDateBetween(pageable, from, to)).thenReturn(pagedTransactions);
+
+        Page<Transaction> returnedList = transactionService.getTransactionsByMonth(DEFAULT_PAGE, DEFAULT_SIZE, year, month);
+
+        assertEquals(pagedTransactions, returnedList);
+    }
+
+    @Test
+    void getTransactionsByYear() {
+        int year = 2023;
+
+        Transaction t1 = new Transaction(AMOUNT, DATE, DESCRIPTION, CATEGORY,
+                PAYMENT_METHOD, VENDOR_OS, Stream.of(TAG1, TAG2).collect(Collectors.toSet()));
+        t1.setId(1);
+
+        Transaction t2 = new Transaction(AMOUNT, DATE, DESCRIPTION, CATEGORY,
+                PAYMENT_METHOD, VENDOR_PS, Stream.of(TAG1).collect(Collectors.toSet()));
+        t2.setId(2);
+
+        List<Transaction> transactions = Arrays.asList(t1, t2);
+
+        Pageable pageable = PageRequest.of(DEFAULT_PAGE, DEFAULT_SIZE, Sort.by("date"));
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), transactions.size());
+
+        Page<Transaction> pagedTransactions = new PageImpl<Transaction>(
+                transactions.subList(start, end), pageable, transactions.size());
+
+        LocalDateTime from = LocalDateTime.of(year, 1, 1, 0, 0, 0).withNano(0);
+        LocalDateTime to = LocalDateTime.of(year, 12, 31, 23, 59, 59).withNano(0);
+
+        when(transactionRepository.findByDateBetween(pageable, from, to)).thenReturn(pagedTransactions);
+
+        Page<Transaction> returnedList = transactionService.getTransactionsByYear(DEFAULT_PAGE, DEFAULT_SIZE, year);
+
+        assertEquals(pagedTransactions, returnedList);
+    }
+
+
+
+    // Helpers
     private static Transaction createTransactionEntity() {
         Transaction entity = new Transaction(AMOUNT, DATE, DESCRIPTION, CATEGORY,
                 PAYMENT_METHOD, VENDOR_OS, Stream.of(TAG1, TAG2).collect(Collectors.toSet()));

@@ -35,14 +35,30 @@ public class TransactionController {
 
     @Operation(summary = "Get all transactions with paging")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Found the transactions page", useReturnTypeSchema = true)
+            @ApiResponse(responseCode = "200", description = "Found the transactions page", useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "404", description = "Bad Request", content = @Content)
     })
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public PageDTO<TransactionDTO> getPaginatedTransactions (@RequestParam(value = "page", defaultValue = "0", required = false) int page,
-                                                             @RequestParam(value = "size", defaultValue = "1", required = false) int size) {
+                                                             @RequestParam(value = "size", defaultValue = "1", required = false) int size,
+                                                             @RequestParam(value = "month", required = false)  Integer month,
+                                                             @RequestParam(value = "year", required = false)  Integer year) {
 
-        Page<Transaction> paginatedTransactions = transactionService.getPaginated(page, size);
+        Page<Transaction> paginatedTransactions;
+        String pageURI = "/api/transactions?";
+        String previousPageURI;
+
+        if(month != null && year != null) {
+            paginatedTransactions = transactionService.getTransactionsByMonth(page, size, year, month);
+            pageURI = pageURI.concat("year=" + year + "&month=" + month + "&");
+        } else if (year != null) {
+            paginatedTransactions = transactionService.getTransactionsByYear(page, size, year);
+            pageURI = pageURI.concat("year=" + year + "&");
+        } else {
+            paginatedTransactions = transactionService.getPaginated(page, size);
+        }
+
 
         PageDTO<TransactionDTO> returnPage = new PageDTO<>();
 
@@ -57,12 +73,12 @@ public class TransactionController {
         returnPage.setTotalPages(paginatedTransactions.getTotalPages());
 
         if (paginatedTransactions.hasNext())
-            returnPage.setNextPage(String.format("/api/transactions?page=%d&size=%d",
-                    paginatedTransactions.getNumber()+1, paginatedTransactions.getSize()));
+            returnPage.setNextPage(pageURI.concat(String.format("page=%d&size=%d",
+                    paginatedTransactions.getNumber()+1, paginatedTransactions.getSize())));
 
         if (paginatedTransactions.hasPrevious())
-            returnPage.setPreviousPage(String.format("/api/transactions?page=%d&size=%d",
-                    paginatedTransactions.getNumber()-1, paginatedTransactions.getSize()));
+            returnPage.setPreviousPage(pageURI.concat(String.format("page=%d&size=%d",
+                    paginatedTransactions.getNumber()-1, paginatedTransactions.getSize())));
 
         return returnPage;
     }

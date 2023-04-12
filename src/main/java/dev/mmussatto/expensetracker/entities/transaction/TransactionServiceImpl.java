@@ -12,6 +12,7 @@ import dev.mmussatto.expensetracker.entities.tag.Tag;
 import dev.mmussatto.expensetracker.entities.tag.TagService;
 import dev.mmussatto.expensetracker.entities.vendor.Vendor;
 import dev.mmussatto.expensetracker.entities.vendor.VendorService;
+import dev.mmussatto.expensetracker.exceptions.InvalidMonthException;
 import dev.mmussatto.expensetracker.exceptions.ResourceNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +20,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.Year;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -136,6 +140,33 @@ public class TransactionServiceImpl implements TransactionService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("date"));
 
         return transactionRepository.findAll(pageable);
+    }
+
+    @Override
+    public Page<Transaction> getTransactionsByMonth(int page, int size, int year, int monthNumber) {
+
+        Month month;
+        try {
+            month = Month.of(monthNumber);
+        } catch (Exception exception) {
+            throw new InvalidMonthException("Invalid value for MonthOfYear: " + monthNumber);
+        }
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("date"));
+        LocalDateTime from = LocalDateTime.of(year, month, 1, 0, 0, 0).withNano(0);
+        LocalDateTime to = LocalDateTime.of(year, month, month.length(Year.isLeap(year)), 23, 59, 59).withNano(0);
+
+        return transactionRepository.findByDateBetween(pageable, from, to);
+    }
+
+    @Override
+    public Page<Transaction> getTransactionsByYear(int page, int size, int year) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("date"));
+        LocalDateTime from = LocalDateTime.of(year, Month.JANUARY, 1, 0, 0, 0).withNano(0);
+        LocalDateTime to = LocalDateTime.of(year, Month.DECEMBER, 31, 23, 59, 59).withNano(0);
+
+        return transactionRepository.findByDateBetween(pageable, from, to);
     }
 
 
