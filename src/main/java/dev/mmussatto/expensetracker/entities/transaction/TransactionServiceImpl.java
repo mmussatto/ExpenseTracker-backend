@@ -12,6 +12,7 @@ import dev.mmussatto.expensetracker.entities.tag.Tag;
 import dev.mmussatto.expensetracker.entities.tag.TagService;
 import dev.mmussatto.expensetracker.entities.vendor.Vendor;
 import dev.mmussatto.expensetracker.entities.vendor.VendorService;
+import dev.mmussatto.expensetracker.exceptions.InvalidMonthException;
 import dev.mmussatto.expensetracker.exceptions.ResourceNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -141,11 +142,18 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public Page<Transaction> getTransactionsByMonth(int page, int size, String month) {
+    public Page<Transaction> getTransactionsByMonth(int page, int size, String monthName) {
+
+        Month month;
+        try {
+            month = Month.valueOf(monthName.toUpperCase());
+        } catch (Exception exception) {
+            throw new InvalidMonthException();
+        }
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("date"));
-        LocalDateTime from = LocalDateTime.of(2023, Month.valueOf(month.toUpperCase()), 1, 0, 0, 0).withNano(0);
-        LocalDateTime to = LocalDateTime.of(2023, Month.valueOf(month.toUpperCase()), 30, 0, 0, 0).withNano(0);
+        LocalDateTime from = LocalDateTime.of(2023, month, 1, 0, 0, 0).withNano(0);
+        LocalDateTime to = LocalDateTime.of(2023, month, 30, 0, 0, 0).withNano(0);
 
         return transactionRepository.findByDateBetween(pageable, from, to);
     }
