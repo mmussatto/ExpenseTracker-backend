@@ -35,7 +35,8 @@ public class TransactionController {
 
     @Operation(summary = "Get all transactions with paging")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Found the transactions page", useReturnTypeSchema = true)
+            @ApiResponse(responseCode = "200", description = "Found the transactions page", useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "404", description = "Bad Request", content = @Content)
     })
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
