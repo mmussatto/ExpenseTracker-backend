@@ -25,5 +25,7 @@ public interface TransactionService {
 
     Page<Transaction> getPaginated(int page, int size);
 
-    Page<Transaction> getTransactionsByMonth(int page, int size, String month);
+    Page<Transaction> getTransactionsByMonth(int page, int size, int year, int month);
+
+    Page<Transaction> getTransactionsByYear(int page, int size, int year);
 }

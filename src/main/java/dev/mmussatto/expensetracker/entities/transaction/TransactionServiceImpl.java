@@ -158,6 +158,18 @@ public class TransactionServiceImpl implements TransactionService {
         return transactionRepository.findByDateBetween(pageable, from, to);
     }
 
+    @Override
+    public Page<Transaction> getTransactionsByYear(int page, int size, int year) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("date"));
+        LocalDateTime from = LocalDateTime.of(year, Month.JANUARY, 1, 0, 0, 0).withNano(0);
+        LocalDateTime to = LocalDateTime.of(year, Month.DECEMBER, 31, 23, 59, 59).withNano(0);
+
+        System.out.println("From:" + from + "   To:" + to);
+
+        return transactionRepository.findByDateBetween(pageable, from, to);
+    }
+
 
     private void checkIfEntitiesExist(Transaction transaction) {
         Category category = categoryService.getCategoryById(transaction.getCategory().getId());
