@@ -138,6 +138,40 @@ public class TransactionController {
 
 
 
+
+    @GetMapping("/month/{month}")
+    @ResponseStatus(HttpStatus.OK)
+    public PageDTO<TransactionDTO> getTransactionsByMonth (@PathVariable final String month,
+                                                           @RequestParam(value = "page", defaultValue = "0", required = false) int page,
+                                                           @RequestParam(value = "size", defaultValue = "1", required = false) int size) {
+
+
+        Page<Transaction> paginatedTransactions = transactionService.getTransactionsByMonth(page, size, month);
+
+        PageDTO<TransactionDTO> returnPage = new PageDTO<>();
+
+        returnPage.setContent(paginatedTransactions.getContent()
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList()));
+
+        returnPage.setPageNo(paginatedTransactions.getNumber());
+        returnPage.setPageSize(paginatedTransactions.getSize());
+        returnPage.setTotalElements(paginatedTransactions.getTotalElements());
+        returnPage.setTotalPages(paginatedTransactions.getTotalPages());
+
+        if (paginatedTransactions.hasNext())
+            returnPage.setNextPage(String.format("/api/transactions/month/%s?page=%d&size=%d",
+                    month, paginatedTransactions.getNumber()+1, paginatedTransactions.getSize()));
+
+        if (paginatedTransactions.hasPrevious())
+            returnPage.setPreviousPage(String.format("/api/transactions/month/%s?page=%d&size=%d",
+                    month, paginatedTransactions.getNumber()-1, paginatedTransactions.getSize()));
+
+        return returnPage;
+    }
+
+
     //Mappers
     private TransactionDTO convertToDTO (Transaction entity) {
         TransactionDTO dto = transactionMapper.convertToDTO(entity);
