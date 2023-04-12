@@ -143,7 +143,7 @@ public class TransactionController {
     @ResponseStatus(HttpStatus.OK)
     public PageDTO<TransactionDTO> getTransactionsByMonth (@PathVariable final String month,
                                                            @RequestParam(value = "page", defaultValue = "0", required = false) int page,
-                                                           @RequestParam(value = "size", defaultValue = "1", required = false) int size) {
+                                                           @RequestParam(value = "size", defaultValue = "10", required = false) int size) {
 
 
         Page<Transaction> paginatedTransactions = transactionService.getTransactionsByMonth(page, size, month);
