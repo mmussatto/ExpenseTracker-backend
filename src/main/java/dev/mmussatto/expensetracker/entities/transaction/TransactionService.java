@@ -11,7 +11,7 @@ import java.util.List;
 public interface TransactionService {
 
 
-    List<Transaction> getAllTransactions ();
+    List<Transaction> getAllTransactions (); //remove
 
     Transaction getTransactionById (Integer id);
 
@@ -24,4 +24,6 @@ public interface TransactionService {
     void deleteTransactionById (Integer id);
 
     Page<Transaction> getPaginated(int page, int size);
+
+    Page<Transaction> getTransactionsByMonth(int page, int size, String month);
 }

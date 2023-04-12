@@ -19,6 +19,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -136,6 +138,16 @@ public class TransactionServiceImpl implements TransactionService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("date"));
 
         return transactionRepository.findAll(pageable);
+    }
+
+    @Override
+    public Page<Transaction> getTransactionsByMonth(int page, int size, String month) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("date"));
+        LocalDateTime from = LocalDateTime.of(2023, Month.valueOf(month.toUpperCase()), 1, 0, 0, 0).withNano(0);
+        LocalDateTime to = LocalDateTime.of(2023, Month.valueOf(month.toUpperCase()), 30, 0, 0, 0).withNano(0);
+
+        return transactionRepository.findByDateBetween(pageable, from, to);
     }
 
 
