@@ -150,10 +150,13 @@ public class CategoryController {
                                                                @RequestParam(value = "page", defaultValue = "0", required = false) int page,
                                                                @RequestParam(value = "size", defaultValue = "1", required = false) int size) {
 
+        //Get page of transactions
         Page<Transaction> paginatedTransactions = categoryService.getTransactionsByCategoryId(id, page, size);
 
+        //Create PageDTO object
         PageDTO<TransactionDTO> returnPage = new PageDTO<>();
 
+        //Convert Transactions to TransactionDTOs
         returnPage.setContent(paginatedTransactions.getContent()
                 .stream()
                 .map(transaction -> {
@@ -163,11 +166,13 @@ public class CategoryController {
                 })
                 .collect(Collectors.toList()));
 
+        //Add page information
         returnPage.setPageNo(paginatedTransactions.getNumber());
         returnPage.setPageSize(paginatedTransactions.getSize());
         returnPage.setTotalElements(paginatedTransactions.getTotalElements());
         returnPage.setTotalPages(paginatedTransactions.getTotalPages());
 
+        //Add links to previous and next pages
         if (paginatedTransactions.hasNext())
             returnPage.setNextPage(String.format("/api/categories/%d/transactions?page=%d&size=%d",
                     id, paginatedTransactions.getNumber()+1, paginatedTransactions.getSize()));
