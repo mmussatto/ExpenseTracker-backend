@@ -22,7 +22,10 @@ import java.util.List;
 
 @Data
 @NoArgsConstructor
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", include = JsonTypeInfo.As.EXISTING_PROPERTY, visible = true)
+@JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION,
+        property = "type",
+        include = JsonTypeInfo.As.EXISTING_PROPERTY,
+        visible = true)
 @JsonSubTypes({
         @JsonSubTypes.Type(value = OnlineStoreDTO.class, name = "Online Store"),
         @JsonSubTypes.Type(value = PhysicalStoreDTO.class, name = "Physical Store")
