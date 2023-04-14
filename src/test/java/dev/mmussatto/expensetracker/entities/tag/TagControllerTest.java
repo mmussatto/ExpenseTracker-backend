@@ -188,7 +188,7 @@ class TagControllerTest {
     }
 
     @Test
-    void createNewTag_IdNotNull() throws Exception {
+    void createNewTag_BodyIdNotNull() throws Exception {
 
         TagDTO passedDTO = new TagDTO(NAME, COLOR);
         passedDTO.setId(ID);
@@ -230,7 +230,7 @@ class TagControllerTest {
     }
 
     @Test
-    void createNewTag_NameAlreadyExists() throws Exception {
+    void createNewTag_ResourceAlreadyExists() throws Exception {
 
         TagDTO passedDTO = new TagDTO(NAME, COLOR);
 
@@ -346,7 +346,7 @@ class TagControllerTest {
     }
 
     @Test
-    void updateTagById_NameAlreadyExists() throws Exception {
+    void updateTagById_ResourceAlreadyExists() throws Exception {
 
         Integer savedId = ID;
 
@@ -436,7 +436,7 @@ class TagControllerTest {
     }
 
     @Test
-    void patchTagById_NameAlreadyExists() throws Exception {
+    void patchTagById_ResourceAlreadyExists() throws Exception {
 
         Integer savedId = ID;
 

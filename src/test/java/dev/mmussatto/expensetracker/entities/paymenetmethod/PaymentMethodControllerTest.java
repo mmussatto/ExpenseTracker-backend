@@ -191,7 +191,7 @@ class PaymentMethodControllerTest {
     }
 
     @Test
-    void createNewPaymentMethod_IdNotNull() throws Exception {
+    void createNewPaymentMethod_BodyIdNotNull() throws Exception {
 
         PaymentMethodDTO passedDTO = new PaymentMethodDTO(NAME, PAYMENT_TYPE);
         passedDTO.setId(ID);
@@ -232,7 +232,7 @@ class PaymentMethodControllerTest {
     }
 
     @Test
-    void createNewPaymentMethod_NameAlreadyExists() throws Exception {
+    void createNewPaymentMethod_ResourceAlreadyExists() throws Exception {
 
         PaymentMethodDTO passedDTO = new PaymentMethodDTO(NAME, PAYMENT_TYPE);
 
@@ -343,7 +343,7 @@ class PaymentMethodControllerTest {
     }
 
     @Test
-    void updatePaymentMethodById_NameAlreadyExists() throws Exception {
+    void updatePaymentMethodById_ResourceAlreadyExists() throws Exception {
 
         Integer savedId = ID;
 
@@ -415,7 +415,7 @@ class PaymentMethodControllerTest {
     }
 
     @Test
-    void patchPaymentMethodById_IdNotNull() throws Exception {
+    void patchPaymentMethodById_BodyIdNotNull() throws Exception {
 
         PaymentMethodDTO passedDTO = new PaymentMethodDTO("Test Update", PAYMENT_TYPE);
         passedDTO.setId(ID);
@@ -429,7 +429,7 @@ class PaymentMethodControllerTest {
     }
 
     @Test
-    void patchPaymentMethodById_NameAlreadyExists() throws Exception {
+    void patchPaymentMethodById_ResourceAlreadyExists() throws Exception {
 
         Integer savedId = ID;
 

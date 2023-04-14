@@ -238,7 +238,7 @@ class CategoryControllerTest {
     }
 
     @Test
-    void createNewCategory_NameAlreadyExists() throws Exception {
+    void createNewCategory_ResourceAlreadyExists() throws Exception {
 
         CategoryDTO passedDTO = new CategoryDTO(NAME, COLOR);
 
@@ -351,7 +351,7 @@ class CategoryControllerTest {
     }
 
     @Test
-    void updateCategoryById_NameAlreadyExists() throws Exception {
+    void updateCategoryById_ResourceAlreadyExists() throws Exception {
 
         CategoryDTO passedDTO = new CategoryDTO(NAME, COLOR);
 
@@ -437,7 +437,7 @@ class CategoryControllerTest {
     }
 
     @Test
-    void patchCategoryById_NameAlreadyExists() throws Exception {
+    void patchCategoryById_ResourceAlreadyExists() throws Exception {
 
         CategoryDTO passedDTO = new CategoryDTO(NAME, COLOR);
 
