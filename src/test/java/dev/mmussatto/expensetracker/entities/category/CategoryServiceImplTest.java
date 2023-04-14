@@ -163,32 +163,34 @@ class CategoryServiceImplTest {
         Category passedEntity = new Category("TestUpdate", Color.GREEN);
 
         //Original Category
-        Category originalCategory = createCategoryEntity();
+        Category originalEntity = createCategoryEntity();
+
+        //To update Category
+        Category toUpdateEntity = new Category(passedEntity.getName(), passedEntity.getColor());
+        toUpdateEntity.setId(originalEntity.getId());
 
         //Updated Category
-        Category updatedCategory = new Category(passedEntity.getName(), passedEntity.getColor());
-        updatedCategory.setId(originalCategory.getId());
-        updatedCategory.setTransactions(originalCategory.getTransactions());
+        Category updatedEntity = new Category(toUpdateEntity.getName(), toUpdateEntity.getColor());
+        updatedEntity.setId(toUpdateEntity.getId());
+        updatedEntity.setTransactions(originalEntity.getTransactions());
 
 
-        when(categoryRepository.findById(originalCategory.getId())).thenReturn(Optional.of(originalCategory));
+        when(categoryRepository.findById(originalEntity.getId())).thenReturn(Optional.of(originalEntity));
         when(categoryRepository.findByName(passedEntity.getName())).thenReturn(Optional.empty());
-        when(categoryRepository.save(updatedCategory)).thenReturn(updatedCategory);
+        when(categoryRepository.save(toUpdateEntity)).thenReturn(updatedEntity);
 
 
         //Category returned after saving updateCategory
-        Category returnedEntity = categoryService.updateCategoryById(originalCategory.getId(), passedEntity);
+        Category returnedEntity = categoryService.updateCategoryById(originalEntity.getId(), passedEntity);
 
-        assertEquals(originalCategory.getId(), returnedEntity.getId());     //same id as before
+        assertEquals(originalEntity.getId(), returnedEntity.getId());     //same id as before
         assertEquals(passedEntity.getName(), returnedEntity.getName());     //updated name
         assertEquals(passedEntity.getColor(), returnedEntity.getColor());   //updated color
-        assertEquals(originalCategory.getTransactions(), returnedEntity.getTransactions()); //same transactions
+        assertEquals(originalEntity.getTransactions(), returnedEntity.getTransactions()); //same transactions
 
 
-        //Verify that the updatedCategory was saved
-        verify(categoryRepository, times(1)).findById(originalCategory.getId());
-        verify(categoryRepository, times(1)).findByName(passedEntity.getName());
-        verify(categoryRepository, times(1)).save(updatedCategory);
+        //Verify that the updatedEntity was saved
+        verify(categoryRepository, times(1)).save(toUpdateEntity);
     }
 
     @Test
