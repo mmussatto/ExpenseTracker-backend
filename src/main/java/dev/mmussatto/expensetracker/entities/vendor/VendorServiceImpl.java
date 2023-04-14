@@ -84,7 +84,7 @@ public class VendorServiceImpl implements VendorService {
 
             if(vendor.getClass() != savedVendor.getClass())
                 throw new IncorrectVendorTypeException(
-                        String.format("Incorrect type for vendor '%d'. Change type in request body or create new vendor", id));
+                        String.format("Incorrect type for vendor '%d'. Change properties in request body or create new vendor", id));
 
             if (vendor.getName() != null) {
                 checkIfNameIsAlreadyInUse(vendor);
