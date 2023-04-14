@@ -16,34 +16,34 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class VendorServiceImpl<V extends Vendor> implements VendorService<V> {
+public class VendorServiceImpl implements VendorService {
 
-    VendorRepository<V> vendorRepository;
+    VendorRepository<Vendor> vendorRepository;
 
-    public VendorServiceImpl(VendorRepository<V> vendorRepository) {
+    public VendorServiceImpl(VendorRepository<Vendor> vendorRepository) {
         this.vendorRepository = vendorRepository;
     }
 
 
     @Override
-    public List<V> getAllVendors() {
+    public List<Vendor> getAllVendors() {
         return vendorRepository.findAll();
     }
 
     @Override
-    public V getVendorById(Integer id) {
+    public Vendor getVendorById(Integer id) {
         return vendorRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Vendor '%d' not found!", id)));
     }
 
     @Override
-    public V getVendorByName(String name) {
+    public Vendor getVendorByName(String name) {
         return vendorRepository.findByName(name)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Vendor '%s' not found!", name)));
     }
 
     @Override
-    public V createNewVendor(V vendor) {
+    public Vendor createNewVendor(Vendor vendor) {
 
         checkIfNameIsAlreadyInUse(vendor);
 
@@ -57,7 +57,7 @@ public class VendorServiceImpl<V extends Vendor> implements VendorService<V> {
     }
 
     @Override
-    public V updateVendorById(Integer id, V vendor) {
+    public Vendor updateVendorById(Integer id, Vendor vendor) {
 
         Vendor savedVendor = vendorRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Vendor '%d' not found!", id)));
@@ -79,7 +79,7 @@ public class VendorServiceImpl<V extends Vendor> implements VendorService<V> {
     }
 
     @Override
-    public V patchVendorById(Integer id, V vendor) {
+    public Vendor patchVendorById(Integer id, Vendor vendor) {
         return vendorRepository.findById(id).map(savedVendor -> {
 
             if(vendor.getClass() != savedVendor.getClass())
@@ -152,7 +152,7 @@ public class VendorServiceImpl<V extends Vendor> implements VendorService<V> {
         });
     }
 
-    private void checkIfNameIsAlreadyInUse(V vendor) {
+    private void checkIfNameIsAlreadyInUse(Vendor vendor) {
         vendorRepository.findByName(vendor.getName()).ifPresent(savedVendor -> {
             throw new ResourceAlreadyExistsException(String.format("Vendor '%s' already exists", vendor.getName()),
                     "/api/vendors/" + savedVendor.getId());

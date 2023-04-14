@@ -53,7 +53,7 @@ class TransactionServiceImplTest {
     PaymentMethodService paymentMethodService;
 
     @Mock
-    VendorService<Vendor> vendorService;
+    VendorService vendorService;
 
     @Mock
     TagService tagService;

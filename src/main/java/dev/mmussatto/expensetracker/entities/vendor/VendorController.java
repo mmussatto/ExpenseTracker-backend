@@ -28,11 +28,11 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/vendors")
 public class VendorController {
 
-    private final VendorService<Vendor> vendorService;
+    private final VendorService vendorService;
 
     private final VendorMapper vendorMapper;
 
-    public VendorController(VendorService<Vendor> vendorService, VendorMapper vendorMapper) {
+    public VendorController(VendorService vendorService, VendorMapper vendorMapper) {
         this.vendorService = vendorService;
         this.vendorMapper = vendorMapper;
     }

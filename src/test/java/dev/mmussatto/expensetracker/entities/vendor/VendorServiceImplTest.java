@@ -31,7 +31,7 @@ class VendorServiceImplTest {
     @Mock
     VendorRepository<Vendor> vendorRepository;
 
-    VendorService<Vendor> vendorService;
+    VendorService vendorService;
 
     public static final Integer ID = 1;
     public static final String NAME = "Test";
@@ -43,7 +43,7 @@ class VendorServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        vendorService = new VendorServiceImpl<>(vendorRepository);
+        vendorService = new VendorServiceImpl(vendorRepository);
         TRANSACTION.setId(1);
     }
 

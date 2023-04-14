@@ -34,13 +34,13 @@ public class TransactionServiceImpl implements TransactionService {
 
     private final CategoryService categoryService;
     private final PaymentMethodService paymentMethodService;
-    private final VendorService<Vendor> vendorService;
+    private final VendorService vendorService;
     private final TagService tagService;
 
     public TransactionServiceImpl(TransactionRepository transactionRepository,
                                   CategoryService categoryService,
                                   PaymentMethodService paymentMethodService,
-                                  VendorService<Vendor> vendorService,
+                                  VendorService vendorService,
                                   TagService tagService) {
         this.transactionRepository = transactionRepository;
         this.categoryService = categoryService;
