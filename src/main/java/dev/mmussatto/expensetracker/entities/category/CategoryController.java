@@ -185,7 +185,7 @@ public class CategoryController {
     }
 
 
-    //Mappers
+    // -------------- Mappers ----------------------------
     private CategoryDTO convertToDTO(Category category) {
         CategoryDTO dto = categoryMapper.convertToDTO(category);
         dto.setPath("/api/categories/" + dto.getId());

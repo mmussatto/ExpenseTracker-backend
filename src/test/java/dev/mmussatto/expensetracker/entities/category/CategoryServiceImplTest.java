@@ -34,7 +34,7 @@ class CategoryServiceImplTest {
     @InjectMocks
     CategoryServiceImpl categoryService;
 
-    //Constants
+    // -------------- Constants ----------------------------
     public static final Integer ID = 1;
     public static final String NAME = "Test";
     public static final Color COLOR = Color.BLUE;
@@ -42,11 +42,14 @@ class CategoryServiceImplTest {
     public static final int DEFAULT_PAGE = 0;
     public static final int DEFAULT_SIZE = 1;
 
+
     @BeforeAll
     static void initializeTransaction() {
         TRANSACTION.setId(1);
     }
 
+
+    // -------------- READ ----------------------------
     @Test
     void getAllCategories() {
 
@@ -111,6 +114,8 @@ class CategoryServiceImplTest {
         assertThrows(ResourceNotFoundException.class, () -> categoryService.getCategoryByName(NAME));
     }
 
+
+    // -------------- CREATE ----------------------------
     @Test
     void createNewCategory() {
 
@@ -149,6 +154,8 @@ class CategoryServiceImplTest {
                 () -> categoryService.createNewCategory(passedEntity));
     }
 
+
+    // -------------- UPDATE ----------------------------
     @Test
     void updateCategoryById() {
 
@@ -224,6 +231,8 @@ class CategoryServiceImplTest {
         verify(categoryRepository, times(1)).findByName(passedEntity.getName());
     }
 
+
+    // -------------- PATCH ----------------------------
     @Test
     void patchCategoryById() {
 
@@ -372,6 +381,8 @@ class CategoryServiceImplTest {
                 () -> categoryService.patchCategoryById(originalCategory.getId(), passedEntity));
     }
 
+
+    // -------------- DELETE ----------------------------
     @Test
     void deleteCategoryById() {
 
@@ -391,6 +402,8 @@ class CategoryServiceImplTest {
         assertThrows(ResourceNotFoundException.class, () -> categoryService.deleteCategoryById(ID));
     }
 
+
+    // -------------- TRANSACTIONS ----------------------------
     @Test
     void getTransactionsByCategoryId() {
 
@@ -418,7 +431,7 @@ class CategoryServiceImplTest {
         Pageable pageable = PageRequest.of(DEFAULT_PAGE, DEFAULT_SIZE, Sort.by("date"));
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), transactions.size());
-        Page<Transaction> pagedTransactions = new PageImpl<Transaction>(
+        Page<Transaction> pagedTransactions = new PageImpl<>(
                 transactions.subList(start, end), pageable, transactions.size());
 
         when(categoryRepository.findById(category.getId())).thenReturn(Optional.of(category));
@@ -439,7 +452,6 @@ class CategoryServiceImplTest {
         assertThrows(ResourceNotFoundException.class, () ->
                 categoryService.getTransactionsByCategoryId(ID, DEFAULT_PAGE, DEFAULT_SIZE));
     }
-
 
 
     // -------------- Helpers ----------------------------

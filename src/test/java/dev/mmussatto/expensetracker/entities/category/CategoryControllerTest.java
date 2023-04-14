@@ -59,6 +59,7 @@ class CategoryControllerTest {
     private ObjectMapper objectMapper;
 
 
+    // -------------- READ ----------------------------
     @Test
     void getAllCategories() throws Exception {
 
@@ -163,6 +164,8 @@ class CategoryControllerTest {
                 .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResourceNotFoundException));
     }
 
+
+    // -------------- CREATE ----------------------------
     @Test
     void createNewCategory() throws Exception {
 
@@ -207,6 +210,34 @@ class CategoryControllerTest {
     }
 
     @Test
+    void createNewCategory_MissingColorField() throws Exception {
+
+        CategoryDTO passedDTO = new CategoryDTO();
+        passedDTO.setName(NAME);
+        //missing color field
+
+        mockMvc.perform(post("/api/categories")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(passedDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ConstraintViolationException));
+    }
+
+    @Test
+    void createNewCategory_MissingNameField() throws Exception {
+
+        CategoryDTO passedDTO = new CategoryDTO();
+        //missing name
+        passedDTO.setColor(COLOR);
+
+        mockMvc.perform(post("/api/categories")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(passedDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ConstraintViolationException));
+    }
+
+    @Test
     void createNewCategory_NameAlreadyExists() throws Exception {
 
         CategoryDTO passedDTO = new CategoryDTO(NAME, COLOR);
@@ -224,6 +255,8 @@ class CategoryControllerTest {
                 .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResourceAlreadyExistsException));
     }
 
+
+    // -------------- UPDATE ----------------------------
     @Test
     void updateCategoryById() throws Exception {
 
@@ -276,11 +309,11 @@ class CategoryControllerTest {
     }
 
     @Test
-    void updateCategoryById_MissingColorField() throws Exception {
+    void updateCategoryById_BodyIdNotNull() throws Exception {
 
-        CategoryDTO passedDTO = new CategoryDTO();
-        passedDTO.setName("Updated Test");
-        //missing color field
+        CategoryDTO passedDTO = new CategoryDTO("Update Test", Color.RED);
+        passedDTO.setId(ID);
+
 
         mockMvc.perform(put("/api/categories/{id}", ID)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -290,11 +323,11 @@ class CategoryControllerTest {
     }
 
     @Test
-    void updateCategoryById_BodyIdNotNull() throws Exception {
+    void updateCategoryById_MissingColorField() throws Exception {
 
-        CategoryDTO passedDTO = new CategoryDTO("Update Test", Color.RED);
-        passedDTO.setId(ID);
-
+        CategoryDTO passedDTO = new CategoryDTO();
+        passedDTO.setName("Updated Test");
+        //missing color field
 
         mockMvc.perform(put("/api/categories/{id}", ID)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -317,6 +350,26 @@ class CategoryControllerTest {
                 .andExpect(result -> assertTrue(result.getResolvedException() instanceof ConstraintViolationException));
     }
 
+    @Test
+    void updateCategoryById_NameAlreadyExists() throws Exception {
+
+        CategoryDTO passedDTO = new CategoryDTO(NAME, COLOR);
+
+        Category toSaveEntity = new Category(passedDTO.getName(), passedDTO.getColor());
+
+        when(categoryMapper.convertToEntity(passedDTO)).thenReturn(toSaveEntity);
+        when(categoryService.updateCategoryById(ID, toSaveEntity)).thenThrow(ResourceAlreadyExistsException.class);
+
+
+        mockMvc.perform(put("/api/categories/{id}", ID)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(passedDTO)))
+                .andExpect(status().isConflict())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResourceAlreadyExistsException));
+    }
+
+
+    // -------------- PATCH ----------------------------
     @Test
     void patchCategoryById() throws Exception {
 
@@ -384,6 +437,26 @@ class CategoryControllerTest {
     }
 
     @Test
+    void patchCategoryById_NameAlreadyExists() throws Exception {
+
+        CategoryDTO passedDTO = new CategoryDTO(NAME, COLOR);
+
+        Category toSaveEntity = new Category(passedDTO.getName(), passedDTO.getColor());
+
+        when(categoryMapper.convertToEntity(passedDTO)).thenReturn(toSaveEntity);
+        when(categoryService.patchCategoryById(ID, toSaveEntity)).thenThrow(ResourceAlreadyExistsException.class);
+
+
+        mockMvc.perform(patch("/api/categories/{id}", ID)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(passedDTO)))
+                .andExpect(status().isConflict())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResourceAlreadyExistsException));
+    }
+
+
+    // -------------- DELETE ----------------------------
+    @Test
     void deleteCategoryById() throws Exception {
 
         mockMvc.perform(delete("/api/categories/{id}", ID)
@@ -406,6 +479,8 @@ class CategoryControllerTest {
         verify(categoryService, times(ID)).deleteCategoryById(anyInt());
     }
 
+
+    // -------------- TRANSACTIONS ----------------------------
     @Test
     void getTransactionsByCategoryId() throws Exception {
 
