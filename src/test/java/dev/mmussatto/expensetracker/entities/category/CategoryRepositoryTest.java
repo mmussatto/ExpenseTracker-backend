@@ -43,7 +43,7 @@ class CategoryRepositoryTest {
     }
 
     @Test
-    void prevent_null() {
+    void preventNull() {
         Category category = new Category();
         //testEntityManager.persist(category);
 
