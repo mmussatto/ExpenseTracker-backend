@@ -43,7 +43,6 @@ class PaymentMethodRepositoryTest {
     @Test
     void prevent_null() {
         PaymentMethod paymentMethod = new PaymentMethod();
-        //testEntityManager.persist(category);
 
         assertThrows(ConstraintViolationException.class, () -> testEntityManager.persist(paymentMethod));
     }

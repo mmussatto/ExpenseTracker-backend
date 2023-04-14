@@ -21,6 +21,7 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
         this.paymentMethodRepository = paymentMethodRepository;
     }
 
+
     @Override
     public List<PaymentMethod> getAllPaymentMethods() {
         return paymentMethodRepository.findAll();
@@ -61,18 +62,20 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
 
     @Override
     public PaymentMethod patchPaymentMethodById(Integer id, PaymentMethod paymentMethod) {
+
         return paymentMethodRepository.findById(id).map(savedEntity -> {
 
+            //Update name
             if (paymentMethod.getName() != null) {
-
                 checkIfNameIsAlreadyInUse(paymentMethod);
-
                 savedEntity.setName(paymentMethod.getName());
             }
 
+            //Update payment type
             if (paymentMethod.getType() != null)
                 savedEntity.setType(paymentMethod.getType());
 
+            //Save
             return paymentMethodRepository.save(savedEntity);
 
         }).orElseThrow(() -> new ResourceNotFoundException("Payment Method " + id + " not found!"));
@@ -99,10 +102,11 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), transactions.size());
 
-        return new PageImpl<Transaction>(transactions.subList(start, end), pageable, transactions.size());
+        return new PageImpl<>(transactions.subList(start, end), pageable, transactions.size());
     }
 
 
+    // -------------- Helpers ----------------------------
     private void checkIfNameIsAlreadyInUse(PaymentMethod paymentMethodDTO) {
         paymentMethodRepository.findByName(paymentMethodDTO.getName()).ifPresent(paymentMethod -> {
             throw new ResourceAlreadyExistsException("Payment Method " + paymentMethodDTO.getName() + " already exists.",
