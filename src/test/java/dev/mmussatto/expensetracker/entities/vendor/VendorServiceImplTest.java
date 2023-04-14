@@ -13,6 +13,7 @@ import dev.mmussatto.expensetracker.exceptions.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
@@ -28,11 +29,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class VendorServiceImplTest {
 
-    @Mock
-    VendorRepository<Vendor> vendorRepository;
-
-    VendorService vendorService;
-
+    // -------------- Constants ----------------------------
     public static final Integer ID = 1;
     public static final String NAME = "Test";
     public static final String URL = "www.test.com";
@@ -41,12 +38,22 @@ class VendorServiceImplTest {
     public static final int DEFAULT_PAGE = 0;
     public static final int DEFAULT_SIZE = 1;
 
+
+    @Mock
+    VendorRepository<Vendor> vendorRepository;
+
+    @InjectMocks
+    VendorServiceImpl vendorService;
+
+
+
     @BeforeEach
     void setUp() {
-        vendorService = new VendorServiceImpl(vendorRepository);
         TRANSACTION.setId(1);
     }
 
+
+    // -------------- READ ----------------------------
     @Test
     void getAllVendors() {
         OnlineStore onlineStore = new OnlineStore();
@@ -107,274 +114,370 @@ class VendorServiceImplTest {
     @Test
     void getVendorByName_NotFound() {
 
-        String notFoundName = "asdf";
+        when(vendorRepository.findByName(NAME)).thenReturn(Optional.empty());
 
-        when(vendorRepository.findByName(notFoundName)).thenReturn(Optional.empty());
-
-        assertThrows(ResourceNotFoundException.class, () -> vendorService.getVendorByName(notFoundName));
+        assertThrows(ResourceNotFoundException.class, () -> vendorService.getVendorByName(NAME));
     }
 
+
+    // -------------- CREATE ----------------------------
     @Test
     void createNewVendor() {
 
-        OnlineStore passedVendor = new OnlineStore(NAME, URL);
-        passedVendor.getTransactions().add(TRANSACTION);
+        OnlineStore passedEntity = new OnlineStore(NAME, URL);
 
-        OnlineStore savedVendor = createOnlineStore();
+        OnlineStore savedEntity = new OnlineStore(passedEntity.getName(), passedEntity.getUrl());
+        savedEntity.setId(ID);
 
 
-        when(vendorRepository.findByName(passedVendor.getName())).thenReturn(Optional.empty());
-        when(vendorRepository.save(passedVendor)).thenReturn(savedVendor);
+        when(vendorRepository.findByName(passedEntity.getName())).thenReturn(Optional.empty());
+        when(vendorRepository.save(passedEntity)).thenReturn(savedEntity);
 
-        Vendor returnedVendor = vendorService.createNewVendor(passedVendor);
+        Vendor returnedVendor = vendorService.createNewVendor(passedEntity);
 
-        assertEquals(savedVendor.getId(), returnedVendor.getId());
-        assertEquals(passedVendor.getName(), returnedVendor.getName());
-        assertEquals(passedVendor.getUrl(), ((OnlineStore) returnedVendor).getUrl());
-        assertEquals(passedVendor.getTransactions(), returnedVendor.getTransactions());
+        assertEquals(savedEntity.getId(), returnedVendor.getId());
+        assertEquals(passedEntity.getName(), returnedVendor.getName());
+        assertEquals(passedEntity.getUrl(), ((OnlineStore) returnedVendor).getUrl());
     }
 
     @Test
     void createNewVendor_NameAlreadyExists() {
 
-        OnlineStore passedVendor = new OnlineStore(NAME, URL);
-        passedVendor.getTransactions().add(TRANSACTION);
+        OnlineStore passedEntity = new OnlineStore(NAME, URL);
 
-        OnlineStore savedVendor = createOnlineStore();
+        OnlineStore savedEntity = createOnlineStore();
 
-
-        when(vendorRepository.findByName(passedVendor.getName())).thenReturn(Optional.of(savedVendor));
+        when(vendorRepository.findByName(passedEntity.getName())).thenReturn(Optional.of(savedEntity));
 
 
-        assertThrows(ResourceAlreadyExistsException.class, () -> vendorService.createNewVendor(passedVendor));
+        assertThrows(ResourceAlreadyExistsException.class, () -> vendorService.createNewVendor(passedEntity));
     }
 
     @Test
     void createNewVendor_UrlAlreadyExists() {
 
-        OnlineStore passedVendor = new OnlineStore(NAME, URL);
-        passedVendor.getTransactions().add(TRANSACTION);
+        OnlineStore passedEntity = new OnlineStore(NAME, URL);
 
-        OnlineStore savedVendor = createOnlineStore();
-
-
-        when(vendorRepository.findByName(passedVendor.getName())).thenReturn(Optional.empty());
-        when(vendorRepository.findByUrl(passedVendor.getUrl())).thenReturn(Optional.of(savedVendor));
+        OnlineStore savedEntity = createOnlineStore();
 
 
-        assertThrows(ResourceAlreadyExistsException.class, () -> vendorService.createNewVendor(passedVendor));
+        when(vendorRepository.findByName(passedEntity.getName())).thenReturn(Optional.empty());
+        when(vendorRepository.findByUrl(passedEntity.getUrl())).thenReturn(Optional.of(savedEntity));
+
+
+        assertThrows(ResourceAlreadyExistsException.class, () -> vendorService.createNewVendor(passedEntity));
     }
 
     @Test
     void createNewVendor_AddressAlreadyExists() {
 
-        PhysicalStore passedVendor = new PhysicalStore(NAME, ADDRESS);
-        passedVendor.getTransactions().add(TRANSACTION);
+        PhysicalStore passedEntity = new PhysicalStore(NAME, ADDRESS);
 
-        PhysicalStore savedVendor = createPhysicalStore();
-
-
-        when(vendorRepository.findByName(passedVendor.getName())).thenReturn(Optional.empty());
-        when(vendorRepository.findByAddress(passedVendor.getAddress())).thenReturn(Optional.of(savedVendor));
+        PhysicalStore savedEntity = createPhysicalStore();
 
 
-        assertThrows(ResourceAlreadyExistsException.class, () -> vendorService.createNewVendor(passedVendor));
+        when(vendorRepository.findByName(passedEntity.getName())).thenReturn(Optional.empty());
+        when(vendorRepository.findByAddress(passedEntity.getAddress())).thenReturn(Optional.of(savedEntity));
+
+
+        assertThrows(ResourceAlreadyExistsException.class, () -> vendorService.createNewVendor(passedEntity));
     }
 
+
+    // -------------- UPDATE ----------------------------
     @Test
     void updateVendorById() {
 
-        PhysicalStore passedVendor = new PhysicalStore("Test Update", "New Address");
+        PhysicalStore passedEntity = new PhysicalStore("Test Update", "New Address");
 
-        PhysicalStore originalVendor = createPhysicalStore();
+        PhysicalStore originalEntity = createPhysicalStore();
 
-        PhysicalStore updatedVendor = new PhysicalStore(passedVendor.getName(), passedVendor.getAddress());
-        updatedVendor.setId(originalVendor.getId());
-        updatedVendor.setTransactions(passedVendor.getTransactions());
+        PhysicalStore toUpdateEntity = new PhysicalStore(passedEntity.getName(), passedEntity.getAddress());
+        toUpdateEntity.setId(originalEntity.getId());
 
-        when(vendorRepository.findById(originalVendor.getId())).thenReturn(Optional.of(originalVendor));
-        when(vendorRepository.findByName(passedVendor.getName())).thenReturn(Optional.empty());
-        when(vendorRepository.save(updatedVendor)).thenReturn(updatedVendor);
+        PhysicalStore updatedEntity = new PhysicalStore(toUpdateEntity.getName(), toUpdateEntity.getAddress());
+        updatedEntity.setId(toUpdateEntity.getId());
+        updatedEntity.setTransactions(originalEntity.getTransactions());
 
-        Vendor returnedVendor = vendorService.updateVendorById(originalVendor.getId(), passedVendor);
+        when(vendorRepository.findById(originalEntity.getId())).thenReturn(Optional.of(originalEntity));
+        when(vendorRepository.findByName(passedEntity.getName())).thenReturn(Optional.empty());
+        when(vendorRepository.findByAddress(passedEntity.getAddress())).thenReturn(Optional.empty());
+        when(vendorRepository.save(toUpdateEntity)).thenReturn(updatedEntity);
 
-        assertEquals(originalVendor.getId(), returnedVendor.getId());
-        assertEquals(passedVendor.getName(), returnedVendor.getName());
-        assertEquals(passedVendor.getAddress(), ((PhysicalStore) returnedVendor).getAddress());
-        assertEquals(passedVendor.getTransactions(), returnedVendor.getTransactions());
+        Vendor returnedVendor = vendorService.updateVendorById(originalEntity.getId(), passedEntity);
+
+        assertEquals(originalEntity.getId(), returnedVendor.getId());
+        assertEquals(passedEntity.getName(), returnedVendor.getName());
+        assertEquals(passedEntity.getAddress(), ((PhysicalStore) returnedVendor).getAddress());
+        assertEquals(originalEntity.getTransactions(), returnedVendor.getTransactions());
+
+        verify(vendorRepository, times(1)).findByName(passedEntity.getName());
+        verify(vendorRepository, times(1)).save(toUpdateEntity);
 
     }
 
     @Test
     void updateVendorById_NotFound() {
 
-        PhysicalStore passedVendor = new PhysicalStore("Test Update", "New Address");
+        PhysicalStore passedEntity = new PhysicalStore("Test Update", "New Address");
 
-        PhysicalStore originalVendor = createPhysicalStore();
+        PhysicalStore originalEntity = createPhysicalStore();
 
-        when(vendorRepository.findById(originalVendor.getId())).thenReturn(Optional.empty());
+        when(vendorRepository.findById(originalEntity.getId())).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
-                () -> vendorService.updateVendorById(originalVendor.getId(), passedVendor));
+                () -> vendorService.updateVendorById(originalEntity.getId(), passedEntity));
     }
 
     @Test
     void updateVendorById_NameAlreadyExists() {
 
-        PhysicalStore passedVendor = new PhysicalStore("Test Update", "New Address");
+        PhysicalStore passedEntity = new PhysicalStore("Test Update", "New Address");
 
-        PhysicalStore originalVendor = createPhysicalStore();
+        PhysicalStore originalEntity = createPhysicalStore();
 
-        PhysicalStore anotherSavedVendor = new PhysicalStore(passedVendor.getName(), ADDRESS);
+        PhysicalStore anotherSavedEntity = new PhysicalStore(passedEntity.getName(), ADDRESS);
 
-        when(vendorRepository.findById(originalVendor.getId())).thenReturn(Optional.of(originalVendor));
-        when(vendorRepository.findByName(passedVendor.getName())).thenReturn(Optional.of(anotherSavedVendor));
+        when(vendorRepository.findById(originalEntity.getId())).thenReturn(Optional.of(originalEntity));
+        when(vendorRepository.findByName(passedEntity.getName())).thenReturn(Optional.of(anotherSavedEntity));
 
         assertThrows(ResourceAlreadyExistsException.class,
-                () -> vendorService.updateVendorById(originalVendor.getId(), passedVendor));
+                () -> vendorService.updateVendorById(originalEntity.getId(), passedEntity));
+
+    }
+
+    @Test
+    void  updateVendorById_UrlAlreadyExists() {
+
+        OnlineStore passedEntity = new OnlineStore("Test Update", "www.newUrl.com");
+
+        OnlineStore originalEntity = createOnlineStore();
+
+        OnlineStore anotherSavedEntity = new OnlineStore(NAME, passedEntity.getUrl());
+
+
+        when(vendorRepository.findById(originalEntity.getId())).thenReturn(Optional.of(originalEntity));
+        when(vendorRepository.findByName(passedEntity.getName())).thenReturn(Optional.empty());
+        when(vendorRepository.findByUrl(passedEntity.getUrl())).thenReturn(Optional.of(anotherSavedEntity));
+
+
+        assertThrows(ResourceAlreadyExistsException.class,
+                () -> vendorService.updateVendorById(originalEntity.getId(), passedEntity));
+    }
+
+    @Test
+    void updateVendorById_AddressAlreadyExists() {
+
+        PhysicalStore passedEntity = new PhysicalStore("Test Update", "New Address");
+
+        PhysicalStore originalEntity = createPhysicalStore();
+
+        PhysicalStore anotherSavedEntity = new PhysicalStore(NAME, passedEntity.getAddress());
+
+        when(vendorRepository.findById(originalEntity.getId())).thenReturn(Optional.of(originalEntity));
+        when(vendorRepository.findByName(passedEntity.getName())).thenReturn(Optional.empty());
+        when(vendorRepository.findByAddress(passedEntity.getAddress())).thenReturn(Optional.of(anotherSavedEntity));
+
+        assertThrows(ResourceAlreadyExistsException.class,
+                () -> vendorService.updateVendorById(originalEntity.getId(), passedEntity));
 
     }
 
     @Test
     void updateVendorById_IncorrectType() {
 
-        PhysicalStore passedVendor = new PhysicalStore("Test Update", "New Address");
+        PhysicalStore passedEntity = new PhysicalStore("Test Update", "New Address");
 
-        OnlineStore originalVendor = createOnlineStore();
+        OnlineStore originalEntity = createOnlineStore();
 
 
-        when(vendorRepository.findById(originalVendor.getId())).thenReturn(Optional.of(originalVendor));
-        when(vendorRepository.findByName(passedVendor.getName())).thenReturn(Optional.empty());
+        when(vendorRepository.findById(originalEntity.getId())).thenReturn(Optional.of(originalEntity));
+        when(vendorRepository.findByName(passedEntity.getName())).thenReturn(Optional.empty());
 
         assertThrows(IncorrectVendorTypeException.class,
-                () -> vendorService.updateVendorById(originalVendor.getId(), passedVendor));
+                () -> vendorService.updateVendorById(originalEntity.getId(), passedEntity));
 
     }
 
+
+    // -------------- PATCH ----------------------------
     @Test
     void patchVendorById() {
-        PhysicalStore passedVendor = new PhysicalStore("Test Patch", "New Address");
 
-        PhysicalStore originalVendor = createPhysicalStore();
+        PhysicalStore passedEntity = new PhysicalStore("Test Patch", "New Address");
 
-        PhysicalStore toUpdateVendor = createPhysicalStore();
+        PhysicalStore originalEntity = createPhysicalStore();
 
-        PhysicalStore updatedVendor = new PhysicalStore(passedVendor.getName(), passedVendor.getAddress());
-        updatedVendor.setId(originalVendor.getId());
-        updatedVendor.setTransactions(passedVendor.getTransactions());
+        PhysicalStore updatedEntity = new PhysicalStore(passedEntity.getName(), passedEntity.getAddress());
+        updatedEntity.setId(originalEntity.getId());
+        updatedEntity.setTransactions(originalEntity.getTransactions());
 
-        when(vendorRepository.findById(originalVendor.getId())).thenReturn(Optional.of(toUpdateVendor));
-        when(vendorRepository.findByName(passedVendor.getName())).thenReturn(Optional.empty());
-        when(vendorRepository.save((updatedVendor))).thenReturn(updatedVendor);
+        when(vendorRepository.findById(originalEntity.getId())).thenReturn(Optional.of(originalEntity));
+        when(vendorRepository.findByName(passedEntity.getName())).thenReturn(Optional.empty());
+        when(vendorRepository.save((updatedEntity))).thenReturn(updatedEntity);
 
-        Vendor returnedVendor = vendorService.patchVendorById(originalVendor.getId(), passedVendor);
+        Vendor returnedVendor = vendorService.patchVendorById(originalEntity.getId(), passedEntity);
 
-        assertEquals(originalVendor.getId(), returnedVendor.getId());
-        assertEquals(passedVendor.getName(), returnedVendor.getName());
-        assertEquals(passedVendor.getAddress(), ((PhysicalStore) returnedVendor).getAddress());
-        assertEquals(passedVendor.getTransactions(), returnedVendor.getTransactions());
+        assertEquals(originalEntity.getId(), returnedVendor.getId());
+        assertEquals(passedEntity.getName(), returnedVendor.getName());
+        assertEquals(passedEntity.getAddress(), ((PhysicalStore) returnedVendor).getAddress());
+        assertEquals(originalEntity.getTransactions(), returnedVendor.getTransactions());
+
+        verify(vendorRepository, times(1)).findByName(passedEntity.getName());
+        verify(vendorRepository, times(1)).save(updatedEntity);
     }
 
     @Test
     void patchVendorById_UpdateOnlyName() {
-        PhysicalStore passedVendor = new PhysicalStore();
-        passedVendor.setName("Test Patch");
 
-        PhysicalStore originalVendor = createPhysicalStore();
+        PhysicalStore passedEntity = new PhysicalStore();
+        passedEntity.setName("Test Patch");
+        //missing address
 
-        PhysicalStore toUpdateVendor = createPhysicalStore();
+        PhysicalStore originalEntity = createPhysicalStore();
 
-        PhysicalStore updatedVendor = new PhysicalStore(passedVendor.getName(), originalVendor.getAddress());
-        updatedVendor.setId(originalVendor.getId());
-        updatedVendor.setTransactions(originalVendor.getTransactions());
+        PhysicalStore updatedEntity = new PhysicalStore(passedEntity.getName(), originalEntity.getAddress());
+        updatedEntity.setId(originalEntity.getId());
+        updatedEntity.setTransactions(originalEntity.getTransactions());
 
-        when(vendorRepository.findById(originalVendor.getId())).thenReturn(Optional.of(toUpdateVendor));
-        when(vendorRepository.findByName(passedVendor.getName())).thenReturn(Optional.empty());
-        when(vendorRepository.save((updatedVendor))).thenReturn(updatedVendor);
+        when(vendorRepository.findById(originalEntity.getId())).thenReturn(Optional.of(originalEntity));
+        when(vendorRepository.findByName(passedEntity.getName())).thenReturn(Optional.empty());
+        when(vendorRepository.save((updatedEntity))).thenReturn(updatedEntity);
 
-        Vendor returnedVendor = vendorService.patchVendorById(originalVendor.getId(), passedVendor);
+        Vendor returnedVendor = vendorService.patchVendorById(originalEntity.getId(), passedEntity);
 
-        assertEquals(originalVendor.getId(), returnedVendor.getId());
-        assertEquals(passedVendor.getName(), returnedVendor.getName());
-        assertEquals(originalVendor.getAddress(), ((PhysicalStore) returnedVendor).getAddress());
-        assertEquals(originalVendor.getTransactions(), returnedVendor.getTransactions());
+        assertEquals(originalEntity.getId(), returnedVendor.getId());
+        assertEquals(passedEntity.getName(), returnedVendor.getName());
+        assertEquals(originalEntity.getAddress(), ((PhysicalStore) returnedVendor).getAddress());
+        assertEquals(originalEntity.getTransactions(), returnedVendor.getTransactions());
+
+        verify(vendorRepository, times(1)).findByName(passedEntity.getName());
+        verify(vendorRepository, times(1)).save(updatedEntity);
     }
 
     @Test
     void patchVendorById_UpdateOnlyAddress() {
-        PhysicalStore passedVendor = new PhysicalStore();
-        passedVendor.setAddress("New Address");
+        PhysicalStore passedEntity = new PhysicalStore();
+        //missing name
+        passedEntity.setAddress("New Address");
 
-        PhysicalStore originalVendor = createPhysicalStore();
+        PhysicalStore originalEntity = createPhysicalStore();
 
-        PhysicalStore toUpdateVendor = createPhysicalStore();
+        PhysicalStore updatedEntity = new PhysicalStore(originalEntity.getName(), passedEntity.getAddress());
+        updatedEntity.setId(originalEntity.getId());
+        updatedEntity.setTransactions(originalEntity.getTransactions());
 
-        PhysicalStore updatedVendor = new PhysicalStore(originalVendor.getName(), passedVendor.getAddress());
-        updatedVendor.setId(originalVendor.getId());
-        updatedVendor.setTransactions(originalVendor.getTransactions());
+        when(vendorRepository.findById(originalEntity.getId())).thenReturn(Optional.of(originalEntity));
+        when(vendorRepository.findByAddress(passedEntity.getAddress())).thenReturn(Optional.empty());
+        when(vendorRepository.save((updatedEntity))).thenReturn(updatedEntity);
 
-        when(vendorRepository.findById(originalVendor.getId())).thenReturn(Optional.of(toUpdateVendor));
-        when(vendorRepository.save((updatedVendor))).thenReturn(updatedVendor);
+        Vendor returnedVendor = vendorService.patchVendorById(originalEntity.getId(), passedEntity);
 
-        Vendor returnedVendor = vendorService.patchVendorById(originalVendor.getId(), passedVendor);
+        assertEquals(originalEntity.getId(), returnedVendor.getId());
+        assertEquals(originalEntity.getName(), returnedVendor.getName());
+        assertEquals(passedEntity.getAddress(), ((PhysicalStore) returnedVendor).getAddress());
+        assertEquals(originalEntity.getTransactions(), returnedVendor.getTransactions());
 
-        assertEquals(originalVendor.getId(), returnedVendor.getId());
-        assertEquals(originalVendor.getName(), returnedVendor.getName());
-        assertEquals(passedVendor.getAddress(), ((PhysicalStore) returnedVendor).getAddress());
-        assertEquals(originalVendor.getTransactions(), returnedVendor.getTransactions());
+        verify(vendorRepository, times(1)).findByAddress(passedEntity.getAddress());
+        verify(vendorRepository, times(1)).save(updatedEntity);
     }
 
     @Test
     void patchVendorById_UpdateOnlyUrl() {
-        OnlineStore passedVendor = new OnlineStore();
-        passedVendor.setUrl("www.newurl.com");
 
-        OnlineStore originalVendor = createOnlineStore();
+        OnlineStore passedEntity = new OnlineStore();
+        //missing name
+        passedEntity.setUrl("www.newurl.com");
 
-        OnlineStore toUpdateVendor = createOnlineStore();
+        OnlineStore originalEntity = createOnlineStore();
 
-        OnlineStore updatedVendor = new OnlineStore(originalVendor.getName(), passedVendor.getUrl());
-        updatedVendor.setId(originalVendor.getId());
-        updatedVendor.setTransactions(originalVendor.getTransactions());
+        OnlineStore updatedEntity = new OnlineStore(originalEntity.getName(), passedEntity.getUrl());
+        updatedEntity.setId(originalEntity.getId());
+        updatedEntity.setTransactions(originalEntity.getTransactions());
 
-        when(vendorRepository.findById(originalVendor.getId())).thenReturn(Optional.of(toUpdateVendor));
-        when(vendorRepository.save((updatedVendor))).thenReturn(updatedVendor);
+        when(vendorRepository.findById(originalEntity.getId())).thenReturn(Optional.of(originalEntity));
+        when(vendorRepository.findByUrl(passedEntity.getUrl())).thenReturn(Optional.empty());
+        when(vendorRepository.save((updatedEntity))).thenReturn(updatedEntity);
 
-        Vendor returnedVendor = vendorService.patchVendorById(originalVendor.getId(), passedVendor);
+        Vendor returnedVendor = vendorService.patchVendorById(originalEntity.getId(), passedEntity);
 
-        assertEquals(originalVendor.getId(), returnedVendor.getId());
-        assertEquals(originalVendor.getName(), returnedVendor.getName());
-        assertEquals(passedVendor.getUrl(), ((OnlineStore) returnedVendor).getUrl());
-        assertEquals(originalVendor.getTransactions(), returnedVendor.getTransactions());
+        assertEquals(originalEntity.getId(), returnedVendor.getId());
+        assertEquals(originalEntity.getName(), returnedVendor.getName());
+        assertEquals(passedEntity.getUrl(), ((OnlineStore) returnedVendor).getUrl());
+        assertEquals(originalEntity.getTransactions(), returnedVendor.getTransactions());
+
+        verify(vendorRepository, times(1)).findByUrl(passedEntity.getUrl());
+        verify(vendorRepository, times(1)).save(updatedEntity);
     }
 
     @Test
     void patchVendorById_NotFound() {
-        PhysicalStore passedVendor = new PhysicalStore("Test Patch", "New Address");
 
-        PhysicalStore originalVendor = createPhysicalStore();
+        PhysicalStore passedEntity = new PhysicalStore("Test Patch", "New Address");
 
-        when(vendorRepository.findById(originalVendor.getId())).thenReturn(Optional.empty());
+        PhysicalStore originalEntity = createPhysicalStore();
+
+        when(vendorRepository.findById(originalEntity.getId())).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
-                () -> vendorService.patchVendorById(originalVendor.getId(), passedVendor));
+                () -> vendorService.patchVendorById(originalEntity.getId(), passedEntity));
     }
 
     @Test
     void patchVendorById_NameAlreadyExists() {
-        PhysicalStore passedVendor = new PhysicalStore("Test Patch", "New Address");
 
-        PhysicalStore originalVendor = createPhysicalStore();
+        PhysicalStore passedEntity = new PhysicalStore("Test Patch", "New Address");
 
-        PhysicalStore anotherSavedVendor = new PhysicalStore(passedVendor.getName(), ADDRESS);
+        PhysicalStore originalEntity = createPhysicalStore();
 
-        when(vendorRepository.findById(originalVendor.getId())).thenReturn(Optional.of(originalVendor));
-        when(vendorRepository.findByName(passedVendor.getName())).thenReturn(Optional.of(anotherSavedVendor));
+        PhysicalStore anotherSavedEntity = new PhysicalStore(passedEntity.getName(), ADDRESS);
+
+        when(vendorRepository.findById(originalEntity.getId())).thenReturn(Optional.of(originalEntity));
+        when(vendorRepository.findByName(passedEntity.getName())).thenReturn(Optional.of(anotherSavedEntity));
 
         assertThrows(ResourceAlreadyExistsException.class,
-                () -> vendorService.patchVendorById(originalVendor.getId(), passedVendor));
+                () -> vendorService.patchVendorById(originalEntity.getId(), passedEntity));
     }
 
+    @Test
+    void  patchVendorById_UrlAlreadyExists() {
+
+        OnlineStore passedEntity = new OnlineStore("Test Update", "www.newUrl.com");
+
+        OnlineStore originalEntity = createOnlineStore();
+
+        OnlineStore anotherSavedEntity = new OnlineStore(NAME, passedEntity.getUrl());
+
+
+        when(vendorRepository.findById(originalEntity.getId())).thenReturn(Optional.of(originalEntity));
+        when(vendorRepository.findByName(passedEntity.getName())).thenReturn(Optional.empty());
+        when(vendorRepository.findByUrl(passedEntity.getUrl())).thenReturn(Optional.of(anotherSavedEntity));
+
+
+        assertThrows(ResourceAlreadyExistsException.class,
+                () -> vendorService.patchVendorById(originalEntity.getId(), passedEntity));
+    }
+
+    @Test
+    void patchVendorById_AddressAlreadyExists() {
+
+        PhysicalStore passedEntity = new PhysicalStore("Test Update", "New Address");
+
+        PhysicalStore originalEntity = createPhysicalStore();
+
+        PhysicalStore anotherSavedEntity = new PhysicalStore(NAME, passedEntity.getAddress());
+
+        when(vendorRepository.findById(originalEntity.getId())).thenReturn(Optional.of(originalEntity));
+        when(vendorRepository.findByName(passedEntity.getName())).thenReturn(Optional.empty());
+        when(vendorRepository.findByAddress(passedEntity.getAddress())).thenReturn(Optional.of(anotherSavedEntity));
+
+        assertThrows(ResourceAlreadyExistsException.class,
+                () -> vendorService.patchVendorById(originalEntity.getId(), passedEntity));
+
+    }
+
+
+    // -------------- DELETE ----------------------------
     @Test
     void deleteVendorById() {
 
@@ -386,6 +489,7 @@ class VendorServiceImplTest {
         verify(vendorRepository, times(1)).deleteById(ID);
 
     }
+
     @Test
     void deleteVendorById_NotFound() {
 
@@ -396,6 +500,7 @@ class VendorServiceImplTest {
     }
 
 
+    // -------------- TRANSACTIONS ----------------------------
     @Test
     void getTransactionsByVendorId() {
 
@@ -444,11 +549,12 @@ class VendorServiceImplTest {
                 vendorService.getTransactionsByVendorId(notFoundId, DEFAULT_PAGE, DEFAULT_SIZE));
     }
 
+
+    // -------------- Helpers ----------------------------
     private OnlineStore createOnlineStore() {
         OnlineStore onlineStore = new OnlineStore(NAME, URL);
         onlineStore.setId(ID);
         onlineStore.getTransactions().add(TRANSACTION);
-
         return onlineStore;
     }
 
@@ -456,7 +562,6 @@ class VendorServiceImplTest {
         PhysicalStore physicalStore = new PhysicalStore(NAME, ADDRESS);
         physicalStore.setId(ID);
         physicalStore.getTransactions().add(TRANSACTION);
-
         return physicalStore;
     }
 }

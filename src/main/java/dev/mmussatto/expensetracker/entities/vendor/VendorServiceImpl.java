@@ -138,6 +138,7 @@ public class VendorServiceImpl implements VendorService {
 
 
 
+    // -------------- Helpers ----------------------------
     private void checkIfAddressIsAlreadyInUse(PhysicalStore vendor) {
         vendorRepository.findByAddress(vendor.getAddress()).ifPresent(savedVendor -> {
             throw new ResourceAlreadyExistsException(String.format("Address '%s' already exists", vendor.getAddress()),

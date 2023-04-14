@@ -29,6 +29,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -39,8 +40,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(VendorController.class)
 class VendorControllerTest {
 
+    // -------------- Constants ----------------------------
     public static final int DEFAULT_PAGE = 0;
     public static final int DEFAULT_SIZE = 1;
+    public static final String OS_NAME = "OS Test";
+    public static final String PS_NAME = "PS Test";
+    public static final String URL = "www.test.com";
+    public static final String ADDRESS = "Test St.";
+    public static final int ID = 1;
+
 
     @Autowired
     private MockMvc mockMvc;
@@ -55,13 +63,16 @@ class VendorControllerTest {
     private ObjectMapper objectMapper;
 
 
+
+
+    // -------------- READ ----------------------------
     @Test
     void getAllVendors() throws Exception{
 
-        OnlineStore onlineStore = new OnlineStore("OS Test", "www.test.com");
-        onlineStore.setId(1);
+        OnlineStore onlineStore = new OnlineStore(OS_NAME, URL);
+        onlineStore.setId(ID);
 
-        PhysicalStore physicalStore = new PhysicalStore("PS Test", "Test St.");
+        PhysicalStore physicalStore = new PhysicalStore(PS_NAME, ADDRESS);
         physicalStore.setId(2);
 
         when(vendorService.getAllVendors()).thenReturn(Arrays.asList(onlineStore, physicalStore));
@@ -69,52 +80,53 @@ class VendorControllerTest {
         mockMvc.perform(get("/api/vendors")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.numberOfItems", equalTo(2)))
-                .andExpect(jsonPath("$.items", hasSize(2)));
+                .andExpect(jsonPath("$", hasSize(2)));
     }
 
     @Test
     void getVendorById_OnlineStore() throws Exception{
 
-        OnlineStore onlineStore = new OnlineStore("OS Test", "www.test.com");
-        onlineStore.setId(1);
+        OnlineStore onlineStore = new OnlineStore(OS_NAME, URL);
+        onlineStore.setId(ID);
 
-        OnlineStoreDTO returnedDto = new OnlineStoreDTO(onlineStore.getName(), onlineStore.getUrl());
-        returnedDto.setId(onlineStore.getId());
+        OnlineStoreDTO returnedDTO = new OnlineStoreDTO(onlineStore.getName(), onlineStore.getUrl());
+        returnedDTO.setId(onlineStore.getId());
 
         when(vendorService.getVendorById(onlineStore.getId())).thenReturn(onlineStore);
-        when(vendorMapper.convertToDTO(any(Vendor.class))).thenReturn(returnedDto);
+        when(vendorMapper.convertToDTO(any(Vendor.class))).thenReturn(returnedDTO);
 
         mockMvc.perform(get("/api/vendors/{id}", onlineStore.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.type", equalTo("Online Store")))
-                .andExpect(jsonPath("$.id", equalTo(onlineStore.getId())))
-                .andExpect(jsonPath("$.name", equalTo(onlineStore.getName())))
-                .andExpect(jsonPath("$.url", equalTo(onlineStore.getUrl())))
-                .andExpect(jsonPath("$.path", equalTo("/api/vendors/" + onlineStore.getId())));
+                .andExpect(result -> {
+                    String retString = result.getResponse().getContentAsString();
+                    OnlineStoreDTO objFromJson = objectMapper.readValue(retString, OnlineStoreDTO.class);
+                    returnedDTO.setPath("/api/vendors/" + returnedDTO.getId()); //path is set inside controller
+                    assertEquals(returnedDTO, objFromJson);
+                });
     }
 
     @Test
     void getVendorById_PhysicalStore() throws Exception{
 
-        PhysicalStore physicalStore = new PhysicalStore("PS Test", "Test St.");
+        PhysicalStore physicalStore = new PhysicalStore(PS_NAME, ADDRESS);
         physicalStore.setId(2);
 
-        PhysicalStoreDTO returnedDto = new PhysicalStoreDTO(physicalStore.getName(), physicalStore.getAddress());
-        returnedDto.setId(physicalStore.getId());
+        PhysicalStoreDTO returnedDTO = new PhysicalStoreDTO(physicalStore.getName(), physicalStore.getAddress());
+        returnedDTO.setId(physicalStore.getId());
 
         when(vendorService.getVendorById(physicalStore.getId())).thenReturn(physicalStore);
-        when(vendorMapper.convertToDTO(any(Vendor.class))).thenReturn(returnedDto);
+        when(vendorMapper.convertToDTO(any(Vendor.class))).thenReturn(returnedDTO);
 
         mockMvc.perform(get("/api/vendors/{id}", physicalStore.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.type", equalTo("Physical Store")))
-                .andExpect(jsonPath("$.id", equalTo(physicalStore.getId())))
-                .andExpect(jsonPath("$.name", equalTo(physicalStore.getName())))
-                .andExpect(jsonPath("$.address", equalTo(physicalStore.getAddress())))
-                .andExpect(jsonPath("$.path", equalTo("/api/vendors/" + physicalStore.getId())));
+                .andExpect(result -> {
+                    String retString = result.getResponse().getContentAsString();
+                    PhysicalStoreDTO objFromJson = objectMapper.readValue(retString, PhysicalStoreDTO.class);
+                    returnedDTO.setPath("/api/vendors/" + returnedDTO.getId()); //path is set inside controller
+                    assertEquals(returnedDTO, objFromJson);
+                });
     }
 
     @Test
@@ -132,29 +144,30 @@ class VendorControllerTest {
     }
 
     @Test
-    void testGetVendorByName() throws Exception{
+    void getVendorByName_PhysicalStore() throws Exception{
 
-        PhysicalStore physicalStore = new PhysicalStore("PS Test", "Test St.");
-        physicalStore.setId(2);
+        PhysicalStore savedEntity = new PhysicalStore(PS_NAME, ADDRESS);
+        savedEntity.setId(ID);
 
-        PhysicalStoreDTO returnedDto = new PhysicalStoreDTO(physicalStore.getName(), physicalStore.getAddress());
-        returnedDto.setId(physicalStore.getId());
+        PhysicalStoreDTO returnedDTO = new PhysicalStoreDTO(savedEntity.getName(), savedEntity.getAddress());
+        returnedDTO.setId(savedEntity.getId());
 
-        when(vendorService.getVendorByName(physicalStore.getName())).thenReturn(physicalStore);
-        when(vendorMapper.convertToDTO(any(Vendor.class))).thenReturn(returnedDto);
+        when(vendorService.getVendorByName(savedEntity.getName())).thenReturn(savedEntity);
+        when(vendorMapper.convertToDTO(any(Vendor.class))).thenReturn(returnedDTO);
 
-        mockMvc.perform(get("/api/vendors/name/{name}", physicalStore.getName())
+        mockMvc.perform(get("/api/vendors/name/{name}", savedEntity.getName())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.type", equalTo("Physical Store")))
-                .andExpect(jsonPath("$.id", equalTo(physicalStore.getId())))
-                .andExpect(jsonPath("$.name", equalTo(physicalStore.getName())))
-                .andExpect(jsonPath("$.address", equalTo(physicalStore.getAddress())))
-                .andExpect(jsonPath("$.path", equalTo("/api/vendors/" + physicalStore.getId())));
+                .andExpect(result -> {
+                    String retString = result.getResponse().getContentAsString();
+                    PhysicalStoreDTO objFromJson = objectMapper.readValue(retString, PhysicalStoreDTO.class);
+                    returnedDTO.setPath("/api/vendors/" + returnedDTO.getId()); //path is set inside controller
+                    assertEquals(returnedDTO, objFromJson);
+                });
     }
 
     @Test
-    void testGetVendorByName_NotFound() throws Exception{
+    void getVendorByName_NotFound() throws Exception{
 
         String notFoundName = "asdf";
 
@@ -167,68 +180,71 @@ class VendorControllerTest {
                         instanceOf(ResourceNotFoundException.class)));
     }
 
+
+    // -------------- CREATE ----------------------------
     @Test
     void createNewVendor_PhysicalStore() throws Exception{
 
-        PhysicalStoreDTO passedDto = new PhysicalStoreDTO("PS Test", "Test St.");
+        PhysicalStoreDTO passedDto = new PhysicalStoreDTO(PS_NAME, ADDRESS);
 
         PhysicalStore passedEntity = new PhysicalStore(passedDto.getName(), passedDto.getAddress());
 
         PhysicalStore returnedEntity = new PhysicalStore(passedEntity.getName(), passedEntity.getAddress());
-        returnedEntity.setId(1);
+        returnedEntity.setId(ID);
 
-        PhysicalStoreDTO returnedDto = new PhysicalStoreDTO(passedDto.getName(), passedDto.getAddress());
-        returnedDto.setId(returnedEntity.getId());
+        PhysicalStoreDTO returnedDTO = new PhysicalStoreDTO(passedDto.getName(), passedDto.getAddress());
+        returnedDTO.setId(returnedEntity.getId());
 
         when(vendorMapper.convertToEntity(any(VendorDTO.class))).thenReturn(passedEntity);
         when(vendorService.createNewVendor(passedEntity)).thenReturn(returnedEntity);
-        when(vendorMapper.convertToDTO(any(Vendor.class))).thenReturn(returnedDto);
+        when(vendorMapper.convertToDTO(any(Vendor.class))).thenReturn(returnedDTO);
 
         mockMvc.perform(post("/api/vendors")
                         .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(passedDto)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.type", equalTo("Physical Store")))
-                .andExpect(jsonPath("$.id", equalTo(returnedDto.getId())))
-                .andExpect(jsonPath("$.name", equalTo(passedDto.getName())))
-                .andExpect(jsonPath("$.address", equalTo(passedDto.getAddress())))
-                .andExpect(jsonPath("$.path", equalTo(returnedDto.getPath())));
+                .andExpect(result -> {
+                    String retString = result.getResponse().getContentAsString();
+                    PhysicalStoreDTO objFromJson = objectMapper.readValue(retString, PhysicalStoreDTO.class);
+                    returnedDTO.setPath("/api/vendors/" + returnedDTO.getId()); //path is set inside controller
+                    assertEquals(returnedDTO, objFromJson);
+                });
     }
 
     @Test
     void createNewVendor_OnlineStore() throws Exception{
 
-        OnlineStoreDTO passedDto = new OnlineStoreDTO("PS Test", "www.test.com");
+        OnlineStoreDTO passedDto = new OnlineStoreDTO(PS_NAME, URL);
 
         OnlineStore passedEntity = new OnlineStore(passedDto.getName(), passedDto.getUrl());
 
         OnlineStore returnedEntity = new OnlineStore(passedEntity.getName(), passedEntity.getUrl());
-        returnedEntity.setId(1);
+        returnedEntity.setId(ID);
 
-        OnlineStoreDTO returnedDto = new OnlineStoreDTO(passedDto.getName(), passedDto.getUrl());
-        returnedDto.setId(returnedEntity.getId());
-        returnedDto.setPath("/api/vendors/" + returnedDto.getId());
+        OnlineStoreDTO returnedDTO = new OnlineStoreDTO(passedDto.getName(), passedDto.getUrl());
+        returnedDTO.setId(returnedEntity.getId());
 
         when(vendorMapper.convertToEntity(any(VendorDTO.class))).thenReturn(passedEntity);
         when(vendorService.createNewVendor(passedEntity)).thenReturn(returnedEntity);
-        when(vendorMapper.convertToDTO(any(Vendor.class))).thenReturn(returnedDto);
+        when(vendorMapper.convertToDTO(any(Vendor.class))).thenReturn(returnedDTO);
 
         mockMvc.perform(post("/api/vendors")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(passedDto)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.type", equalTo("Online Store")))
-                .andExpect(jsonPath("$.id", equalTo(returnedDto.getId())))
-                .andExpect(jsonPath("$.name", equalTo(passedDto.getName())))
-                .andExpect(jsonPath("$.url", equalTo(passedDto.getUrl())))
-                .andExpect(jsonPath("$.path", equalTo(returnedDto.getPath())));
+                .andExpect(result -> {
+                    String retString = result.getResponse().getContentAsString();
+                    OnlineStoreDTO objFromJson = objectMapper.readValue(retString, OnlineStoreDTO.class);
+                    returnedDTO.setPath("/api/vendors/" + returnedDTO.getId()); //path is set inside controller
+                    assertEquals(returnedDTO, objFromJson);
+                });
     }
 
     @Test
-    void createNewVendor_IdNotNull() throws Exception{
+    void createNewVendor_BodyIdNotNull() throws Exception{
 
-        OnlineStoreDTO passedDto = new OnlineStoreDTO("PS Test", "www.test.com");
-        passedDto.setId(1);
+        OnlineStoreDTO passedDto = new OnlineStoreDTO(PS_NAME, URL);
+        passedDto.setId(ID);
 
         mockMvc.perform(post("/api/vendors")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -239,9 +255,54 @@ class VendorControllerTest {
     }
 
     @Test
-    void createNewVendor_NameAlreadyExists() throws Exception{
+    void createNewVendor_MissingNameField() throws Exception{
 
-        OnlineStoreDTO passedDto = new OnlineStoreDTO("PS Test", "www.test.com");
+        OnlineStoreDTO passedDto = new OnlineStoreDTO();
+        //missing name
+        passedDto.setUrl(URL);
+
+        mockMvc.perform(post("/api/vendors")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(passedDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertThat(result.getResolvedException(),
+                        instanceOf(ConstraintViolationException.class)));
+    }
+
+    @Test
+    void createNewVendor_MissingUrlField() throws Exception{
+
+        OnlineStoreDTO passedDto = new OnlineStoreDTO();
+        passedDto.setName(OS_NAME);
+        //missing url
+
+        mockMvc.perform(post("/api/vendors")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(passedDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertThat(result.getResolvedException(),
+                        instanceOf(ConstraintViolationException.class)));
+    }
+
+    @Test
+    void createNewVendor_MissingAddressField() throws Exception{
+
+        PhysicalStore passedDto = new PhysicalStore();
+        passedDto.setName(OS_NAME);
+        //missing address
+
+        mockMvc.perform(post("/api/vendors")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(passedDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertThat(result.getResolvedException(),
+                        instanceOf(ConstraintViolationException.class)));
+    }
+
+    @Test
+    void createNewVendor_ResourceAlreadyExists() throws Exception{
+
+        OnlineStoreDTO passedDto = new OnlineStoreDTO(PS_NAME, URL);
 
         OnlineStore passedEntity = new OnlineStore(passedDto.getName(), passedDto.getUrl());
 
@@ -256,35 +317,38 @@ class VendorControllerTest {
                         instanceOf(ResourceAlreadyExistsException.class)));
     }
 
+
+
+    // -------------- UPDATE ----------------------------
     @Test
     void updateVendorById() throws Exception{
 
-        int savedId = 1;
+        int savedId = ID;
 
-        OnlineStoreDTO passedDto = new OnlineStoreDTO("PS Test Update", "www.testUpdate.com");
+        OnlineStoreDTO passedDto = new OnlineStoreDTO(OS_NAME, URL);
 
-        OnlineStore passedEntity = new OnlineStore(passedDto.getName(), passedDto.getUrl());
+        OnlineStore toUpdateEntity = new OnlineStore(passedDto.getName(), passedDto.getUrl());
 
-        OnlineStore returnedEntity = new OnlineStore(passedEntity.getName(), passedEntity.getUrl());
-        returnedEntity.setId(savedId);
+        OnlineStore updatedEntity = new OnlineStore(toUpdateEntity.getName(), toUpdateEntity.getUrl());
+        updatedEntity.setId(savedId);
 
-        OnlineStoreDTO returnedDto = new OnlineStoreDTO(passedDto.getName(), passedDto.getUrl());
-        returnedDto.setId(returnedEntity.getId());
-        returnedDto.setPath("/api/vendors/" + returnedDto.getId());
+        OnlineStoreDTO returnedDTO = new OnlineStoreDTO(passedDto.getName(), passedDto.getUrl());
+        returnedDTO.setId(updatedEntity.getId());
 
-        when(vendorMapper.convertToEntity(any(VendorDTO.class))).thenReturn(passedEntity);
-        when(vendorService.updateVendorById(savedId, passedEntity)).thenReturn(returnedEntity);
-        when(vendorMapper.convertToDTO(any(Vendor.class))).thenReturn(returnedDto);
+        when(vendorMapper.convertToEntity(any(VendorDTO.class))).thenReturn(toUpdateEntity);
+        when(vendorService.updateVendorById(savedId, toUpdateEntity)).thenReturn(updatedEntity);
+        when(vendorMapper.convertToDTO(any(Vendor.class))).thenReturn(returnedDTO);
 
         mockMvc.perform(put("/api/vendors/{id}", savedId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(passedDto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.type", equalTo("Online Store")))
-                .andExpect(jsonPath("$.id", equalTo(savedId)))
-                .andExpect(jsonPath("$.name", equalTo(passedDto.getName())))
-                .andExpect(jsonPath("$.url", equalTo(passedDto.getUrl())))
-                .andExpect(jsonPath("$.path", equalTo(returnedDto.getPath())));
+                .andExpect(result -> {
+                    String retString = result.getResponse().getContentAsString();
+                    OnlineStoreDTO objFromJson = objectMapper.readValue(retString, OnlineStoreDTO.class);
+                    returnedDTO.setPath("/api/vendors/" + returnedDTO.getId()); //path is set inside controller
+                    assertEquals(returnedDTO, objFromJson);
+                });
     }
 
     @Test
@@ -292,7 +356,7 @@ class VendorControllerTest {
 
         int notFoundId = 123;
 
-        OnlineStoreDTO passedDto = new OnlineStoreDTO("PS Test Update", "www.testUpdate.com");
+        OnlineStoreDTO passedDto = new OnlineStoreDTO(OS_NAME, URL);
 
         OnlineStore passedEntity = new OnlineStore(passedDto.getName(), passedDto.getUrl());
 
@@ -309,12 +373,12 @@ class VendorControllerTest {
     }
 
     @Test
-    void updateVendorById_IdNotNull() throws Exception{
+    void updateVendorById_BodyIdNotNull() throws Exception{
 
-        OnlineStoreDTO passedDto = new OnlineStoreDTO("PS Test Update", "www.testUpdate.com");
-        passedDto.setId(1);
+        OnlineStoreDTO passedDto = new OnlineStoreDTO(OS_NAME, URL);
+        passedDto.setId(ID);
 
-        mockMvc.perform(put("/api/vendors/{id}", 1)
+        mockMvc.perform(put("/api/vendors/{id}", ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(passedDto)))
                 .andExpect(status().isBadRequest())
@@ -323,11 +387,11 @@ class VendorControllerTest {
     }
 
     @Test
-    void updateVendorById_NameAlreadyExists() throws Exception{
+    void updateVendorById_ResourceAlreadyExists() throws Exception{
 
-        int savedId = 1;
+        int savedId = ID;
 
-        OnlineStoreDTO passedDto = new OnlineStoreDTO("PS Test Update", "www.testUpdate.com");
+        OnlineStoreDTO passedDto = new OnlineStoreDTO(OS_NAME, URL);
 
         OnlineStore passedEntity = new OnlineStore(passedDto.getName(), passedDto.getUrl());
 
@@ -344,12 +408,43 @@ class VendorControllerTest {
     }
 
     @Test
+    void updateVendorById_MissingNameField() throws Exception{
+
+        OnlineStoreDTO passedDto = new OnlineStoreDTO();
+        //missing name
+        passedDto.setUrl(URL);
+
+        mockMvc.perform(put("/api/vendors/{id}", ID)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(passedDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertThat(result.getResolvedException(),
+                        instanceOf(ConstraintViolationException.class)));
+    }
+
+    @Test
     void updateVendorById_MissingUrlField() throws Exception{
 
         OnlineStoreDTO passedDto = new OnlineStoreDTO();
-        passedDto.setName("OS Test");
+        passedDto.setName(OS_NAME);
+        //missing url
 
-        mockMvc.perform(put("/api/vendors/{id}", 1)
+        mockMvc.perform(put("/api/vendors/{id}", ID)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(passedDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertThat(result.getResolvedException(),
+                        instanceOf(ConstraintViolationException.class)));
+    }
+
+    @Test
+    void updateVendorById_MissingAddressField() throws Exception{
+
+        PhysicalStore passedDto = new PhysicalStore();
+        passedDto.setName(OS_NAME);
+        //missing address
+
+        mockMvc.perform(put("/api/vendors/{id}", ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(passedDto)))
                 .andExpect(status().isBadRequest())
@@ -360,9 +455,9 @@ class VendorControllerTest {
     @Test
     void updateVendorById_IncorrectType() throws Exception{
 
-        int savedId = 1;
+        int savedId = ID;
 
-        OnlineStoreDTO passedDto = new OnlineStoreDTO("PS Test Update", "www.testUpdate.com");
+        OnlineStoreDTO passedDto = new OnlineStoreDTO(OS_NAME, URL);
 
         OnlineStore passedEntity = new OnlineStore(passedDto.getName(), passedDto.getUrl());
 
@@ -378,35 +473,37 @@ class VendorControllerTest {
                         instanceOf(IncorrectVendorTypeException.class)));
     }
 
+
+    // -------------- PATCH ----------------------------
     @Test
     void patchVendorById() throws Exception{
 
-        int savedId = 1;
+        int savedId = ID;
 
-        OnlineStoreDTO passedDto = new OnlineStoreDTO("PS Test Update", "www.testUpdate.com");
+        OnlineStoreDTO passedDto = new OnlineStoreDTO(OS_NAME, URL);
 
-        OnlineStore passedEntity = new OnlineStore(passedDto.getName(), passedDto.getUrl());
+        OnlineStore toPatchEntity = new OnlineStore(passedDto.getName(), passedDto.getUrl());
 
-        OnlineStore returnedEntity = new OnlineStore(passedEntity.getName(), passedEntity.getUrl());
-        returnedEntity.setId(savedId);
+        OnlineStore patchedEntity = new OnlineStore(toPatchEntity.getName(), toPatchEntity.getUrl());
+        patchedEntity.setId(savedId);
 
-        OnlineStoreDTO returnedDto = new OnlineStoreDTO(passedDto.getName(), passedDto.getUrl());
-        returnedDto.setId(returnedEntity.getId());
-        returnedDto.setPath("/api/vendors/" + returnedDto.getId());
+        OnlineStoreDTO returnedDTO = new OnlineStoreDTO(passedDto.getName(), passedDto.getUrl());
+        returnedDTO.setId(patchedEntity.getId());
 
-        when(vendorMapper.convertToEntity(any(VendorDTO.class))).thenReturn(passedEntity);
-        when(vendorService.patchVendorById(savedId, passedEntity)).thenReturn(returnedEntity);
-        when(vendorMapper.convertToDTO(any(Vendor.class))).thenReturn(returnedDto);
+        when(vendorMapper.convertToEntity(any(VendorDTO.class))).thenReturn(toPatchEntity);
+        when(vendorService.patchVendorById(savedId, toPatchEntity)).thenReturn(patchedEntity);
+        when(vendorMapper.convertToDTO(any(Vendor.class))).thenReturn(returnedDTO);
 
         mockMvc.perform(patch("/api/vendors/{id}", savedId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(passedDto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.type", equalTo("Online Store")))
-                .andExpect(jsonPath("$.id", equalTo(savedId)))
-                .andExpect(jsonPath("$.name", equalTo(passedDto.getName())))
-                .andExpect(jsonPath("$.url", equalTo(passedDto.getUrl())))
-                .andExpect(jsonPath("$.path", equalTo(returnedDto.getPath())));
+                .andExpect(result -> {
+                    String retString = result.getResponse().getContentAsString();
+                    OnlineStoreDTO objFromJson = objectMapper.readValue(retString, OnlineStoreDTO.class);
+                    returnedDTO.setPath("/api/vendors/" + returnedDTO.getId()); //path is set inside controller
+                    assertEquals(returnedDTO, objFromJson);
+                });
     }
 
     @Test
@@ -414,7 +511,7 @@ class VendorControllerTest {
 
         int notFoundId = 123;
 
-        OnlineStoreDTO passedDto = new OnlineStoreDTO("PS Test Update", "www.testUpdate.com");
+        OnlineStoreDTO passedDto = new OnlineStoreDTO(OS_NAME, URL);
 
         OnlineStore passedEntity = new OnlineStore(passedDto.getName(), passedDto.getUrl());
 
@@ -431,12 +528,12 @@ class VendorControllerTest {
     }
 
     @Test
-    void patchVendorById_IdNotNull() throws Exception{
+    void patchVendorById_BodyIdNotNull() throws Exception{
 
-        OnlineStoreDTO passedDto = new OnlineStoreDTO("PS Test Update", "www.testUpdate.com");
-        passedDto.setId(1);
+        OnlineStoreDTO passedDto = new OnlineStoreDTO(OS_NAME, URL);
+        passedDto.setId(ID);
 
-        mockMvc.perform(patch("/api/vendors/{id}", 1)
+        mockMvc.perform(patch("/api/vendors/{id}", ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(passedDto)))
                 .andExpect(status().isBadRequest())
@@ -445,11 +542,11 @@ class VendorControllerTest {
     }
 
     @Test
-    void patchVendorById_NameAlreadyExists() throws Exception{
+    void patchVendorById_ResourceAlreadyExists() throws Exception{
 
-        int savedId = 1;
+        int savedId = ID;
 
-        OnlineStoreDTO passedDto = new OnlineStoreDTO("PS Test Update", "www.testUpdate.com");
+        OnlineStoreDTO passedDto = new OnlineStoreDTO(OS_NAME, URL);
 
         OnlineStore passedEntity = new OnlineStore(passedDto.getName(), passedDto.getUrl());
 
@@ -465,17 +562,39 @@ class VendorControllerTest {
 
     }
 
+    @Test
+    void patchVendorById_IncorrectType() throws Exception{
 
+        int savedId = ID;
+
+        OnlineStoreDTO passedDto = new OnlineStoreDTO(OS_NAME, URL);
+
+        OnlineStore passedEntity = new OnlineStore(passedDto.getName(), passedDto.getUrl());
+
+
+        when(vendorMapper.convertToEntity(any(VendorDTO.class))).thenReturn(passedEntity);
+        when(vendorService.patchVendorById(savedId, passedEntity)).thenThrow(IncorrectVendorTypeException.class);
+
+        mockMvc.perform(patch("/api/vendors/{id}", savedId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(passedDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertThat(result.getResolvedException(),
+                        instanceOf(IncorrectVendorTypeException.class)));
+    }
+
+
+    // -------------- DELETE ----------------------------
     @Test
     void deleteVendorById() throws Exception{
 
-        Integer idToDelete = 1;
+        Integer idToDelete = ID;
 
         mockMvc.perform(delete("/api/vendors/{id}", idToDelete)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
 
-        verify(vendorService, times(1)).deleteVendorById(idToDelete);
+        verify(vendorService, times(ID)).deleteVendorById(idToDelete);
     }
 
     @Test
@@ -491,14 +610,16 @@ class VendorControllerTest {
                 .andExpect(result -> assertThat(result.getResolvedException(),
                         instanceOf(ResourceNotFoundException.class)));
 
-        verify(vendorService, times(1)).deleteVendorById(notFoundId);
+        verify(vendorService, times(ID)).deleteVendorById(notFoundId);
     }
 
+
+    // -------------- TRANSACTIONS ----------------------------
     @Test
     void getTransactionsByVendorId() throws Exception{
 
         Transaction t1 = new Transaction();
-        t1.setId(1);
+        t1.setId(ID);
         t1.setAmount(53.00);
         t1.setDescription("Test Transaction 1");
 
@@ -507,28 +628,34 @@ class VendorControllerTest {
         t2.setAmount(123.00);
         t2.setDescription("Test Transaction 2");
 
-        List<Transaction> transactions = Arrays.asList(t1, t2);
+        Transaction t3 = new Transaction();
+        t3.setId(3);
+        t3.setAmount(123.00);
+        t3.setDescription("Test Transaction 3");
 
-        Integer vendorId = 1;
+        List<Transaction> transactions = Arrays.asList(t1, t2, t3);
 
-        Pageable pageable = PageRequest.of(DEFAULT_PAGE, DEFAULT_SIZE, Sort.by("date"));
+        Integer vendorId = ID;
+
+        Pageable pageable = PageRequest.of(1, DEFAULT_SIZE, Sort.by("date"));
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), transactions.size());
 
-        Page<Transaction> pagedTransactions = new PageImpl<Transaction>(
+        Page<Transaction> pagedTransactions = new PageImpl<>(
                 transactions.subList(start, end), pageable, transactions.size());
 
-        when(vendorService.getTransactionsByVendorId(vendorId, DEFAULT_PAGE, DEFAULT_SIZE)).thenReturn(pagedTransactions);
+        when(vendorService.getTransactionsByVendorId(vendorId, 1, DEFAULT_SIZE)).thenReturn(pagedTransactions);
 
         mockMvc.perform(get("/api/vendors/{id}/transactions", vendorId)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("page", "1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.pageNo", equalTo(DEFAULT_PAGE)))
+                .andExpect(jsonPath("$.pageNo", equalTo(1)))
                 .andExpect(jsonPath("$.pageSize", equalTo(DEFAULT_SIZE)))
                 .andExpect(jsonPath("$.totalElements", equalTo(transactions.size())))
-                .andExpect(jsonPath("$.nextPage", equalTo("/api/vendors/1/transactions?page=1&size=1")))
-                .andExpect(jsonPath("$.previousPage", equalTo(null)))
-                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.nextPage", equalTo("/api/vendors/1/transactions?page=2&size=1")))
+                .andExpect(jsonPath("$.previousPage", equalTo("/api/vendors/1/transactions?page=0&size=1")))
+                .andExpect(jsonPath("$.content", hasSize(DEFAULT_SIZE)))
                 .andDo(print());
     }
 
