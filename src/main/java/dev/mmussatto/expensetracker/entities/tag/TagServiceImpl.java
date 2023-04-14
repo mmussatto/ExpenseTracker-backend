@@ -104,6 +104,7 @@ public class TagServiceImpl implements TagService {
     }
 
 
+    // -------------- Helpers ----------------------------
     private void checkIfNameIsAlreadyInUse(Tag Tag) {
         tagRepository.findByName(Tag.getName()).ifPresent(tag -> {
             throw new ResourceAlreadyExistsException(String.format("Tag %s already exists", Tag.getName()),
