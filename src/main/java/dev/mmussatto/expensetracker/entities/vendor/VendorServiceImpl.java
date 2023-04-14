@@ -24,6 +24,7 @@ public class VendorServiceImpl<V extends Vendor> implements VendorService<V> {
         this.vendorRepository = vendorRepository;
     }
 
+
     @Override
     public List<V> getAllVendors() {
         return vendorRepository.findAll();

@@ -13,9 +13,9 @@ import dev.mmussatto.expensetracker.entities.vendor.physicalstore.PhysicalStore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.apache.commons.lang3.builder.HashCodeExclude;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +27,6 @@ import java.util.List;
 })
 @Data
 @NoArgsConstructor
-@EqualsAndHashCode(exclude = {"transactions"})
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Vendor {
@@ -41,6 +40,7 @@ public abstract class Vendor {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "vendor")
     @ToString.Exclude
+    @HashCodeExclude
     @JsonIgnore
     private List<Transaction> transactions = new ArrayList<>();
 

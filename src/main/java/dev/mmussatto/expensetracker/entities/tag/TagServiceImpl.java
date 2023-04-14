@@ -21,6 +21,7 @@ public class TagServiceImpl implements TagService {
         this.tagRepository = tagRepository;
     }
 
+
     @Override
     public List<Tag> getAllTags() {
         return tagRepository.findAll();

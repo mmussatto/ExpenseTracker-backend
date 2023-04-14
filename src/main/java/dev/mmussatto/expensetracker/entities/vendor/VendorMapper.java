@@ -36,11 +36,14 @@ public interface VendorMapper {
         }
     }
 
-    OnlineStoreDTO convertToDTO(OnlineStore onlineStore);
 
+
+    // -------------- Online Store ----------------------------
+    OnlineStoreDTO convertToDTO(OnlineStore onlineStore);
     OnlineStore convertToEntity(OnlineStoreDTO onlineStoreDTO);
 
-    PhysicalStoreDTO convertToDTO(PhysicalStore physicalStore);
 
+    // -------------- Physical Store ----------------------------
+    PhysicalStoreDTO convertToDTO(PhysicalStore physicalStore);
     PhysicalStore convertToEntity(PhysicalStoreDTO physicalStoreDTO);
 }

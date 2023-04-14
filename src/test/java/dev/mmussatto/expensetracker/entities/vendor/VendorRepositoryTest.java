@@ -6,12 +6,14 @@ package dev.mmussatto.expensetracker.entities.vendor;
 
 import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStore;
 import dev.mmussatto.expensetracker.entities.vendor.physicalstore.PhysicalStore;
+import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DataJpaTest
 class VendorRepositoryTest {
@@ -78,5 +80,15 @@ class VendorRepositoryTest {
         assertEquals(ps1.getId(), psTest.getId());
         assertEquals(ps1.getName(), psTest.getName());
 
+    }
+
+    @Test
+    void preventNull() {
+
+        Vendor os = new OnlineStore();
+        Vendor ps = new PhysicalStore();
+
+        assertThrows(ConstraintViolationException.class, () -> testEntityManager.persist(os));
+        assertThrows(ConstraintViolationException.class, () -> testEntityManager.persist(ps));
     }
 }

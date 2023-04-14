@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class VendorMapperTest {
 
+    // -------------- Constants ----------------------------
     public static final Integer ID = 1;
     public static final String NAME = "Test";
     public static final String URL  = "www.test.com";
@@ -29,6 +30,39 @@ class VendorMapperTest {
     VendorMapper vendorMapper = VendorMapper.INSTANCE;
 
 
+    // -------------- Online Store ----------------------------
+    @Test
+    void convertOnlineStoreToDTO() {
+
+        OnlineStore entity = new OnlineStore(NAME, URL);
+        entity.setId(ID);
+        entity.setTransactions(TRANSACTIONS);
+
+        OnlineStoreDTO dto = vendorMapper.convertToDTO(entity);
+
+        assertEquals(entity.getId(), dto.getId());
+        assertEquals(entity.getName(), dto.getName());
+        assertEquals(entity.getUrl(), dto.getUrl());
+        assertEquals(entity.getTransactions(), dto.getTransactions());
+    }
+
+    @Test
+    void convertOnlineStoreDTOToEntity() {
+
+        OnlineStoreDTO dto = new OnlineStoreDTO(NAME, ADDRESS);
+        dto.setId(ID);
+        dto.setTransactions(TRANSACTIONS);
+
+        OnlineStore entity = vendorMapper.convertToEntity(dto);
+
+        assertEquals(dto.getId(), entity.getId());
+        assertEquals(dto.getName(), entity.getName());
+        assertEquals(dto.getUrl(), entity.getUrl());
+        assertEquals(dto.getTransactions(), entity.getTransactions());
+    }
+
+
+    // -------------- Physical Store ----------------------------
     @Test
     void convertPhysicalStoreToDTO() {
 
@@ -58,36 +92,4 @@ class VendorMapperTest {
         assertEquals(dto.getAddress(), entity.getAddress());
         assertEquals(dto.getTransactions(), entity.getTransactions());
     }
-
-    @Test
-    void testConvertOnlineStoreToDTO() {
-
-        OnlineStore entity = new OnlineStore(NAME, URL);
-        entity.setId(ID);
-        entity.setTransactions(TRANSACTIONS);
-
-        OnlineStoreDTO dto = vendorMapper.convertToDTO(entity);
-
-        assertEquals(entity.getId(), dto.getId());
-        assertEquals(entity.getName(), dto.getName());
-        assertEquals(entity.getUrl(), dto.getUrl());
-        assertEquals(entity.getTransactions(), dto.getTransactions());
-    }
-
-    @Test
-    void testConvertOnlineStoreDTOToEntity() {
-
-        OnlineStoreDTO dto = new OnlineStoreDTO(NAME, ADDRESS);
-        dto.setId(ID);
-        dto.setTransactions(TRANSACTIONS);
-
-        OnlineStore entity = vendorMapper.convertToEntity(dto);
-
-        assertEquals(dto.getId(), entity.getId());
-        assertEquals(dto.getName(), entity.getName());
-        assertEquals(dto.getUrl(), entity.getUrl());
-        assertEquals(dto.getTransactions(), entity.getTransactions());
-    }
-
-
 }
