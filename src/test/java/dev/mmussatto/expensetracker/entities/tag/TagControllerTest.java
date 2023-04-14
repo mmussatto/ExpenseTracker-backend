@@ -523,7 +523,7 @@ class TagControllerTest {
 
         mockMvc.perform(get("/api/tags/{id}/transactions", tagId)
                         .contentType(MediaType.APPLICATION_JSON)
-                .param("page", "1"))
+                        .param("page", "1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.pageNo", equalTo(1)))
                 .andExpect(jsonPath("$.pageSize", equalTo(DEFAULT_SIZE)))
