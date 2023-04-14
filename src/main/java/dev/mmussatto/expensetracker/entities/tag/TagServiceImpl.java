@@ -40,6 +40,7 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public Tag createNewTag(Tag tag) {
+
         checkIfNameIsAlreadyInUse(tag);
 
         return tagRepository.save(tag);
@@ -60,17 +61,20 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public Tag patchTagById(Integer id, Tag tag) {
+
         return tagRepository.findById(id).map(savedEntity -> {
 
+            //Update name
             if (tag.getName() != null) {
                 checkIfNameIsAlreadyInUse(tag);
-
                 savedEntity.setName(tag.getName());
             }
 
+            //Update color
             if (tag.getColor() != null)
                 savedEntity.setColor(tag.getColor());
 
+            //Save
             return tagRepository.save(savedEntity);
 
         }).orElseThrow(() -> new ResourceNotFoundException(String.format("Tag %d not found!", id)));
@@ -95,7 +99,7 @@ public class TagServiceImpl implements TagService {
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), transactions.size());
 
-        return new PageImpl<Transaction>(transactions.subList(start, end), pageable, transactions.size());
+        return new PageImpl<>(transactions.subList(start, end), pageable, transactions.size());
     }
 
 

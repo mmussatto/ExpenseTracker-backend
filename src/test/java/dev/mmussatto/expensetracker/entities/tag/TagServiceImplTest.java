@@ -8,9 +8,10 @@ import dev.mmussatto.expensetracker.entities.helpers.Color;
 import dev.mmussatto.expensetracker.entities.transaction.Transaction;
 import dev.mmussatto.expensetracker.exceptions.ResourceAlreadyExistsException;
 import dev.mmussatto.expensetracker.exceptions.ResourceNotFoundException;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
@@ -26,11 +27,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class TagServiceImplTest {
 
-    @Mock
-    TagRepository tagRepository;
-
-    TagService tagService;
-
+    // -------------- Constants ----------------------------
     public static final Integer ID = 1;
     public static final String NAME = "Test";
     public static final Color COLOR = Color.BLUE;
@@ -39,12 +36,21 @@ class TagServiceImplTest {
     public static final int DEFAULT_SIZE = 1;
 
 
-    @BeforeEach
-    void setUp() {
-        tagService = new TagServiceImpl(tagRepository);
+    @Mock
+    TagRepository tagRepository;
+
+    @InjectMocks
+    TagServiceImpl tagService;
+
+
+
+    @BeforeAll
+    static void initializeTransaction() {
         TRANSACTION.setId(1);
     }
 
+
+    // -------------- READ ----------------------------
     @Test
     void getAllTags() {
 
@@ -109,16 +115,16 @@ class TagServiceImplTest {
         assertThrows(ResourceNotFoundException.class, () -> tagService.getTagByName(NAME));
     }
 
+
+    // -------------- CREATE ----------------------------
     @Test
     void createNewTag() {
 
         //Entity passed to function
         Tag passedEntity = new Tag(NAME, COLOR);
-        passedEntity.getTransactions().add(TRANSACTION);
 
         //Saved Entity
         Tag savedTag = new Tag(passedEntity.getName(), passedEntity.getColor());
-        savedTag.setTransactions(passedEntity.getTransactions());
         savedTag.setId(ID);
 
         when(tagRepository.findByName(passedEntity.getName())).thenReturn(Optional.empty());
@@ -131,7 +137,6 @@ class TagServiceImplTest {
         assertEquals(savedTag.getId(), returnedEntity.getId());
         assertEquals(passedEntity.getName(), returnedEntity.getName());
         assertEquals(passedEntity.getColor(), returnedEntity.getColor());
-        assertEquals(passedEntity.getTransactions(), returnedEntity.getTransactions());
     }
 
     @Test
@@ -149,6 +154,8 @@ class TagServiceImplTest {
         assertThrows(ResourceAlreadyExistsException.class, () -> tagService.createNewTag(passedEntity));
     }
 
+
+    // -------------- UPDATE ----------------------------
     @Test
     void updateTagById() {
 
@@ -156,27 +163,32 @@ class TagServiceImplTest {
         Tag passedEntity = new Tag("Test Update", Color.GREEN);
 
         //Saved Entity
-        Tag original = createTagEntity();
+        Tag originalEntity = createTagEntity();
+
+        //To update Tag
+        Tag toUpdateEntity = new Tag(passedEntity.getName(), passedEntity.getColor());
+        toUpdateEntity.setId(originalEntity.getId());
 
         //Updated Tag
-        Tag updatedTag = new Tag(passedEntity.getName(), passedEntity.getColor());
-        updatedTag.setId(original.getId());
-        updatedTag.setTransactions(passedEntity.getTransactions());
+        Tag updatedTag = new Tag(toUpdateEntity.getName(), toUpdateEntity.getColor());
+        updatedTag.setId(toUpdateEntity.getId());
+        updatedTag.setTransactions(originalEntity.getTransactions());
 
-        when(tagRepository.findById(original.getId())).thenReturn(Optional.of(original));
+        when(tagRepository.findById(originalEntity.getId())).thenReturn(Optional.of(originalEntity));
         when(tagRepository.findByName(passedEntity.getName())).thenReturn(Optional.empty());
-        when(tagRepository.save(updatedTag)).thenReturn(updatedTag);
+        when(tagRepository.save(toUpdateEntity)).thenReturn(updatedTag);
 
 
-        Tag returnedEntity = tagService.updateTagById(original.getId(), passedEntity);
+        Tag returnedEntity = tagService.updateTagById(originalEntity.getId(), passedEntity);
 
 
-        assertEquals(original.getId(), returnedEntity.getId());
+        assertEquals(originalEntity.getId(), returnedEntity.getId());
         assertEquals(passedEntity.getName(), returnedEntity.getName());
         assertEquals(passedEntity.getColor(), returnedEntity.getColor());
-        assertEquals(passedEntity.getTransactions(), returnedEntity.getTransactions());
+        assertEquals(originalEntity.getTransactions(), returnedEntity.getTransactions());
 
         verify(tagRepository, times(1)).findByName(passedEntity.getName());
+        verify(tagRepository, times(1)).save(toUpdateEntity);
     }
 
     @Test
@@ -186,12 +198,12 @@ class TagServiceImplTest {
         Tag passedEntity = new Tag("Test Update", Color.GREEN);
 
         //Saved Entity
-        Tag original = createTagEntity();
+        Tag originalEntity = createTagEntity();
 
-        when(tagRepository.findById(original.getId())).thenReturn(Optional.empty());
+        when(tagRepository.findById(originalEntity.getId())).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
-                () -> tagService.updateTagById(original.getId(), passedEntity));
+                () -> tagService.updateTagById(originalEntity.getId(), passedEntity));
     }
 
     @Test
@@ -204,18 +216,19 @@ class TagServiceImplTest {
         Tag original = createTagEntity();
 
         //Saved Entity already using passedEntity name
-        Tag anotherSavedEntity = createTagEntity();
-        anotherSavedEntity.setName("Test Update");
+        Tag nameAlreadyInUseEntity = new Tag(passedEntity.getName(), COLOR);
 
 
         when(tagRepository.findById(original.getId())).thenReturn(Optional.of(original));
-        when(tagRepository.findByName(passedEntity.getName())).thenReturn(Optional.of(anotherSavedEntity));
+        when(tagRepository.findByName(passedEntity.getName())).thenReturn(Optional.of(nameAlreadyInUseEntity));
 
 
         assertThrows(ResourceAlreadyExistsException.class,
                 () -> tagService.updateTagById(original.getId(), passedEntity));
     }
 
+
+    // -------------- PATCH ----------------------------
     @Test
     void patchTagById() {
 
@@ -223,26 +236,29 @@ class TagServiceImplTest {
         Tag passedEntity = new Tag("Test Patch", Color.GREEN);
 
         //Saved Entity
-        Tag original = new Tag(NAME, COLOR);
-        original.setId(ID);
+        Tag originalEntity = createTagEntity();
 
         //Tag that will be updated and saved
-        Tag updated = new Tag(passedEntity.getName(), passedEntity.getColor());
-        updated.setId(original.getId());
+        Tag updatedEntity = new Tag(passedEntity.getName(), passedEntity.getColor());
+        updatedEntity.setId(originalEntity.getId());
+        updatedEntity.setTransactions(originalEntity.getTransactions());
 
-        when(tagRepository.findById(original.getId())).thenReturn(Optional.of(original));
+        when(tagRepository.findById(originalEntity.getId())).thenReturn(Optional.of(originalEntity));
         when(tagRepository.findByName(passedEntity.getName())).thenReturn(Optional.empty());
-        when(tagRepository.save(updated)).thenReturn(updated);
+        when(tagRepository.save(updatedEntity)).thenReturn(updatedEntity);
 
 
-        Tag returnedEntity = tagService.patchTagById(original.getId(), passedEntity);
+        Tag returnedEntity = tagService.patchTagById(originalEntity.getId(), passedEntity);
 
 
-        assertEquals(original.getId(), returnedEntity.getId());
+        assertEquals(originalEntity.getId(), returnedEntity.getId());
         assertEquals(passedEntity.getName(), returnedEntity.getName());
         assertEquals(passedEntity.getColor(), returnedEntity.getColor());
+        assertEquals(originalEntity.getTransactions(),returnedEntity.getTransactions());
 
         verify(tagRepository, times(1)).findByName(passedEntity.getName());
+        verify(tagRepository, times(1)).save(updatedEntity);
+
     }
 
     @Test
@@ -251,29 +267,32 @@ class TagServiceImplTest {
         //DTO passed to function
         Tag passedEntity = new Tag();
         passedEntity.setName("Test Patch");
+        //missing color
 
         //Saved Entity
-        Tag original = createTagEntity();
+        Tag originalEntity = createTagEntity();
 
         //Tag that will be updated and saved
-        Tag updated = new Tag(passedEntity.getName(), original.getColor());
-        updated.setId(original.getId());
-        updated.setTransactions(original.getTransactions());
+        Tag updatedEntity = new Tag(passedEntity.getName(), originalEntity.getColor());
+        updatedEntity.setId(originalEntity.getId());
+        updatedEntity.setTransactions(originalEntity.getTransactions());
 
-        when(tagRepository.findById(original.getId())).thenReturn(Optional.of(original));
+        when(tagRepository.findById(originalEntity.getId())).thenReturn(Optional.of(originalEntity));
         when(tagRepository.findByName(passedEntity.getName())).thenReturn(Optional.empty());
-        when(tagRepository.save(updated)).thenReturn(updated);
+        when(tagRepository.save(updatedEntity)).thenReturn(updatedEntity);
 
 
-        Tag returnedEntity = tagService.patchTagById(original.getId(), passedEntity);
+        Tag returnedEntity = tagService.patchTagById(originalEntity.getId(), passedEntity);
 
 
-        assertEquals(original.getId(), returnedEntity.getId());
+        assertEquals(originalEntity.getId(), returnedEntity.getId());
         assertEquals(passedEntity.getName(), returnedEntity.getName());
-        assertEquals(original.getColor(), returnedEntity.getColor());
-        assertEquals(original.getTransactions(), returnedEntity.getTransactions());
+        assertEquals(originalEntity.getColor(), returnedEntity.getColor());
+        assertEquals(originalEntity.getTransactions(), returnedEntity.getTransactions());
 
         verify(tagRepository, times(1)).findByName(passedEntity.getName());
+        verify(tagRepository, times(1)).save(updatedEntity);
+
     }
 
     @Test
@@ -281,29 +300,31 @@ class TagServiceImplTest {
 
         //DTO passed to function
         Tag passedEntity = new Tag();
+        //missing name
         passedEntity.setColor(Color.RED);
 
         //Saved Entity
-        Tag original = createTagEntity();
+        Tag originalEntity = createTagEntity();
 
         //Tag that will be updated and saved
-        Tag updated = new Tag(original.getName(), passedEntity.getColor());
-        updated.setId(original.getId());
-        updated.setTransactions(original.getTransactions());
+        Tag updatedEntity = new Tag(originalEntity.getName(), passedEntity.getColor());
+        updatedEntity.setId(originalEntity.getId());
+        updatedEntity.setTransactions(originalEntity.getTransactions());
 
-        when(tagRepository.findById(original.getId())).thenReturn(Optional.of(original));
-        when(tagRepository.save(updated)).thenReturn(updated);
-
-
-        Tag returnedEntity = tagService.patchTagById(original.getId(), passedEntity);
+        when(tagRepository.findById(originalEntity.getId())).thenReturn(Optional.of(originalEntity));
+        when(tagRepository.save(updatedEntity)).thenReturn(updatedEntity);
 
 
-        assertEquals(original.getId(), returnedEntity.getId());
-        assertEquals(original.getName(), returnedEntity.getName());
+        Tag returnedEntity = tagService.patchTagById(originalEntity.getId(), passedEntity);
+
+
+        assertEquals(originalEntity.getId(), returnedEntity.getId());
+        assertEquals(originalEntity.getName(), returnedEntity.getName());
         assertEquals(passedEntity.getColor(), returnedEntity.getColor());
-        assertEquals(original.getTransactions(), returnedEntity.getTransactions());
+        assertEquals(originalEntity.getTransactions(), returnedEntity.getTransactions());
 
         verify(tagRepository, never()).findByName(passedEntity.getName());
+        verify(tagRepository, times(1)).save(updatedEntity);
     }
 
     @Test
@@ -334,7 +355,7 @@ class TagServiceImplTest {
 
         //Another Saved Entity with the passedEntity name
         Tag anotherSavedEntity = createTagEntity();
-        anotherSavedEntity.setName("Test Patch");
+        anotherSavedEntity.setName(passedEntity.getName());
 
 
         when(tagRepository.findById(original.getId())).thenReturn(Optional.of(original));
@@ -345,6 +366,8 @@ class TagServiceImplTest {
                 () -> tagService.patchTagById(original.getId(), passedEntity));
     }
 
+
+    // -------------- DELETE ----------------------------
     @Test
     void deleteTagById() {
         when(tagRepository.findById(ID)).thenReturn(Optional.of(new Tag()));
@@ -368,6 +391,8 @@ class TagServiceImplTest {
         verify(tagRepository, times(1)).findById(notFoundId);
     }
 
+
+    // -------------- TRANSACTIONS ----------------------------
     @Test
     void getTransactionsByTagId() {
 
@@ -396,7 +421,7 @@ class TagServiceImplTest {
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), transactions.size());
 
-        Page<Transaction> pagedTransactions = new PageImpl<Transaction>(
+        Page<Transaction> pagedTransactions = new PageImpl<>(
                 transactions.subList(start, end), pageable, transactions.size());
 
 
@@ -421,7 +446,7 @@ class TagServiceImplTest {
     }
 
 
-
+    // -------------- Helpers ----------------------------
     private static Tag createTagEntity() {
         Tag tag = new Tag(NAME, COLOR);
         tag.setId(ID);

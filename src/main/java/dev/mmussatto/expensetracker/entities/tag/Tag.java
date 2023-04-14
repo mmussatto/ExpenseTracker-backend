@@ -10,15 +10,14 @@ import dev.mmussatto.expensetracker.entities.transaction.Transaction;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.apache.commons.lang3.builder.HashCodeExclude;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@EqualsAndHashCode(exclude = {"transactions"})
 @NoArgsConstructor
 @Entity
 public class Tag {
@@ -36,6 +35,7 @@ public class Tag {
 
     @ManyToMany(mappedBy = "tags")
     @ToString.Exclude
+    @HashCodeExclude
     @JsonIgnore
     private List<Transaction> transactions = new ArrayList<>();
 
