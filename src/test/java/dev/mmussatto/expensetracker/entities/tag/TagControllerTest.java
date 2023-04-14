@@ -91,7 +91,6 @@ class TagControllerTest {
 
         TagDTO returnedDTO = new TagDTO(savedEntity.getName(), savedEntity.getColor());
         returnedDTO.setId(savedEntity.getId());
-        returnedDTO.setPath("/api/tags" + returnedDTO.getId());
 
         when(tagService.getTagById(savedEntity.getId())).thenReturn(savedEntity);
         when(tagMapper.convertToDTO(savedEntity)).thenReturn(returnedDTO);
@@ -102,6 +101,7 @@ class TagControllerTest {
                 .andExpect(result -> {
                     String retString = result.getResponse().getContentAsString();
                     TagDTO objFromJson = objectMapper.readValue(retString, TagDTO.class);
+                    returnedDTO.setPath("/api/tags/" + returnedDTO.getId()); //path is set inside controller
                     assertEquals(returnedDTO, objFromJson);
                 });
     }
@@ -128,7 +128,6 @@ class TagControllerTest {
 
         TagDTO returnedDTO = new TagDTO(savedEntity.getName(), savedEntity.getColor());
         returnedDTO.setId(savedEntity.getId());
-        returnedDTO.setPath("/api/tags" + returnedDTO.getId());
 
         when(tagService.getTagByName(savedEntity.getName())).thenReturn(savedEntity);
         when(tagMapper.convertToDTO(savedEntity)).thenReturn(returnedDTO);
@@ -140,6 +139,7 @@ class TagControllerTest {
                 .andExpect(result -> {
                     String retString = result.getResponse().getContentAsString();
                     TagDTO objFromJson = objectMapper.readValue(retString, TagDTO.class);
+                    returnedDTO.setPath("/api/tags/" + returnedDTO.getId()); //path is set inside controller
                     assertEquals(returnedDTO, objFromJson);
                 });
     }
@@ -170,7 +170,6 @@ class TagControllerTest {
 
         TagDTO returnedDTO = new TagDTO(savedEntity.getName(), savedEntity.getColor());
         returnedDTO.setId(savedEntity.getId());
-        returnedDTO.setPath("/api/tags" + returnedDTO.getId());
 
         when(tagMapper.convertToEntity(passedDTO)).thenReturn(toSaveEntity);
         when(tagService.createNewTag(toSaveEntity)).thenReturn(savedEntity);
@@ -183,6 +182,7 @@ class TagControllerTest {
                 .andExpect(result -> {
                     String retString = result.getResponse().getContentAsString();
                     TagDTO objFromJson = objectMapper.readValue(retString, TagDTO.class);
+                    returnedDTO.setPath("/api/tags/" + returnedDTO.getId()); //path is set inside controller
                     assertEquals(returnedDTO, objFromJson);
                 });
     }
@@ -263,7 +263,6 @@ class TagControllerTest {
 
         TagDTO returnedDTO = new TagDTO(updatedEntity.getName(), updatedEntity.getColor());
         returnedDTO.setId(updatedEntity.getId());
-        returnedDTO.setPath("/api/tags" + returnedDTO.getId());
 
         when(tagMapper.convertToEntity(passedDTO)).thenReturn(toUpdateEntity);
         when(tagService.updateTagById(savedId, toUpdateEntity)).thenReturn(updatedEntity);
@@ -277,6 +276,7 @@ class TagControllerTest {
                 .andExpect(result -> {
                     String retString = result.getResponse().getContentAsString();
                     TagDTO objFromJson = objectMapper.readValue(retString, TagDTO.class);
+                    returnedDTO.setPath("/api/tags/" + returnedDTO.getId()); //path is set inside controller
                     assertEquals(returnedDTO, objFromJson);
                 });
     }
@@ -381,7 +381,6 @@ class TagControllerTest {
 
         TagDTO returnedDTO = new TagDTO(patchedEntity.getName(), patchedEntity.getColor());
         returnedDTO.setId(patchedEntity.getId());
-        returnedDTO.setPath("/api/tags" + returnedDTO.getId());
 
         when(tagMapper.convertToEntity(passedDTO)).thenReturn(toPatchEntity);
         when(tagService.patchTagById(savedId, toPatchEntity)).thenReturn(patchedEntity);
@@ -395,6 +394,7 @@ class TagControllerTest {
                 .andExpect(result -> {
                     String retString = result.getResponse().getContentAsString();
                     TagDTO objFromJson = objectMapper.readValue(retString, TagDTO.class);
+                    returnedDTO.setPath("/api/tags/" + returnedDTO.getId()); //path is set inside controller
                     assertEquals(returnedDTO, objFromJson);
                 });
     }

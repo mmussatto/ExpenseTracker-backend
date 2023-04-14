@@ -99,7 +99,6 @@ class CategoryControllerTest {
 
         CategoryDTO returnedDTO = new CategoryDTO(savedEntity.getName(), savedEntity.getColor());
         returnedDTO.setId(savedEntity.getId());
-        returnedDTO.setPath("/api/categories/" + returnedDTO.getId() );
 
         when(categoryService.getCategoryById(savedEntity.getId())).thenReturn(savedEntity);
         when(categoryMapper.convertToDTO(savedEntity)).thenReturn(returnedDTO);
@@ -111,6 +110,7 @@ class CategoryControllerTest {
                 .andExpect(result -> {
                     String retString = result.getResponse().getContentAsString();
                     CategoryDTO objFromJson = objectMapper.readValue(retString, CategoryDTO.class);
+                    returnedDTO.setPath("/api/categories/" + returnedDTO.getId()); //path is set inside controller
                     assertEquals(returnedDTO, objFromJson);
                 });
     }
@@ -134,7 +134,6 @@ class CategoryControllerTest {
 
         CategoryDTO returnedDTO = new CategoryDTO(savedEntity.getName(), savedEntity.getColor());
         returnedDTO.setId(savedEntity.getId());
-        returnedDTO.setPath("/api/categories/" + returnedDTO.getId() );
 
 
         when(categoryService.getCategoryByName(savedEntity.getName())).thenReturn(savedEntity);
@@ -147,6 +146,7 @@ class CategoryControllerTest {
                 .andExpect(result -> {
                     String retString = result.getResponse().getContentAsString();
                     CategoryDTO objFromJson = objectMapper.readValue(retString, CategoryDTO.class);
+                    returnedDTO.setPath("/api/categories/" + returnedDTO.getId()); //path is set inside controller
                     assertEquals(returnedDTO, objFromJson);
                 });
     }
@@ -178,7 +178,6 @@ class CategoryControllerTest {
 
         CategoryDTO returnedDTO = new CategoryDTO(savedEntity.getName(), savedEntity.getColor());
         returnedDTO.setId(savedEntity.getId());
-        returnedDTO.setPath("/api/categories/" + returnedDTO.getId());
 
 
         when(categoryMapper.convertToEntity(passedDTO)).thenReturn(toSaveEntity);
@@ -192,6 +191,7 @@ class CategoryControllerTest {
                 .andExpect(result -> {
                     String retString = result.getResponse().getContentAsString();
                     CategoryDTO objFromJson = objectMapper.readValue(retString, CategoryDTO.class);
+                    returnedDTO.setPath("/api/categories/" + returnedDTO.getId()); //path is set inside controller
                     assertEquals(returnedDTO, objFromJson);
                 });
     }
@@ -271,7 +271,6 @@ class CategoryControllerTest {
 
         CategoryDTO returnedDTO = new CategoryDTO(updatedEntity.getName(), updatedEntity.getColor());
         returnedDTO.setId(updatedEntity.getId());
-        returnedDTO.setPath("/api/categories/" + returnedDTO.getId());
 
 
         when(categoryMapper.convertToEntity(passedDTO)).thenReturn(toUpdateEntity);
@@ -285,6 +284,7 @@ class CategoryControllerTest {
                 .andExpect(result -> {
                     String retString = result.getResponse().getContentAsString();
                     CategoryDTO objFromJson = objectMapper.readValue(retString, CategoryDTO.class);
+                    returnedDTO.setPath("/api/categories/" + returnedDTO.getId()); //path is set inside controller
                     assertEquals(returnedDTO, objFromJson);
                 });
     }
@@ -384,7 +384,6 @@ class CategoryControllerTest {
 
         CategoryDTO returnedDTO = new CategoryDTO(patchedEntity.getName(), patchedEntity.getColor());
         returnedDTO.setId(patchedEntity.getId());
-        returnedDTO.setPath("/api/categories/" + returnedDTO.getId());
 
 
         when(categoryMapper.convertToEntity(passedDTO)).thenReturn(toPatchEntity);
@@ -399,6 +398,7 @@ class CategoryControllerTest {
                 .andExpect(result -> {
                     String retString = result.getResponse().getContentAsString();
                     CategoryDTO objFromJson = objectMapper.readValue(retString, CategoryDTO.class);
+                    returnedDTO.setPath("/api/categories/" + returnedDTO.getId()); //path is set inside controller
                     assertEquals(returnedDTO, objFromJson);
                 });
     }

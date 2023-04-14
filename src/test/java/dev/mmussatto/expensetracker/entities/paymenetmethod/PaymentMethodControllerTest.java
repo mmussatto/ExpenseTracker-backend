@@ -95,7 +95,6 @@ class PaymentMethodControllerTest {
 
         PaymentMethodDTO returnedDTO = new PaymentMethodDTO(savedEntity.getName(), savedEntity.getType());
         returnedDTO.setId(savedEntity.getId());
-        returnedDTO.setPath("/api/payment-methods/" + returnedDTO.getId());
 
         when(paymentMethodService.getPaymentMethodById(savedEntity.getId())).thenReturn(savedEntity);
         when(paymentMethodMapper.convertToDTO(savedEntity)).thenReturn(returnedDTO);
@@ -106,6 +105,7 @@ class PaymentMethodControllerTest {
                 .andExpect(result -> {
                     String retString = result.getResponse().getContentAsString();
                     PaymentMethodDTO objFromJson = objectMapper.readValue(retString, PaymentMethodDTO.class);
+                    returnedDTO.setPath("/api/payment-methods/" + returnedDTO.getId()); //path is set inside controller
                     assertEquals(returnedDTO, objFromJson);
                 });
     }
@@ -131,7 +131,6 @@ class PaymentMethodControllerTest {
 
         PaymentMethodDTO returnedDTO = new PaymentMethodDTO(savedEntity.getName(), savedEntity.getType());
         returnedDTO.setId(savedEntity.getId());
-        returnedDTO.setPath("/api/payment-methods/" + returnedDTO.getId());
 
         when(paymentMethodService.getPaymentMethodByName(savedEntity.getName())).thenReturn(savedEntity);
         when(paymentMethodMapper.convertToDTO(savedEntity)).thenReturn(returnedDTO);
@@ -142,6 +141,7 @@ class PaymentMethodControllerTest {
                 .andExpect(result -> {
                     String retString = result.getResponse().getContentAsString();
                     PaymentMethodDTO objFromJson = objectMapper.readValue(retString, PaymentMethodDTO.class);
+                    returnedDTO.setPath("/api/payment-methods/" + returnedDTO.getId()); //path is set inside controller
                     assertEquals(returnedDTO, objFromJson);
                 });
     }
@@ -173,7 +173,6 @@ class PaymentMethodControllerTest {
 
         PaymentMethodDTO returnedDTO = new PaymentMethodDTO(savedEntity.getName(), savedEntity.getType());
         returnedDTO.setId(savedEntity.getId());
-        returnedDTO.setPath("/api/payment-methods/" + returnedDTO.getId());
 
         when(paymentMethodMapper.convertToEntity(passedDTO)).thenReturn(toSaveEntity);
         when(paymentMethodService.createNewPaymentMethod(toSaveEntity)).thenReturn(savedEntity);
@@ -186,6 +185,7 @@ class PaymentMethodControllerTest {
                 .andExpect(result -> {
                     String retString = result.getResponse().getContentAsString();
                     PaymentMethodDTO objFromJson = objectMapper.readValue(retString, PaymentMethodDTO.class);
+                    returnedDTO.setPath("/api/payment-methods/" + returnedDTO.getId()); //path is set inside controller
                     assertEquals(returnedDTO, objFromJson);
                 });
     }
@@ -264,7 +264,6 @@ class PaymentMethodControllerTest {
 
         PaymentMethodDTO returnedDTO = new PaymentMethodDTO(updatedEntity.getName(), updatedEntity.getType());
         returnedDTO.setId(updatedEntity.getId());
-        returnedDTO.setPath("/api/payment-methods/" + returnedDTO.getId());
 
         when(paymentMethodMapper.convertToEntity(passedDTO)).thenReturn(toUpdateEntity);
         when(paymentMethodService.updatePaymentMethodById(savedID, toUpdateEntity)).thenReturn(updatedEntity);
@@ -278,6 +277,7 @@ class PaymentMethodControllerTest {
                 .andExpect(result -> {
                     String retString = result.getResponse().getContentAsString();
                     PaymentMethodDTO objFromJson = objectMapper.readValue(retString, PaymentMethodDTO.class);
+                    returnedDTO.setPath("/api/payment-methods/" + returnedDTO.getId()); //path is set inside controller
                     assertEquals(returnedDTO, objFromJson);
                 });
     }
@@ -377,7 +377,6 @@ class PaymentMethodControllerTest {
 
         PaymentMethodDTO returnedDTO = new PaymentMethodDTO(patchedEntity.getName(), patchedEntity.getType());
         returnedDTO.setId(patchedEntity.getId());
-        returnedDTO.setPath("/api/payment-methods/" + returnedDTO.getId());
 
         when(paymentMethodMapper.convertToEntity(passedDTO)).thenReturn(toPatchEntity);
         when(paymentMethodService.patchPaymentMethodById(savedID, toPatchEntity)).thenReturn(patchedEntity);
@@ -391,6 +390,7 @@ class PaymentMethodControllerTest {
                 .andExpect(result -> {
                     String retString = result.getResponse().getContentAsString();
                     PaymentMethodDTO objFromJson = objectMapper.readValue(retString, PaymentMethodDTO.class);
+                    returnedDTO.setPath("/api/payment-methods/" + returnedDTO.getId()); //path is set inside controller
                     assertEquals(returnedDTO, objFromJson);
                 });
     }
