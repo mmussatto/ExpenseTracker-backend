@@ -30,12 +30,6 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class PaymentMethodServiceImplTest {
 
-    @Mock
-    PaymentMethodRepository paymentMethodRepository;
-
-    @InjectMocks
-    PaymentMethodServiceImpl paymentMethodService;
-
     // -------------- Constants ----------------------------
     public static final Integer ID = 1;
     public static final String NAME = "Test";
@@ -43,6 +37,14 @@ class PaymentMethodServiceImplTest {
     public static final Transaction TRANSACTION = new Transaction();
     public static final int DEFAULT_PAGE = 0;
     public static final int DEFAULT_SIZE = 1;
+
+
+    @Mock
+    PaymentMethodRepository paymentMethodRepository;
+
+    @InjectMocks
+    PaymentMethodServiceImpl paymentMethodService;
+
 
 
     @BeforeAll
@@ -129,6 +131,7 @@ class PaymentMethodServiceImplTest {
         PaymentMethod savedEntity = new PaymentMethod(passedEntity.getName(), passedEntity.getType());
         savedEntity.setId(ID);
 
+        when(paymentMethodRepository.findByName(passedEntity.getName())).thenReturn(Optional.empty());
         when(paymentMethodRepository.save(passedEntity)).thenReturn(savedEntity);
 
         PaymentMethod returnedEntity = paymentMethodService.createNewPaymentMethod(passedEntity);
@@ -171,6 +174,7 @@ class PaymentMethodServiceImplTest {
         updatedEntity.setTransactions(originalEntity.getTransactions());
 
         when(paymentMethodRepository.findById(originalEntity.getId())).thenReturn(Optional.of(originalEntity));
+        when(paymentMethodRepository.findByName(passedEntity.getName())).thenReturn(Optional.empty());
         when(paymentMethodRepository.save(toUpdateEntity)).thenReturn(updatedEntity);
 
         PaymentMethod returnedEntity = paymentMethodService.updatePaymentMethodById(originalEntity.getId(), passedEntity);

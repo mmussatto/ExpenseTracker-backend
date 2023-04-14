@@ -36,11 +36,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(PaymentMethodController.class)
 class PaymentMethodControllerTest {
 
+    // -------------- Constants ----------------------------
     public static final int DEFAULT_PAGE = 0;
     public static final int DEFAULT_SIZE = 1;
     public static final PaymentType PAYMENT_TYPE = PaymentType.CREDIT_CARD;
     public static final String NAME = "Test";
     public static final int ID = 1;
+
 
     @Autowired
     private MockMvc mockMvc;
