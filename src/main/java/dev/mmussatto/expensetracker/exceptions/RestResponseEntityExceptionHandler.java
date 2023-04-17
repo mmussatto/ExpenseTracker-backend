@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 @ControllerAdvice
 public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
 
+
     @ExceptionHandler({ResourceNotFoundException.class})
     public ResponseEntity<Object> handleNotFoundException (ResourceNotFoundException exception, WebRequest request) {
 
@@ -76,6 +77,10 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         return new ResponseEntity<>(responseBody, new HttpHeaders(), HttpStatus.BAD_REQUEST);
     }
 
+
+    /*
+     * Database validation constraints
+     */
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<Object> handleConstraintViolationException(ConstraintViolationException exception, WebRequest request) {
 
@@ -96,6 +101,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         return new ResponseEntity<>(responseBody, new HttpHeaders(), HttpStatus.BAD_REQUEST);
     }
 
+
     @ExceptionHandler(InvalidMonthException.class)
     public ResponseEntity<Object> handleInvalidMonthException(InvalidMonthException exception, WebRequest request) {
 
@@ -113,6 +119,9 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     }
 
 
+    /*
+     * Parameters passed to controller validation
+     */
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
@@ -133,6 +142,10 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         return handleExceptionInternal(ex, responseBody, headers, status, request);
     }
 
+
+    /*
+     * Handler for enum properties
+     */
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers,
                                                                   HttpStatusCode status, WebRequest request) {
