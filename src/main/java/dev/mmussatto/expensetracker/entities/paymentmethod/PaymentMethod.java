@@ -9,9 +9,9 @@ import dev.mmussatto.expensetracker.entities.transaction.Transaction;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.apache.commons.lang3.builder.HashCodeExclude;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +35,7 @@ public class PaymentMethod {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "paymentMethod")
     @ToString.Exclude
     @JsonIgnore
-    @HashCodeExclude
+    @EqualsAndHashCode.Exclude
     private List<Transaction> transactions = new ArrayList<>();
 
     public PaymentMethod(String name, PaymentType type) {
