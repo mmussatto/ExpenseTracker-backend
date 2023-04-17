@@ -5,6 +5,7 @@
 package dev.mmussatto.expensetracker.entities.vendor;
 
 import dev.mmussatto.expensetracker.entities.transaction.Transaction;
+import dev.mmussatto.expensetracker.entities.vendor.defaultvendor.DefaultVendor;
 import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStore;
 import dev.mmussatto.expensetracker.entities.vendor.physicalstore.PhysicalStore;
 import dev.mmussatto.expensetracker.exceptions.IncorrectVendorTypeException;
@@ -82,7 +83,7 @@ public class VendorServiceImpl implements VendorService {
     public Vendor patchVendorById(Integer id, Vendor vendor) {
         return vendorRepository.findById(id).map(savedVendor -> {
 
-            if(vendor.getClass() != savedVendor.getClass())
+            if(vendor.getClass() != savedVendor.getClass() && !(vendor instanceof DefaultVendor))
                 throw new IncorrectVendorTypeException(
                         String.format("Incorrect type for vendor '%d'. Change properties in request body or create new vendor", id));
 

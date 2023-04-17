@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import dev.mmussatto.expensetracker.entities.transaction.Transaction;
+import dev.mmussatto.expensetracker.entities.vendor.defaultvendor.DefaultVendorDTO;
 import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStoreDTO;
 import dev.mmussatto.expensetracker.entities.vendor.physicalstore.PhysicalStoreDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -25,10 +26,12 @@ import java.util.List;
 @JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION,
         property = "type",
         include = JsonTypeInfo.As.EXISTING_PROPERTY,
-        visible = true)
+        visible = true,
+        defaultImpl = DefaultVendorDTO.class)
 @JsonSubTypes({
         @JsonSubTypes.Type(value = OnlineStoreDTO.class, name = "Online Store"),
-        @JsonSubTypes.Type(value = PhysicalStoreDTO.class, name = "Physical Store")
+        @JsonSubTypes.Type(value = PhysicalStoreDTO.class, name = "Physical Store"),
+        @JsonSubTypes.Type(value = DefaultVendorDTO.class, name = "Default Store")
 })
 public abstract class VendorDTO {
 

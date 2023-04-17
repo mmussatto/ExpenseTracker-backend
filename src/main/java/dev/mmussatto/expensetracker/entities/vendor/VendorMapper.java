@@ -4,6 +4,8 @@
 
 package dev.mmussatto.expensetracker.entities.vendor;
 
+import dev.mmussatto.expensetracker.entities.vendor.defaultvendor.DefaultVendor;
+import dev.mmussatto.expensetracker.entities.vendor.defaultvendor.DefaultVendorDTO;
 import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStore;
 import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStoreDTO;
 import dev.mmussatto.expensetracker.entities.vendor.physicalstore.PhysicalStore;
@@ -31,6 +33,8 @@ public interface VendorMapper {
             return convertToEntity((OnlineStoreDTO) vendorDTO);
         } else if (vendorDTO instanceof PhysicalStoreDTO) {
             return convertToEntity((PhysicalStoreDTO) vendorDTO);
+        } else if (vendorDTO instanceof DefaultVendorDTO) {
+            return convertToEntity((DefaultVendorDTO) vendorDTO);
         } else {
             return null;
         }
@@ -46,4 +50,8 @@ public interface VendorMapper {
     // -------------- Physical Store ----------------------------
     PhysicalStoreDTO convertToDTO(PhysicalStore physicalStore);
     PhysicalStore convertToEntity(PhysicalStoreDTO physicalStoreDTO);
+
+    // -------------- Default Vendor ----------------------------
+//    PhysicalStoreDTO convertToDTO(PhysicalStore physicalStore);
+    DefaultVendor convertToEntity(DefaultVendorDTO physicalStoreDTO);
 }

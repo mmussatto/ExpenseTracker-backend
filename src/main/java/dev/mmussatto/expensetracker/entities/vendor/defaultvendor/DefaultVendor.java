@@ -18,4 +18,8 @@ public class DefaultVendor extends Vendor {
     public DefaultVendor(Integer id) {
         super.setId(id);
     }
+
+    public DefaultVendor(String name) {
+        super.setName(name);
+    }
 }
