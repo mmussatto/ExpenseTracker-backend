@@ -6,6 +6,7 @@ package dev.mmussatto.expensetracker.entities.vendor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.mmussatto.expensetracker.entities.transaction.Transaction;
+import dev.mmussatto.expensetracker.entities.vendor.defaultvendor.DefaultVendor;
 import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStore;
 import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStoreDTO;
 import dev.mmussatto.expensetracker.entities.vendor.physicalstore.PhysicalStore;
@@ -317,6 +318,19 @@ class VendorControllerTest {
                         instanceOf(ResourceAlreadyExistsException.class)));
     }
 
+    @Test
+    void createNewVendor_RejectDefaultVendor() throws Exception{
+
+        DefaultVendor passedDto = new DefaultVendor("Should reject this vendor");
+
+        mockMvc.perform(post("/api/vendors")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(passedDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertThat(result.getResolvedException(),
+                        instanceOf(IncorrectVendorTypeException.class)));
+    }
+
 
 
     // -------------- UPDATE ----------------------------
@@ -466,6 +480,21 @@ class VendorControllerTest {
         when(vendorService.updateVendorById(savedId, passedEntity)).thenThrow(IncorrectVendorTypeException.class);
 
         mockMvc.perform(put("/api/vendors/{id}", savedId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(passedDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertThat(result.getResolvedException(),
+                        instanceOf(IncorrectVendorTypeException.class)));
+    }
+
+    @Test
+    void updateVendorById_RejectDefaultVendor() throws Exception{
+
+        //Default vendor should not be passed to update function because it cannot be saved to the database.
+        //Also, it does not have the other children properties, like "address" or "url"
+        DefaultVendor passedDto = new DefaultVendor("Update Name");
+
+        mockMvc.perform(put("/api/vendors/{id}", ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(passedDto)))
                 .andExpect(status().isBadRequest())

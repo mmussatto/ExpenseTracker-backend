@@ -8,6 +8,8 @@ import dev.mmussatto.expensetracker.entities.helpers.PageDTO;
 import dev.mmussatto.expensetracker.entities.transaction.Transaction;
 import dev.mmussatto.expensetracker.entities.transaction.TransactionDTO;
 import dev.mmussatto.expensetracker.entities.transaction.TransactionMapper;
+import dev.mmussatto.expensetracker.entities.vendor.defaultvendor.DefaultVendorDTO;
+import dev.mmussatto.expensetracker.exceptions.IncorrectVendorTypeException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -90,6 +92,10 @@ public class VendorController {
     @Validated(VendorDTO.allFieldsValidation.class)
     public VendorDTO createNewVendor (@Valid @RequestBody VendorDTO vendorDTO) {
 
+        //Should deserialize to a vendor other than the default. Cannot save default vendor in the database
+        if (vendorDTO instanceof DefaultVendorDTO)
+            throw new IncorrectVendorTypeException("Invalid deserialization: DefaultVendor. Missing properties to correctly deserialize.");
+
         Vendor vendor = getVendor(vendorDTO);
 
         vendor = vendorService.createNewVendor(vendor);
@@ -109,6 +115,10 @@ public class VendorController {
     @ResponseStatus(HttpStatus.OK)
     @Validated(VendorDTO.allFieldsValidation.class)
     public VendorDTO updateVendorById (@PathVariable final Integer id, @Valid @RequestBody VendorDTO vendorDTO) {
+
+        //Validate that all properties are present in request body. Should deserialize to a vendor other than the default
+        if (vendorDTO instanceof DefaultVendorDTO)
+            throw new IncorrectVendorTypeException("Invalid deserialization: DefaultVendor. Missing properties to correctly deserialize.");
 
         Vendor vendor = getVendor(vendorDTO);
 
