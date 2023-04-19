@@ -25,6 +25,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -34,8 +35,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(TagController.class)
 class TagControllerTest {
 
+    // -------------- Constants ----------------------------
     public static final int DEFAULT_PAGE = 0;
     public static final int DEFAULT_SIZE = 1;
+    public static final Color COLOR = Color.BLUE;
+    public static final String NAME = "Test name";
+    public static final int ID = 1;
 
 
     @Autowired
@@ -52,11 +57,12 @@ class TagControllerTest {
 
 
 
+    // -------------- READ ----------------------------
     @Test
     void getAllTags() throws Exception {
 
-        Tag t1 = new Tag("t1", Color.BLUE);
-        t1.setId(1);
+        Tag t1 = new Tag(NAME, COLOR);
+        t1.setId(ID);
 
         Tag t2 = new Tag("t2", Color.GREEN);
         t2.setId(2);
@@ -74,19 +80,17 @@ class TagControllerTest {
         mockMvc.perform(get("/api/tags")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.numberOfItems", equalTo(2)))
-                .andExpect(jsonPath("$.items", hasSize(2)));
+                .andExpect(jsonPath("$", hasSize(2)));
     }
 
     @Test
     void getTagById() throws Exception {
 
-        Tag savedEntity = new Tag("t1", Color.BLUE);
-        savedEntity.setId(1);
+        Tag savedEntity = new Tag(NAME, COLOR);
+        savedEntity.setId(ID);
 
         TagDTO returnedDTO = new TagDTO(savedEntity.getName(), savedEntity.getColor());
         returnedDTO.setId(savedEntity.getId());
-        returnedDTO.setPath("/api/tags" + returnedDTO.getId());
 
         when(tagService.getTagById(savedEntity.getId())).thenReturn(savedEntity);
         when(tagMapper.convertToDTO(savedEntity)).thenReturn(returnedDTO);
@@ -94,10 +98,12 @@ class TagControllerTest {
         mockMvc.perform(get("/api/tags/{id}", savedEntity.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", equalTo(returnedDTO.getId())))
-                .andExpect(jsonPath("$.name", equalTo(returnedDTO.getName())))
-                .andExpect(jsonPath("$.color", equalTo(returnedDTO.getColor().toString())))
-                .andExpect(jsonPath("$.path", equalTo(returnedDTO.getPath())));
+                .andExpect(result -> {
+                    String retString = result.getResponse().getContentAsString();
+                    TagDTO objFromJson = objectMapper.readValue(retString, TagDTO.class);
+                    returnedDTO.setPath("/api/tags/" + returnedDTO.getId()); //path is set inside controller
+                    assertEquals(returnedDTO, objFromJson);
+                });
     }
 
     @Test
@@ -117,12 +123,11 @@ class TagControllerTest {
     @Test
     void getTagByName() throws Exception {
 
-        Tag savedEntity = new Tag("t1", Color.BLUE);
-        savedEntity.setId(1);
+        Tag savedEntity = new Tag(NAME, COLOR);
+        savedEntity.setId(ID);
 
         TagDTO returnedDTO = new TagDTO(savedEntity.getName(), savedEntity.getColor());
         returnedDTO.setId(savedEntity.getId());
-        returnedDTO.setPath("/api/tags" + returnedDTO.getId());
 
         when(tagService.getTagByName(savedEntity.getName())).thenReturn(savedEntity);
         when(tagMapper.convertToDTO(savedEntity)).thenReturn(returnedDTO);
@@ -131,38 +136,40 @@ class TagControllerTest {
         mockMvc.perform(get("/api/tags/name/{name}", returnedDTO.getName())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", equalTo(returnedDTO.getId())))
-                .andExpect(jsonPath("$.name", equalTo(returnedDTO.getName())))
-                .andExpect(jsonPath("$.color", equalTo(returnedDTO.getColor().toString())))
-                .andExpect(jsonPath("$.path", equalTo(returnedDTO.getPath())));
+                .andExpect(result -> {
+                    String retString = result.getResponse().getContentAsString();
+                    TagDTO objFromJson = objectMapper.readValue(retString, TagDTO.class);
+                    returnedDTO.setPath("/api/tags/" + returnedDTO.getId()); //path is set inside controller
+                    assertEquals(returnedDTO, objFromJson);
+                });
     }
 
     @Test
     void getTagByName_NotFound() throws Exception {
-        String notFoundName = "asdf";
 
-        when(tagService.getTagByName(notFoundName)).thenThrow(ResourceNotFoundException.class);
+        when(tagService.getTagByName(NAME)).thenThrow(ResourceNotFoundException.class);
 
-        mockMvc.perform(get("/api/tags/name/{name}", notFoundName)
+        mockMvc.perform(get("/api/tags/name/{name}", NAME)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andExpect(result -> assertThat(result.getResolvedException(),
                         instanceOf(ResourceNotFoundException.class)));
     }
 
+
+    // -------------- CREATE ----------------------------
     @Test
     void createNewTag() throws Exception {
 
-        TagDTO passedDTO = new TagDTO("t1", Color.BLUE);
+        TagDTO passedDTO = new TagDTO(NAME, COLOR);
 
         Tag toSaveEntity = new Tag(passedDTO.getName(), passedDTO.getColor());
 
         Tag savedEntity = new Tag(toSaveEntity.getName(), toSaveEntity.getColor());
-        savedEntity.setId(1);
+        savedEntity.setId(ID);
 
         TagDTO returnedDTO = new TagDTO(savedEntity.getName(), savedEntity.getColor());
         returnedDTO.setId(savedEntity.getId());
-        returnedDTO.setPath("/api/tags" + returnedDTO.getId());
 
         when(tagMapper.convertToEntity(passedDTO)).thenReturn(toSaveEntity);
         when(tagService.createNewTag(toSaveEntity)).thenReturn(savedEntity);
@@ -172,17 +179,19 @@ class TagControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(passedDTO)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", equalTo(returnedDTO.getId())))
-                .andExpect(jsonPath("$.name", equalTo(returnedDTO.getName())))
-                .andExpect(jsonPath("$.color", equalTo(returnedDTO.getColor().toString())))
-                .andExpect(jsonPath("$.path", equalTo(returnedDTO.getPath())));
+                .andExpect(result -> {
+                    String retString = result.getResponse().getContentAsString();
+                    TagDTO objFromJson = objectMapper.readValue(retString, TagDTO.class);
+                    returnedDTO.setPath("/api/tags/" + returnedDTO.getId()); //path is set inside controller
+                    assertEquals(returnedDTO, objFromJson);
+                });
     }
 
     @Test
-    void createNewTag_IdNotNull() throws Exception {
+    void createNewTag_BodyIdNotNull() throws Exception {
 
-        TagDTO passedDTO = new TagDTO("t1", Color.BLUE);
-        passedDTO.setId(1);
+        TagDTO passedDTO = new TagDTO(NAME, COLOR);
+        passedDTO.setId(ID);
 
         mockMvc.perform(post("/api/tags")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -193,9 +202,37 @@ class TagControllerTest {
     }
 
     @Test
-    void createNewTag_NameAlreadyExists() throws Exception {
+    void createNewTag_MissingNameField() throws Exception {
 
-        TagDTO passedDTO = new TagDTO("t1", Color.BLUE);
+        TagDTO passedDTO = new TagDTO();
+        //missing name
+        passedDTO.setColor(COLOR);
+
+        mockMvc.perform(post("/api/tags")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(passedDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertThat(result.getResolvedException(), instanceOf(ConstraintViolationException.class)));
+    }
+
+    @Test
+    void createNewTag_MissingColorField() throws Exception {
+
+        TagDTO passedDTO = new TagDTO();
+        passedDTO.setName(NAME);
+        //missing color
+
+        mockMvc.perform(post("/api/tags")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(passedDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertThat(result.getResolvedException(), instanceOf(ConstraintViolationException.class)));
+    }
+
+    @Test
+    void createNewTag_ResourceAlreadyExists() throws Exception {
+
+        TagDTO passedDTO = new TagDTO(NAME, COLOR);
 
         Tag toSaveEntity = new Tag(passedDTO.getName(), passedDTO.getColor());
 
@@ -210,12 +247,14 @@ class TagControllerTest {
                         instanceOf(ResourceAlreadyExistsException.class)));
     }
 
+
+    // -------------- UPDATE ----------------------------
     @Test
     void updateTagById() throws Exception {
 
-        Integer savedId = 1;
+        Integer savedId = ID;
 
-        TagDTO passedDTO = new TagDTO("t1", Color.BLUE);
+        TagDTO passedDTO = new TagDTO(NAME, COLOR);
 
         Tag toUpdateEntity = new Tag(passedDTO.getName(), passedDTO.getColor());
 
@@ -224,7 +263,6 @@ class TagControllerTest {
 
         TagDTO returnedDTO = new TagDTO(updatedEntity.getName(), updatedEntity.getColor());
         returnedDTO.setId(updatedEntity.getId());
-        returnedDTO.setPath("/api/tags" + returnedDTO.getId());
 
         when(tagMapper.convertToEntity(passedDTO)).thenReturn(toUpdateEntity);
         when(tagService.updateTagById(savedId, toUpdateEntity)).thenReturn(updatedEntity);
@@ -235,10 +273,12 @@ class TagControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(passedDTO)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", equalTo(returnedDTO.getId())))
-                .andExpect(jsonPath("$.name", equalTo(returnedDTO.getName())))
-                .andExpect(jsonPath("$.color", equalTo(returnedDTO.getColor().toString())))
-                .andExpect(jsonPath("$.path", equalTo(returnedDTO.getPath())));
+                .andExpect(result -> {
+                    String retString = result.getResponse().getContentAsString();
+                    TagDTO objFromJson = objectMapper.readValue(retString, TagDTO.class);
+                    returnedDTO.setPath("/api/tags/" + returnedDTO.getId()); //path is set inside controller
+                    assertEquals(returnedDTO, objFromJson);
+                });
     }
 
     @Test
@@ -265,9 +305,9 @@ class TagControllerTest {
     void updateTagById_BodyIdNotNull() throws Exception {
 
         TagDTO passedDTO = new TagDTO("Test Update", Color.GREEN);
-        passedDTO.setId(1);
+        passedDTO.setId(ID);
 
-        mockMvc.perform(put("/api/tags/{id}", 1)
+        mockMvc.perform(put("/api/tags/{id}", ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(passedDTO)))
                 .andExpect(status().isBadRequest())
@@ -279,9 +319,10 @@ class TagControllerTest {
     void updateTagById_MissingNameField() throws Exception {
 
         TagDTO passedDTO = new TagDTO();
-        passedDTO.setColor(Color.BLUE);
+        //missing name field
+        passedDTO.setColor(COLOR);
 
-        mockMvc.perform(put("/api/tags/{id}", 1)
+        mockMvc.perform(put("/api/tags/{id}", ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(passedDTO)))
                 .andExpect(status().isBadRequest())
@@ -293,9 +334,10 @@ class TagControllerTest {
     void updateTagById_MissingColorField() throws Exception {
 
         TagDTO passedDTO = new TagDTO();
-        passedDTO.setName("t1");
+        passedDTO.setName(NAME);
+        //missing color
 
-        mockMvc.perform(put("/api/tags/{id}", 1)
+        mockMvc.perform(put("/api/tags/{id}", ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(passedDTO)))
                 .andExpect(status().isBadRequest())
@@ -304,11 +346,33 @@ class TagControllerTest {
     }
 
     @Test
+    void updateTagById_ResourceAlreadyExists() throws Exception {
+
+        Integer savedId = ID;
+
+        TagDTO passedDTO = new TagDTO(NAME, COLOR);
+
+        Tag toUpdateEntity = new Tag(passedDTO.getName(), passedDTO.getColor());
+
+        when(tagMapper.convertToEntity(passedDTO)).thenReturn(toUpdateEntity);
+        when(tagService.updateTagById(savedId, toUpdateEntity)).thenThrow(ResourceAlreadyExistsException.class);
+
+        mockMvc.perform(put("/api/tags/{id}", savedId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(passedDTO)))
+                .andExpect(status().isConflict())
+                .andExpect(result -> assertThat(result.getResolvedException(),
+                        instanceOf(ResourceAlreadyExistsException.class)));
+    }
+
+
+    // -------------- PATCH ----------------------------
+    @Test
     void patchTagById() throws Exception {
 
-        Integer savedId = 1;
+        Integer savedId = ID;
 
-        TagDTO passedDTO = new TagDTO("t1", Color.BLUE);
+        TagDTO passedDTO = new TagDTO(NAME, COLOR);
 
         Tag toPatchEntity = new Tag(passedDTO.getName(), passedDTO.getColor());
 
@@ -317,7 +381,6 @@ class TagControllerTest {
 
         TagDTO returnedDTO = new TagDTO(patchedEntity.getName(), patchedEntity.getColor());
         returnedDTO.setId(patchedEntity.getId());
-        returnedDTO.setPath("/api/tags" + returnedDTO.getId());
 
         when(tagMapper.convertToEntity(passedDTO)).thenReturn(toPatchEntity);
         when(tagService.patchTagById(savedId, toPatchEntity)).thenReturn(patchedEntity);
@@ -328,11 +391,12 @@ class TagControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(passedDTO)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", equalTo(returnedDTO.getId())))
-                .andExpect(jsonPath("$.name", equalTo(returnedDTO.getName())))
-                .andExpect(jsonPath("$.color", equalTo(returnedDTO.getColor().toString())))
-                .andExpect(jsonPath("$.path", equalTo(returnedDTO.getPath())));
-
+                .andExpect(result -> {
+                    String retString = result.getResponse().getContentAsString();
+                    TagDTO objFromJson = objectMapper.readValue(retString, TagDTO.class);
+                    returnedDTO.setPath("/api/tags/" + returnedDTO.getId()); //path is set inside controller
+                    assertEquals(returnedDTO, objFromJson);
+                });
     }
 
     @Test
@@ -359,23 +423,22 @@ class TagControllerTest {
 
     @Test
     void patchTagById_BodyIdNotNull() throws Exception {
+
         TagDTO passedDTO = new TagDTO("Test Update", Color.GREEN);
         passedDTO.setId(123);
 
-
-        mockMvc.perform(patch("/api/tags/{id}", 1)
+        mockMvc.perform(patch("/api/tags/{id}", ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(passedDTO)))
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> assertThat(result.getResolvedException(),
                         instanceOf(ConstraintViolationException.class)));
-
-
     }
 
     @Test
-    void patchTagById_NameAlreadyExists() throws Exception {
-        Integer savedId = 1;
+    void patchTagById_ResourceAlreadyExists() throws Exception {
+
+        Integer savedId = ID;
 
         TagDTO passedDTO = new TagDTO("Test Update", Color.GREEN);
 
@@ -385,7 +448,7 @@ class TagControllerTest {
         when(tagMapper.convertToEntity(passedDTO)).thenReturn(toPatchEntity);
         when(tagService.patchTagById(savedId, toPatchEntity)).thenThrow(ResourceAlreadyExistsException.class);
 
-        mockMvc.perform(patch("/api/tags/{id}", 1)
+        mockMvc.perform(patch("/api/tags/{id}", ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(passedDTO)))
                 .andExpect(status().isConflict())
@@ -394,20 +457,24 @@ class TagControllerTest {
 
     }
 
+
+    // -------------- DELETE ----------------------------
     @Test
     void deleteTagById() throws Exception {
-        Integer idToDelete = 1;
+
+        Integer idToDelete = ID;
 
         mockMvc.perform(delete("/api/tags/{id}", idToDelete)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
 
-        verify(tagService, times(1)).deleteTagById(idToDelete);
+        verify(tagService, times(ID)).deleteTagById(idToDelete);
     }
 
     @Test
     void deleteTagById_IdNotFound() throws Exception {
-        Integer notFoundId = 1;
+
+        Integer notFoundId = ID;
 
         doThrow(ResourceNotFoundException.class).when(tagService).deleteTagById(notFoundId);
 
@@ -417,14 +484,16 @@ class TagControllerTest {
                 .andExpect(result -> assertThat(result.getResolvedException(),
                         instanceOf(ResourceNotFoundException.class)));
 
-        verify(tagService, times(1)).deleteTagById(notFoundId);
+        verify(tagService, times(ID)).deleteTagById(notFoundId);
     }
 
+
+    // -------------- TRANSACTIONS ----------------------------
     @Test
     void getPaymentMethodTransactionsById() throws Exception {
 
         Transaction t1 = new Transaction();
-        t1.setId(1);
+        t1.setId(ID);
         t1.setAmount(53.00);
         t1.setDescription("Test Transaction 1");
 
@@ -433,29 +502,35 @@ class TagControllerTest {
         t2.setAmount(123.00);
         t2.setDescription("Test Transaction 2");
 
-        List<Transaction> transactions = Arrays.asList(t1, t2);
+        Transaction t3 = new Transaction();
+        t3.setId(3);
+        t3.setAmount(123.00);
+        t3.setDescription("Test Transaction 3");
 
-        Integer tagId = 1;
+        List<Transaction> transactions = Arrays.asList(t1, t2, t3);
 
-        Pageable pageable = PageRequest.of(DEFAULT_PAGE, DEFAULT_SIZE, Sort.by("date"));
+        Integer tagId = ID;
+
+        Pageable pageable = PageRequest.of(1, DEFAULT_SIZE, Sort.by("date"));
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), transactions.size());
 
-        Page<Transaction> pagedTransactions = new PageImpl<Transaction>(
+        Page<Transaction> pagedTransactions = new PageImpl<>(
                 transactions.subList(start, end), pageable, transactions.size());
 
 
-        when(tagService.getTransactionsByTagId(tagId, DEFAULT_PAGE, DEFAULT_SIZE)).thenReturn(pagedTransactions);
+        when(tagService.getTransactionsByTagId(tagId, 1, DEFAULT_SIZE)).thenReturn(pagedTransactions);
 
         mockMvc.perform(get("/api/tags/{id}/transactions", tagId)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("page", "1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.pageNo", equalTo(DEFAULT_PAGE)))
+                .andExpect(jsonPath("$.pageNo", equalTo(1)))
                 .andExpect(jsonPath("$.pageSize", equalTo(DEFAULT_SIZE)))
                 .andExpect(jsonPath("$.totalElements", equalTo(transactions.size())))
-                .andExpect(jsonPath("$.nextPage", equalTo("/api/tags/1/transactions?page=1&size=1")))
-                .andExpect(jsonPath("$.previousPage", equalTo(null)))
-                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.nextPage", equalTo("/api/tags/1/transactions?page=2&size=1")))
+                .andExpect(jsonPath("$.previousPage", equalTo("/api/tags/1/transactions?page=0&size=1")))
+                .andExpect(jsonPath("$.content", hasSize(ID)))
                 .andDo(print());
     }
 

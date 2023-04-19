@@ -25,7 +25,7 @@ class TagMapperTest {
     TagMapper tagMapper = TagMapper.INSTANCE;
 
     @Test
-    void tagToTagDTO() {
+    void convertToDTO() {
 
         Tag tag = new Tag(NAME, COLOR);
         tag.setId(ID);
@@ -40,7 +40,7 @@ class TagMapperTest {
     }
 
     @Test
-    void tagDTOToTag() {
+    void convertToEntity() {
 
         TagDTO tagDTO = new TagDTO();
         tagDTO.setId(ID);

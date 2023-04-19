@@ -9,6 +9,7 @@ import dev.mmussatto.expensetracker.entities.paymentmethod.PaymentMethod;
 import dev.mmussatto.expensetracker.entities.tag.Tag;
 import dev.mmussatto.expensetracker.entities.vendor.Vendor;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -25,22 +26,28 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @NotNull
     private Double amount;
 
+    @NotNull
     private LocalDateTime date;
 
     @Column(columnDefinition="TEXT")
     private String description;
 
+    @NotNull
     @ManyToOne
     private Category category;
 
+    @NotNull
     @ManyToOne
     private PaymentMethod paymentMethod;
 
+    @NotNull
     @ManyToOne
     private Vendor vendor;
 
+    @NotNull
     @ManyToMany
     @JoinTable(name = "transaction_tags",
             joinColumns = @JoinColumn(name = "transaction_id"),
@@ -59,7 +66,4 @@ public class Transaction {
         this.tags = tags;
     }
 
-    public Transaction(Integer id) {
-        this.id = id;
-    }
 }

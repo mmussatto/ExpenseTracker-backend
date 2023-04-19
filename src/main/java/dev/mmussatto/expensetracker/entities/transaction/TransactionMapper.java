@@ -7,11 +7,9 @@ package dev.mmussatto.expensetracker.entities.transaction;
 import dev.mmussatto.expensetracker.entities.category.Category;
 import dev.mmussatto.expensetracker.entities.paymentmethod.PaymentMethod;
 import dev.mmussatto.expensetracker.entities.tag.Tag;
-import dev.mmussatto.expensetracker.entities.vendor.Vendor;
 import dev.mmussatto.expensetracker.entities.vendor.defaultvendor.DefaultVendor;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 
 import java.util.Set;
@@ -26,10 +24,11 @@ public interface TransactionMapper {
     Transaction convertToEntity(TransactionDTO transactionDTO);
 
 
-    //Request Mappers
+    // -------------- Transaction Request ----------------------------
+    //Request Mapper
     @Mapping(target = "category", source = "source.categoryId")
     @Mapping(target = "paymentMethod", source = "source.paymentMethodId")
-    @Mapping(target = "vendor", source = "source", qualifiedByName="mapVendorWithIdAndType")
+    @Mapping(target = "vendor", source = "source.vendorId")
     @Mapping(target = "tags", source = "source.tagIds")
     Transaction convertRequestToEntity (RequestTransactionDTO source);
 
@@ -43,13 +42,10 @@ public interface TransactionMapper {
 
     @Mapping(target = "id", source = "tagId")
     Tag mapTags (Integer tagId);
-
     @Mapping(target = "tag.id", source = "tagIds")
     Set<Tag> mapTagSet (Set<Integer> tagIds);
 
-    @Named("mapVendorWithIdAndType")
-    default Vendor mapVendor (RequestTransactionDTO source) {
-        return source.getVendorId() == null ? null : new DefaultVendor(source.getVendorId());
-    }
+    @Mapping(target = "id", source = "vendorId")
+    DefaultVendor mapVendor (Integer vendorId);
 
 }

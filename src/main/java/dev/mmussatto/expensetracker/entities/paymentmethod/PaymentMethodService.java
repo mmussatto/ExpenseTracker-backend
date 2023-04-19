@@ -25,5 +25,5 @@ public interface PaymentMethodService {
 
     void deletePaymentMethodById (Integer id);
 
-    Page<Transaction> getPaymentMethodTransactionsById(Integer id, int page, int size);
+    Page<Transaction> getPaymentMethodTransactionsById (Integer id, int page, int size);
 }

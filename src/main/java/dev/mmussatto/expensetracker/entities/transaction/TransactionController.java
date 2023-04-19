@@ -36,7 +36,7 @@ public class TransactionController {
     @Operation(summary = "Get all transactions with paging")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Found the transactions page", useReturnTypeSchema = true),
-            @ApiResponse(responseCode = "404", description = "Bad Request", content = @Content)
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)
     })
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
@@ -47,8 +47,8 @@ public class TransactionController {
 
         Page<Transaction> paginatedTransactions;
         String pageURI = "/api/transactions?";
-        String previousPageURI;
 
+        //Select transactions
         if(month != null && year != null) {
             paginatedTransactions = transactionService.getTransactionsByMonth(page, size, year, month);
             pageURI = pageURI.concat("year=" + year + "&month=" + month + "&");
@@ -59,7 +59,7 @@ public class TransactionController {
             paginatedTransactions = transactionService.getPaginated(page, size);
         }
 
-
+        //Create PageDTO
         PageDTO<TransactionDTO> returnPage = new PageDTO<>();
 
         returnPage.setContent(paginatedTransactions.getContent()
@@ -106,7 +106,7 @@ public class TransactionController {
     @ResponseStatus(HttpStatus.CREATED)
     @Validated(RequestTransactionDTO.allFieldsValidation.class)
     public TransactionDTO createNewTransaction (@Valid @RequestBody RequestTransactionDTO transactionDTO) {
-        Transaction entity = transactionMapper.convertRequestToEntity(transactionDTO);
+        Transaction entity = convertRequestToEntity(transactionDTO);
         return convertToDTO(transactionService.createNewTransaction(entity));
     }
 
@@ -121,7 +121,7 @@ public class TransactionController {
     @ResponseStatus(HttpStatus.OK)
     @Validated(RequestTransactionDTO.allFieldsValidation.class)
     public TransactionDTO updateTransactionById (@PathVariable final Integer id, @Valid @RequestBody RequestTransactionDTO transactionDTO) {
-        Transaction entity = transactionMapper.convertRequestToEntity(transactionDTO);
+        Transaction entity = convertRequestToEntity(transactionDTO);
         return convertToDTO(transactionService.updateTransactionById(id, entity));
     }
 
@@ -136,7 +136,7 @@ public class TransactionController {
     @ResponseStatus(HttpStatus.OK)
     @Validated(RequestTransactionDTO.onlyIdValidation.class)
     public TransactionDTO patchTransactionById (@PathVariable final Integer id, @Valid @RequestBody RequestTransactionDTO transactionDTO) {
-        Transaction entity = transactionMapper.convertRequestToEntity(transactionDTO);
+        Transaction entity = convertRequestToEntity(transactionDTO);
         return convertToDTO(transactionService.patchTransactionById(id, entity));
     }
 
@@ -154,14 +154,14 @@ public class TransactionController {
 
 
 
-    //Mappers
+    // -------------- Helpers ----------------------------
     private TransactionDTO convertToDTO (Transaction entity) {
         TransactionDTO dto = transactionMapper.convertToDTO(entity);
         dto.setPath("/api/transactions/" + dto.getId());
         return dto;
     }
 
-    private Transaction convertToEntity (TransactionDTO dto) {
-        return transactionMapper.convertToEntity(dto);
+    private Transaction convertRequestToEntity (RequestTransactionDTO dto) {
+        return transactionMapper.convertRequestToEntity(dto);
     }
 }

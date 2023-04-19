@@ -9,19 +9,19 @@ import org.springframework.data.domain.Page;
 
 import java.util.List;
 
-public interface VendorService<V extends Vendor> {
+public interface VendorService {
 
-    List<V> getAllVendors ();
+    List<Vendor> getAllVendors ();
 
-    V getVendorById (Integer id);
+    Vendor getVendorById (Integer id);
 
-    V getVendorByName (String name);
+    Vendor getVendorByName (String name);
 
-    V createNewVendor (V vendor);
+    Vendor createNewVendor (Vendor vendor);
 
-    V updateVendorById (Integer id, V vendor);
+    Vendor updateVendorById (Integer id, Vendor vendor);
 
-    V patchVendorById (Integer id, V vendor);
+    Vendor patchVendorById (Integer id, Vendor vendor);
 
     void deleteVendorById (Integer id);
 

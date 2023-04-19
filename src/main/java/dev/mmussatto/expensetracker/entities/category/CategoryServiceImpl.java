@@ -65,14 +65,17 @@ public class CategoryServiceImpl implements CategoryService {
 
         return categoryRepository.findById(id).map(savedCategory -> {
 
+            //Update name
             if (category.getName() != null) {
                 checkIfNameIsAlreadyInUse(category);
                 savedCategory.setName(category.getName());
             }
 
+            //Update color
             if (category.getColor() != null)
                 savedCategory.setColor(category.getColor());
 
+            //Save
             return categoryRepository.save(savedCategory);
 
         }).orElseThrow(() -> new ResourceNotFoundException("Category " + id + " not found!"));

@@ -68,7 +68,7 @@ public class PaymentMethodController {
     @Operation(summary = "Get a payment method by its name")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Found the payment method", useReturnTypeSchema = true),
-            @ApiResponse(responseCode = "400", description = "Invalid id supplied", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Invalid name supplied", content = @Content),
             @ApiResponse(responseCode = "404", description = "Payment method not found", content = @Content)
     })
     @GetMapping("/name/{name}")
@@ -180,7 +180,7 @@ public class PaymentMethodController {
     }
 
 
-    //Helpers
+    // -------------- Helpers ----------------------------
     private PaymentMethodDTO convertToDTO (PaymentMethod entity) {
         PaymentMethodDTO paymentMethodDTO = paymentMethodMapper.convertToDTO(entity);
         paymentMethodDTO.setPath("/api/payment-methods/" + paymentMethodDTO.getId());

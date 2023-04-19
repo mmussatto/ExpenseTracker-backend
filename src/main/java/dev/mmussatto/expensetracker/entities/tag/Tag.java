@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@EqualsAndHashCode(exclude = {"transactions"})
 @NoArgsConstructor
 @Entity
 public class Tag {
@@ -36,6 +35,7 @@ public class Tag {
 
     @ManyToMany(mappedBy = "tags")
     @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @JsonIgnore
     private List<Transaction> transactions = new ArrayList<>();
 

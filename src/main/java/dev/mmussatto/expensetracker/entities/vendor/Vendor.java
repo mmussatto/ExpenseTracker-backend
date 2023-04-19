@@ -27,7 +27,6 @@ import java.util.List;
 })
 @Data
 @NoArgsConstructor
-@EqualsAndHashCode(exclude = {"transactions"})
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Vendor {
@@ -41,6 +40,7 @@ public abstract class Vendor {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "vendor")
     @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @JsonIgnore
     private List<Transaction> transactions = new ArrayList<>();
 

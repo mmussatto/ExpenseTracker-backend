@@ -34,7 +34,7 @@ class CategoryServiceImplTest {
     @InjectMocks
     CategoryServiceImpl categoryService;
 
-
+    // -------------- Constants ----------------------------
     public static final Integer ID = 1;
     public static final String NAME = "Test";
     public static final Color COLOR = Color.BLUE;
@@ -42,11 +42,14 @@ class CategoryServiceImplTest {
     public static final int DEFAULT_PAGE = 0;
     public static final int DEFAULT_SIZE = 1;
 
+
     @BeforeAll
     static void initializeTransaction() {
         TRANSACTION.setId(1);
     }
 
+
+    // -------------- READ ----------------------------
     @Test
     void getAllCategories() {
 
@@ -111,6 +114,8 @@ class CategoryServiceImplTest {
         assertThrows(ResourceNotFoundException.class, () -> categoryService.getCategoryByName(NAME));
     }
 
+
+    // -------------- CREATE ----------------------------
     @Test
     void createNewCategory() {
 
@@ -149,40 +154,43 @@ class CategoryServiceImplTest {
                 () -> categoryService.createNewCategory(passedEntity));
     }
 
+
+    // -------------- UPDATE ----------------------------
     @Test
     void updateCategoryById() {
 
         //Category passed to updateCategoryById
         Category passedEntity = new Category("TestUpdate", Color.GREEN);
-        passedEntity.getTransactions().add(TRANSACTION);
 
         //Original Category
-        Category originalCategory = createCategoryEntity();
+        Category originalEntity = createCategoryEntity();
+
+        //To update Category
+        Category toUpdateEntity = new Category(passedEntity.getName(), passedEntity.getColor());
+        toUpdateEntity.setId(originalEntity.getId());
 
         //Updated Category
-        Category updatedCategory = new Category(passedEntity.getName(), passedEntity.getColor());
-        updatedCategory.setId(originalCategory.getId());
-        updatedCategory.setTransactions(passedEntity.getTransactions());
+        Category updatedEntity = new Category(toUpdateEntity.getName(), toUpdateEntity.getColor());
+        updatedEntity.setId(toUpdateEntity.getId());
+        updatedEntity.setTransactions(originalEntity.getTransactions());
 
 
-        when(categoryRepository.findById(originalCategory.getId())).thenReturn(Optional.of(originalCategory));
+        when(categoryRepository.findById(originalEntity.getId())).thenReturn(Optional.of(originalEntity));
         when(categoryRepository.findByName(passedEntity.getName())).thenReturn(Optional.empty());
-        when(categoryRepository.save(updatedCategory)).thenReturn(updatedCategory);
+        when(categoryRepository.save(toUpdateEntity)).thenReturn(updatedEntity);
 
 
         //Category returned after saving updateCategory
-        Category returnedEntity = categoryService.updateCategoryById(originalCategory.getId(), passedEntity);
+        Category returnedEntity = categoryService.updateCategoryById(originalEntity.getId(), passedEntity);
 
-        assertEquals(originalCategory.getId(), returnedEntity.getId());   //same id as before
-        assertEquals(passedEntity.getName(), returnedEntity.getName());      //updated name
-        assertEquals(passedEntity.getColor(), returnedEntity.getColor());    //updated color
-        assertEquals(passedEntity.getTransactions(), returnedEntity.getTransactions());  //updated transactions
+        assertEquals(originalEntity.getId(), returnedEntity.getId());     //same id as before
+        assertEquals(passedEntity.getName(), returnedEntity.getName());     //updated name
+        assertEquals(passedEntity.getColor(), returnedEntity.getColor());   //updated color
+        assertEquals(originalEntity.getTransactions(), returnedEntity.getTransactions()); //same transactions
 
 
-        //Verify that the updatedCategory was saved
-        verify(categoryRepository, times(1)).findById(anyInt());
-        verify(categoryRepository, times(1)).findByName(passedEntity.getName());
-        verify(categoryRepository, times(1)).save(updatedCategory);
+        //Verify that the updatedEntity was saved
+        verify(categoryRepository, times(1)).save(toUpdateEntity);
     }
 
     @Test
@@ -190,7 +198,6 @@ class CategoryServiceImplTest {
 
         //Category passed to updateCategoryById
         Category passedEntity = new Category("TestUpdate", Color.GREEN);
-        passedEntity.getTransactions().add(TRANSACTION);
 
         //Original Category
         Category originalCategory = createCategoryEntity();
@@ -226,14 +233,13 @@ class CategoryServiceImplTest {
         verify(categoryRepository, times(1)).findByName(passedEntity.getName());
     }
 
+
+    // -------------- PATCH ----------------------------
     @Test
     void patchCategoryById() {
 
         //Category passed to updateCategoryById
         Category passedEntity = new Category("TestUpdate", Color.GREEN);
-        Transaction passedTransaction = new Transaction();
-        passedTransaction.setId(2);
-        passedEntity.getTransactions().add(passedTransaction);
 
         //Category previously saved in the database
         Category originalCategory = createCategoryEntity();
@@ -241,13 +247,13 @@ class CategoryServiceImplTest {
         //Category modified by function and saved
         Category updatedCategory = new Category(passedEntity.getName(), passedEntity.getColor());
         updatedCategory.setId(originalCategory.getId());
-        updatedCategory.setTransactions(passedEntity.getTransactions());
+        updatedCategory.setTransactions(originalCategory.getTransactions());
 
 
         //when searching repository, returned object with original values
         when(categoryRepository.findById(originalCategory.getId())).thenReturn(Optional.of(originalCategory));
 
-        //there is no other category already using the name
+        //search repo for a category using the name to be updated
         when(categoryRepository.findByName(passedEntity.getName())).thenReturn(Optional.empty());
 
         //return the modified originalCategory after saving
@@ -258,10 +264,10 @@ class CategoryServiceImplTest {
 
 
         //Assert that the returnedEntity is as expected
-        assertEquals(originalCategory.getId(), returnedEntity.getId());   //same id as before
-        assertEquals(passedEntity.getName(), returnedEntity.getName());      //updated name
-        assertEquals(passedEntity.getColor(), returnedEntity.getColor());    //updated color
-        assertEquals(passedEntity.getTransactions(), returnedEntity.getTransactions()); //updated transactions
+        assertEquals(originalCategory.getId(), returnedEntity.getId());     //same id as before
+        assertEquals(passedEntity.getName(), returnedEntity.getName());     //updated name
+        assertEquals(passedEntity.getColor(), returnedEntity.getColor());   //updated color
+        assertEquals(originalCategory.getTransactions(), returnedEntity.getTransactions()); //same transactions
 
         verify(categoryRepository, times(1)).save(updatedCategory);
     }
@@ -332,7 +338,7 @@ class CategoryServiceImplTest {
         //Assert that the returnedEntity is as expected
         assertEquals(originalCategory.getId(), returnedEntity.getId());       //same id as before
         assertEquals(originalCategory.getName(), returnedEntity.getName());   //same name as before
-        assertEquals(passedEntity.getColor(), returnedEntity.getColor());      //updated color
+        assertEquals(passedEntity.getColor(), returnedEntity.getColor());     //updated color
         assertEquals(originalCategory.getTransactions(), returnedEntity.getTransactions()); //same transactions
 
     }
@@ -342,12 +348,11 @@ class CategoryServiceImplTest {
 
         //Category passed to updateCategoryById
         Category passedEntity = new Category("TestUpdate", Color.GREEN);
-        passedEntity.getTransactions().add(TRANSACTION);
 
         //Category previously saved in the database
-        Category originalCategory = new Category(NAME, COLOR);
-        originalCategory.setId(ID);
+        Category originalCategory = createCategoryEntity();
 
+        //search repo by id, could not find anything
         when(categoryRepository.findById(originalCategory.getId())).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
@@ -359,9 +364,6 @@ class CategoryServiceImplTest {
 
         //Category passed to updateCategoryById
         Category passedEntity = new Category("TestUpdate", Color.GREEN);
-        Transaction passedTransaction = new Transaction();
-        passedTransaction.setId(2);
-        passedEntity.getTransactions().add(passedTransaction);
 
         //Category previously saved in the database
         Category originalCategory = createCategoryEntity();
@@ -370,12 +372,10 @@ class CategoryServiceImplTest {
         Category savedWithUpdateName = new Category("TestUpdate", Color.BLUE);
         savedWithUpdateName.setId(2);
 
-        //Category returned after save
-        Category updatedCategory = createCategoryEntity();
 
+        when(categoryRepository.findById(originalCategory.getId())).thenReturn(Optional.of(originalCategory));
 
-        when(categoryRepository.findById(originalCategory.getId())).thenReturn(Optional.of(updatedCategory));
-
+        //find another category using the name
         when(categoryRepository.findByName(passedEntity.getName())).thenReturn(Optional.of(savedWithUpdateName));
 
 
@@ -383,6 +383,8 @@ class CategoryServiceImplTest {
                 () -> categoryService.patchCategoryById(originalCategory.getId(), passedEntity));
     }
 
+
+    // -------------- DELETE ----------------------------
     @Test
     void deleteCategoryById() {
 
@@ -402,6 +404,8 @@ class CategoryServiceImplTest {
         assertThrows(ResourceNotFoundException.class, () -> categoryService.deleteCategoryById(ID));
     }
 
+
+    // -------------- TRANSACTIONS ----------------------------
     @Test
     void getTransactionsByCategoryId() {
 
@@ -429,30 +433,30 @@ class CategoryServiceImplTest {
         Pageable pageable = PageRequest.of(DEFAULT_PAGE, DEFAULT_SIZE, Sort.by("date"));
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), transactions.size());
-
-        Page<Transaction> pagedTransactions = new PageImpl<Transaction>(
+        Page<Transaction> pagedTransactions = new PageImpl<>(
                 transactions.subList(start, end), pageable, transactions.size());
 
         when(categoryRepository.findById(category.getId())).thenReturn(Optional.of(category));
 
+        //Return page
         Page<Transaction> returnPagedTransactions = categoryService.getTransactionsByCategoryId(category.getId(), DEFAULT_PAGE, DEFAULT_SIZE);
 
         assertEquals(DEFAULT_SIZE, returnPagedTransactions.getContent().size(), "Wrong number of transactions");
+        assertEquals(2, returnPagedTransactions.getTotalElements());
         assertEquals(pagedTransactions, returnPagedTransactions);
     }
 
     @Test
     void getTransactionsByCategoryId_NotFound() {
 
-        Integer notFoundId = 123;
-
-        when(categoryRepository.findById(notFoundId)).thenReturn(Optional.empty());
+        when(categoryRepository.findById(ID)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () ->
-                categoryService.getTransactionsByCategoryId(notFoundId, DEFAULT_PAGE, DEFAULT_SIZE));
+                categoryService.getTransactionsByCategoryId(ID, DEFAULT_PAGE, DEFAULT_SIZE));
     }
 
 
+    // -------------- Helpers ----------------------------
     private static Category createCategoryEntity() {
         Category category = new Category(NAME, COLOR);
         category.setId(ID);

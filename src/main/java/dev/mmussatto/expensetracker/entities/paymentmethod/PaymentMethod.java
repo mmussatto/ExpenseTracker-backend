@@ -18,7 +18,6 @@ import java.util.List;
 
 @Data
 @NoArgsConstructor
-@EqualsAndHashCode(exclude = {"transactions"})
 @Entity
 public class PaymentMethod {
 
@@ -36,6 +35,7 @@ public class PaymentMethod {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "paymentMethod")
     @ToString.Exclude
     @JsonIgnore
+    @EqualsAndHashCode.Exclude
     private List<Transaction> transactions = new ArrayList<>();
 
     public PaymentMethod(String name, PaymentType type) {
