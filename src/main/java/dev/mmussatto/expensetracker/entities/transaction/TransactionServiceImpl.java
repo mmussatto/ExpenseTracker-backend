@@ -30,12 +30,15 @@ import java.util.stream.Collectors;
 @Service
 public class TransactionServiceImpl implements TransactionService {
 
+    //Repo
     private final TransactionRepository transactionRepository;
 
+    //Entity services
     private final CategoryService categoryService;
     private final PaymentMethodService paymentMethodService;
     private final VendorService vendorService;
     private final TagService tagService;
+
 
     public TransactionServiceImpl(TransactionRepository transactionRepository,
                                   CategoryService categoryService,
@@ -49,9 +52,45 @@ public class TransactionServiceImpl implements TransactionService {
         this.tagService = tagService;
     }
 
+
     @Override
     public List<Transaction> getAllTransactions() {
         return transactionRepository.findAll();
+    }
+
+    @Override
+    public Page<Transaction> getPaginated(int page, int size) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("date"));
+
+        return transactionRepository.findAll(pageable);
+    }
+
+    @Override
+    public Page<Transaction> getTransactionsByYear(int page, int size, int year) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("date"));
+        LocalDateTime from = LocalDateTime.of(year, Month.JANUARY, 1, 0, 0, 0).withNano(0);
+        LocalDateTime to = LocalDateTime.of(year, Month.DECEMBER, 31, 23, 59, 59).withNano(0);
+
+        return transactionRepository.findByDateBetween(pageable, from, to);
+    }
+
+    @Override
+    public Page<Transaction> getTransactionsByMonth(int page, int size, int year, int monthNumber) {
+
+        Month month;
+        try {
+            month = Month.of(monthNumber);
+        } catch (Exception exception) {
+            throw new InvalidMonthException("Invalid value for MonthOfYear: " + monthNumber);
+        }
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("date"));
+        LocalDateTime from = LocalDateTime.of(year, month, 1, 0, 0, 0).withNano(0);
+        LocalDateTime to = LocalDateTime.of(year, month, month.length(Year.isLeap(year)), 23, 59, 59).withNano(0);
+
+        return transactionRepository.findByDateBetween(pageable, from, to);
     }
 
     @Override
@@ -62,6 +101,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Transaction createNewTransaction(Transaction transaction) {
+
         checkIfEntitiesExist(transaction);
 
         return transactionRepository.save(transaction);
@@ -89,35 +129,34 @@ public class TransactionServiceImpl implements TransactionService {
             if (transaction.getDate() != null)
                 savedEntity.setDate(transaction.getDate());
 
-
             if (transaction.getDescription() != null)
                 savedEntity.setDescription(transaction.getDescription());
 
-            if (transaction.getPaymentMethod() != null) {
-                PaymentMethod pm = paymentMethodService.getPaymentMethodById(transaction.getPaymentMethod().getId());
-
-                savedEntity.setPaymentMethod(pm);
-            }
-
+            //Category
             if (transaction.getCategory() != null) {
                 Category category = categoryService.getCategoryById(transaction.getCategory().getId());
-
                 savedEntity.setCategory(category);
             }
 
+            //Payment Method
+            if (transaction.getPaymentMethod() != null) {
+                PaymentMethod pm = paymentMethodService.getPaymentMethodById(transaction.getPaymentMethod().getId());
+                savedEntity.setPaymentMethod(pm);
+            }
+
+            //Tags
             if (transaction.getTags() != null) {
                 savedEntity.getTags().clear();
 
                 transaction.getTags().forEach(transactionTag -> {
                     Tag savedTag = tagService.getTagById(transactionTag.getId());
-
                     savedEntity.getTags().add(savedTag);
                 });
             }
 
+            //Vendor
             if (transaction.getVendor() != null) {
                 Vendor vendor = vendorService.getVendorById(transaction.getVendor().getId());
-
                 savedEntity.setVendor(vendor);
             }
 
@@ -134,54 +173,22 @@ public class TransactionServiceImpl implements TransactionService {
         transactionRepository.deleteById(id);
     }
 
-    @Override
-    public Page<Transaction> getPaginated(int page, int size) {
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by("date"));
-
-        return transactionRepository.findAll(pageable);
-    }
-
-    @Override
-    public Page<Transaction> getTransactionsByMonth(int page, int size, int year, int monthNumber) {
-
-        Month month;
-        try {
-            month = Month.of(monthNumber);
-        } catch (Exception exception) {
-            throw new InvalidMonthException("Invalid value for MonthOfYear: " + monthNumber);
-        }
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by("date"));
-        LocalDateTime from = LocalDateTime.of(year, month, 1, 0, 0, 0).withNano(0);
-        LocalDateTime to = LocalDateTime.of(year, month, month.length(Year.isLeap(year)), 23, 59, 59).withNano(0);
-
-        return transactionRepository.findByDateBetween(pageable, from, to);
-    }
-
-    @Override
-    public Page<Transaction> getTransactionsByYear(int page, int size, int year) {
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by("date"));
-        LocalDateTime from = LocalDateTime.of(year, Month.JANUARY, 1, 0, 0, 0).withNano(0);
-        LocalDateTime to = LocalDateTime.of(year, Month.DECEMBER, 31, 23, 59, 59).withNano(0);
-
-        return transactionRepository.findByDateBetween(pageable, from, to);
-    }
-
-
+    // -------------- Helpers ----------------------------
     private void checkIfEntitiesExist(Transaction transaction) {
+
         Category category = categoryService.getCategoryById(transaction.getCategory().getId());
         transaction.setCategory(category);
 
         PaymentMethod paymentMethod = paymentMethodService.getPaymentMethodById(transaction.getPaymentMethod().getId());
         transaction.setPaymentMethod(paymentMethod);
 
-        Vendor vendor = vendorService.getVendorById(transaction.getVendor().getId());
-        transaction.setVendor(vendor);
-
         Set<Tag> tags = transaction.getTags().stream()
                 .map(tag -> tagService.getTagById(tag.getId())).collect(Collectors.toSet());
         transaction.setTags(tags);
+
+        Vendor vendor = vendorService.getVendorById(transaction.getVendor().getId());
+        transaction.setVendor(vendor);
+
     }
 }

@@ -15,6 +15,7 @@ import dev.mmussatto.expensetracker.entities.vendor.defaultvendor.DefaultVendor;
 import dev.mmussatto.expensetracker.entities.vendor.onlinestore.OnlineStore;
 import dev.mmussatto.expensetracker.exceptions.ResourceNotFoundException;
 import jakarta.validation.ConstraintViolationException;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -45,8 +46,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(TransactionController.class)
 class TransactionControllerTest {
 
+    // -------------- Constants ----------------------------
+    private static final Integer ID = 1;
+    private static final Double AMOUNT = 115.00;
+    private static final LocalDateTime DATE = LocalDateTime.now().withNano(0);
+    private static final String DESCRIPTION = "Description";
+    private static final Category CATEGORY = new Category("Test Category", Color.BLUE);
+    private static final PaymentMethod PAYMENT_METHOD = new PaymentMethod("Test Payment Method", PaymentType.CASH);
+    private static final Vendor VENDOR = new OnlineStore("Test Online Store", "www.test.com");
+    private static final Tag TAG1 = new Tag("Test Tag 1", Color.BLUE);
+    private static final Tag TAG2 = new Tag("Test Tag 2", Color.RED);
     private static final int DEFAULT_PAGE = 0;
     private static final int DEFAULT_SIZE = 1;
+
 
     @Autowired
     private MockMvc mockMvc;
@@ -61,34 +73,48 @@ class TransactionControllerTest {
     private ObjectMapper objectMapper;
 
 
+    @BeforeAll
+    static void setUpEntities() {
+        CATEGORY.setId(1);
+        PAYMENT_METHOD.setId(1);
+        VENDOR.setId(1);
+        TAG1.setId(1);
+        TAG2.setId(2);
+    }
+
+
+    // -------------- READ ----------------------------
     @Test
-    void getAllTransactions() throws Exception {
+    void getPaginatedTransactions() throws Exception {
+
+        //Create entities
         Transaction t1 = new Transaction();
         t1.setId(1);
-
         Transaction t2 = new Transaction();
         t2.setId(2);
 
         List<Transaction> transactions = Arrays.asList(t1, t2);
 
+        //Create dtos
         TransactionDTO dto1 = new TransactionDTO();
         dto1.setId(t1.getId());
-
         TransactionDTO dto2 = new TransactionDTO();
         dto2.setId(t2.getId());
 
-        List<TransactionDTO>  transactionDTOs = Arrays.asList(dto1, dto2);
 
+        //Create page
         Pageable pageable = PageRequest.of(DEFAULT_PAGE, DEFAULT_SIZE, Sort.by("date"));
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), transactions.size());
 
-        Page<Transaction> pagedTransactions = new PageImpl<Transaction>(
+        Page<Transaction> pagedTransactions = new PageImpl<>(
                 transactions.subList(start, end), pageable, transactions.size());
+
 
         when(transactionService.getPaginated(DEFAULT_PAGE, DEFAULT_SIZE)).thenReturn(pagedTransactions);
         when(transactionMapper.convertToDTO(t1)).thenReturn(dto1);
         when(transactionMapper.convertToDTO(t2)).thenReturn(dto2);
+
 
         mockMvc.perform(get("/api/transactions")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -98,34 +124,89 @@ class TransactionControllerTest {
                 .andExpect(jsonPath("$.totalElements", equalTo(transactions.size())))
                 .andExpect(jsonPath("$.nextPage", equalTo("/api/transactions?page=1&size=1")))
                 .andExpect(jsonPath("$.previousPage", equalTo(null)))
-                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content", hasSize(DEFAULT_SIZE)))
                 .andExpect(jsonPath("$.content[0].path", equalTo("/api/transactions/1")));
     }
 
     @Test
+    void getPaginatedTransactions_PreviousAndNextPage() throws Exception {
+
+        //Create entities
+        Transaction t1 = new Transaction();
+        t1.setId(1);
+        Transaction t2 = new Transaction();
+        t2.setId(2);
+        Transaction t3 = new Transaction();
+        t3.setId(3);
+
+        List<Transaction> transactions = Arrays.asList(t1, t2, t3);
+
+        //Create dtos
+        TransactionDTO dto1 = new TransactionDTO();
+        dto1.setId(t1.getId());
+        TransactionDTO dto2 = new TransactionDTO();
+        dto2.setId(t2.getId());
+        TransactionDTO dto3 = new TransactionDTO();
+        dto3.setId(t3.getId());
+
+
+        //Create second page (page 1) it has a previous and next page
+        Pageable pageable = PageRequest.of(1, DEFAULT_SIZE, Sort.by("date"));
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), transactions.size());
+
+        Page<Transaction> pagedTransactions = new PageImpl<>(
+                transactions.subList(start, end), pageable, transactions.size());
+
+
+        when(transactionService.getPaginated(1, DEFAULT_SIZE)).thenReturn(pagedTransactions);
+        when(transactionMapper.convertToDTO(t1)).thenReturn(dto1);
+        when(transactionMapper.convertToDTO(t2)).thenReturn(dto2);
+        when(transactionMapper.convertToDTO(t3)).thenReturn(dto3);
+
+
+        mockMvc.perform(get("/api/transactions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("page", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.pageNo", equalTo(1)))
+                .andExpect(jsonPath("$.pageSize", equalTo(DEFAULT_SIZE)))
+                .andExpect(jsonPath("$.totalElements", equalTo(transactions.size())))
+                .andExpect(jsonPath("$.nextPage", equalTo("/api/transactions?page=2&size=1")))
+                .andExpect(jsonPath("$.previousPage", equalTo("/api/transactions?page=0&size=1")))
+                .andExpect(jsonPath("$.content", hasSize(DEFAULT_SIZE)))
+                .andExpect(jsonPath("$.content[0].path", equalTo("/api/transactions/2")));
+    }
+
+    @Test
     void getTransactionsByYear() throws Exception {
+
+        //Create entities
         Transaction t1 = new Transaction();
         t1.setId(1);
         Transaction t2 = new Transaction();
         t2.setId(2);
         List<Transaction> transactions = Arrays.asList(t1, t2);
 
+        //Create dtos
         TransactionDTO dto1 = new TransactionDTO();
         dto1.setId(t1.getId());
         TransactionDTO dto2 = new TransactionDTO();
         dto2.setId(t2.getId());
-        List<TransactionDTO>  transactionDTOs = Arrays.asList(dto1, dto2);
 
+        //Create page
         Pageable pageable = PageRequest.of(DEFAULT_PAGE, DEFAULT_SIZE, Sort.by("date"));
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), transactions.size());
 
-        Page<Transaction> pagedTransactions = new PageImpl<Transaction>(
+        Page<Transaction> pagedTransactions = new PageImpl<>(
                 transactions.subList(start, end), pageable, transactions.size());
+
 
         when(transactionService.getTransactionsByYear(DEFAULT_PAGE, DEFAULT_SIZE, 2023)).thenReturn(pagedTransactions);
         when(transactionMapper.convertToDTO(t1)).thenReturn(dto1);
         when(transactionMapper.convertToDTO(t2)).thenReturn(dto2);
+
 
         mockMvc.perform(get("/api/transactions")
                         .param("year", "2023")
@@ -136,7 +217,7 @@ class TransactionControllerTest {
                 .andExpect(jsonPath("$.totalElements", equalTo(transactions.size())))
                 .andExpect(jsonPath("$.nextPage", equalTo("/api/transactions?year=2023&page=1&size=1")))
                 .andExpect(jsonPath("$.previousPage", equalTo(null)))
-                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content", hasSize(DEFAULT_SIZE)))
                 .andExpect(jsonPath("$.content[0].path", equalTo("/api/transactions/1")));
 
         verify(transactionService).getTransactionsByYear(DEFAULT_PAGE, DEFAULT_SIZE, 2023);
@@ -144,28 +225,33 @@ class TransactionControllerTest {
 
     @Test
     void getTransactionsByMonth() throws Exception {
+
+        // Create entities
         Transaction t1 = new Transaction();
         t1.setId(1);
         Transaction t2 = new Transaction();
         t2.setId(2);
         List<Transaction> transactions = Arrays.asList(t1, t2);
 
+        //Create dtos
         TransactionDTO dto1 = new TransactionDTO();
         dto1.setId(t1.getId());
         TransactionDTO dto2 = new TransactionDTO();
         dto2.setId(t2.getId());
-        List<TransactionDTO>  transactionDTOs = Arrays.asList(dto1, dto2);
 
+        //Create page
         Pageable pageable = PageRequest.of(DEFAULT_PAGE, DEFAULT_SIZE, Sort.by("date"));
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), transactions.size());
 
-        Page<Transaction> pagedTransactions = new PageImpl<Transaction>(
+        Page<Transaction> pagedTransactions = new PageImpl<>(
                 transactions.subList(start, end), pageable, transactions.size());
+
 
         when(transactionService.getTransactionsByMonth(DEFAULT_PAGE, DEFAULT_SIZE, 2023, 4)).thenReturn(pagedTransactions);
         when(transactionMapper.convertToDTO(t1)).thenReturn(dto1);
         when(transactionMapper.convertToDTO(t2)).thenReturn(dto2);
+
 
         mockMvc.perform(get("/api/transactions")
                         .param("year", "2023")
@@ -177,7 +263,7 @@ class TransactionControllerTest {
                 .andExpect(jsonPath("$.totalElements", equalTo(transactions.size())))
                 .andExpect(jsonPath("$.nextPage", equalTo("/api/transactions?year=2023&month=4&page=1&size=1")))
                 .andExpect(jsonPath("$.previousPage", equalTo(null)))
-                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content", hasSize(DEFAULT_SIZE)))
                 .andExpect(jsonPath("$.content[0].path", equalTo("/api/transactions/1")));
 
         verify(transactionService).getTransactionsByMonth(DEFAULT_PAGE, DEFAULT_SIZE, 2023, 4);
@@ -216,6 +302,8 @@ class TransactionControllerTest {
                         instanceOf(ResourceNotFoundException.class)));
     }
 
+
+    // -------------- CREATE ----------------------------
     @Test
     void createNewTransaction() throws Exception {
 
@@ -223,14 +311,10 @@ class TransactionControllerTest {
 
         Transaction toSaveEntity = convertRequestToEntity(requestDTO);
 
-        //Implemented code will search repo and get the correct vendor
-        Vendor vendor_os = new OnlineStore("Test Online Store", "www.test.com");
-        vendor_os.setId(toSaveEntity.getVendor().getId());
-
         Transaction savedEntity = new Transaction(toSaveEntity.getAmount(), toSaveEntity.getDate(),
-                toSaveEntity.getDescription(), toSaveEntity.getCategory(), toSaveEntity.getPaymentMethod(),
-                vendor_os, toSaveEntity.getTags());
-        savedEntity.setId(1);
+                toSaveEntity.getDescription(), CATEGORY, PAYMENT_METHOD, VENDOR,
+                Stream.of(TAG1, TAG2).collect(Collectors.toSet()));
+        savedEntity.setId(ID);
 
         TransactionDTO returnedDTO = new TransactionDTO(savedEntity.getAmount(), savedEntity.getDate(),
                 savedEntity.getDescription(), savedEntity.getCategory(), savedEntity.getPaymentMethod(),
@@ -254,19 +338,42 @@ class TransactionControllerTest {
     }
 
     @Test
-    void createNewTransaction_IdNotNull() throws Exception {
+    void createNewTransaction_MissingFieldsField() throws Exception {
 
-        TransactionDTO passedDTO = createTransactionDTO();
-        passedDTO.setId(1);
+        RequestTransactionDTO requestDTO = new RequestTransactionDTO();
 
         mockMvc.perform(post("/api/transactions")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(passedDTO)))
+                        .content(objectMapper.writeValueAsString(requestDTO)))
                 .andExpect(status().isBadRequest())
+                .andDo(print())
                 .andExpect(result -> assertThat(result.getResolvedException(),
-                        instanceOf(ConstraintViolationException.class)));
+                        instanceOf(ConstraintViolationException.class)))
+                .andExpect(jsonPath("$.messages", hasSize(7)));
     }
 
+    @Test
+    void createNewTransaction_EntityNotFound() throws Exception {
+
+        RequestTransactionDTO requestDTO = createRequestTransactionDTO();
+
+        Transaction toSaveEntity = convertRequestToEntity(requestDTO);
+
+
+        when(transactionMapper.convertRequestToEntity(requestDTO)).thenReturn(toSaveEntity);
+        when(transactionService.createNewTransaction(toSaveEntity)).thenThrow(ResourceNotFoundException.class);
+
+
+        mockMvc.perform(post("/api/transactions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDTO)))
+                .andExpect(status().isNotFound())
+                .andExpect(result -> assertThat(result.getResolvedException(),
+                        instanceOf(ResourceNotFoundException.class)));
+    }
+
+
+    // -------------- UPDATE ----------------------------
     @Test
     void updateTransactionById() throws Exception {
 
@@ -274,14 +381,10 @@ class TransactionControllerTest {
 
         Transaction toUpdateEntity = convertRequestToEntity(requestDTO);
 
-        //Implemented code will search repo and get the correct vendor
-        Vendor vendor_os = new OnlineStore("Test Online Store", "www.test.com");
-        vendor_os.setId(toUpdateEntity.getVendor().getId());
-
         Transaction updatedEntity = new Transaction(toUpdateEntity.getAmount(), toUpdateEntity.getDate(),
-                toUpdateEntity.getDescription(), toUpdateEntity.getCategory(), toUpdateEntity.getPaymentMethod(),
-                vendor_os, toUpdateEntity.getTags());
-        updatedEntity.setId(1);
+                toUpdateEntity.getDescription(), CATEGORY, PAYMENT_METHOD, VENDOR,
+                Stream.of(TAG1, TAG2).collect(Collectors.toSet()));
+        updatedEntity.setId(ID);
 
         TransactionDTO returnedDTO = new TransactionDTO(updatedEntity.getAmount(), updatedEntity.getDate(),
                 updatedEntity.getDescription(), updatedEntity.getCategory(), updatedEntity.getPaymentMethod(),
@@ -327,50 +430,22 @@ class TransactionControllerTest {
     }
 
     @Test
-    void updateTransactionById_BodyIdNotNull() throws Exception {
+    void updateTransactionById_MissingFields() throws Exception {
 
-        Integer notFoundId = 123;
+        RequestTransactionDTO requestDTO = new RequestTransactionDTO();
 
-        TransactionDTO passedDTO = createTransactionDTO();
-        passedDTO.setId(1);
-
-        mockMvc.perform(put("/api/transactions/{id}", notFoundId)
+        mockMvc.perform(put("/api/transactions/{id}", ID)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(passedDTO)))
+                        .content(objectMapper.writeValueAsString(requestDTO)))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertThat(result.getResolvedException(),
-                        instanceOf(ConstraintViolationException.class)));
-    }
-
-    @Test
-    void updateTransactionById_MissingAmountField() throws Exception {
-
-        TransactionDTO passedDTO = createTransactionDTO();
-        passedDTO.setAmount(null);
-
-        mockMvc.perform(put("/api/transactions/{id}", 1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(passedDTO)))
-                .andExpect(status().isBadRequest())
-                .andExpect(result -> assertThat(result.getResolvedException(),
-                        instanceOf(ConstraintViolationException.class)));
-    }
-
-    @Test
-    void updateTransactionById_MissingCategoryField() throws Exception {
-
-        TransactionDTO passedDTO = createTransactionDTO();
-        passedDTO.setCategory(null);
-
-        mockMvc.perform(put("/api/transactions/{id}", 1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(passedDTO)))
-                .andExpect(status().isBadRequest())
+                .andDo(print())
                 .andExpect(result -> assertThat(result.getResolvedException(),
                         instanceOf(ConstraintViolationException.class)))
-                .andDo(print());
+                .andExpect(jsonPath("$.messages", hasSize(7)));
     }
 
+
+    // -------------- PATCH ----------------------------
     @Test
     void patchTransactionById() throws Exception {
 
@@ -378,13 +453,9 @@ class TransactionControllerTest {
 
         Transaction toPatchEntity = convertRequestToEntity(requestDTO);
 
-        //Implemented code will search repo and get the correct vendor
-        Vendor vendor_os = new OnlineStore("Test Online Store", "www.test.com");
-        vendor_os.setId(toPatchEntity.getVendor().getId());
-
         Transaction patchedEntity = new Transaction(toPatchEntity.getAmount(), toPatchEntity.getDate(),
-                toPatchEntity.getDescription(), toPatchEntity.getCategory(), toPatchEntity.getPaymentMethod(),
-                vendor_os, toPatchEntity.getTags());
+                toPatchEntity.getDescription(), CATEGORY, PAYMENT_METHOD, VENDOR,
+                Stream.of(TAG1, TAG2).collect(Collectors.toSet()));
         patchedEntity.setId(1);
 
         TransactionDTO returnedDTO = new TransactionDTO(patchedEntity.getAmount(), patchedEntity.getDate(),
@@ -415,11 +486,12 @@ class TransactionControllerTest {
 
         RequestTransactionDTO requestDTO = createRequestTransactionDTO();
 
-        Transaction toUpdateEntity = convertRequestToEntity(requestDTO);
+        Transaction toPatchEntity = convertRequestToEntity(requestDTO);
 
 
-        when(transactionMapper.convertRequestToEntity(requestDTO)).thenReturn(toUpdateEntity);
-        when(transactionService.patchTransactionById(notFoundId, toUpdateEntity)).thenThrow(ResourceNotFoundException.class);
+        when(transactionMapper.convertRequestToEntity(requestDTO)).thenReturn(toPatchEntity);
+        when(transactionService.patchTransactionById(notFoundId, toPatchEntity)).thenThrow(ResourceNotFoundException.class);
+
 
         mockMvc.perform(patch("/api/transactions/{id}", notFoundId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -430,6 +502,7 @@ class TransactionControllerTest {
     }
 
 
+    // -------------- DELETE ----------------------------
     @Test
     void deleteTransactionById() throws Exception {
 
@@ -460,56 +533,11 @@ class TransactionControllerTest {
 
 
     // -------------------- Helpers ---------------------------
-    private static Transaction createTransactionEntity() {
-
-        Category category = new Category("Test Category", Color.BLUE);
-        category.setId(1);
-
-        PaymentMethod payment_method = new PaymentMethod("Test Payment Method", PaymentType.CASH);
-        payment_method.setId(1);
-
-        Vendor vendor_os = new OnlineStore("Test Online Store", "www.test.com");
-        vendor_os.setId(1);
-
-        Tag tag1 = new Tag("Test Tag 1", Color.BLUE);
-        tag1.setId(1);
-        Tag tag2 = new Tag("Test Tag 2", Color.RED);
-        tag2.setId(2);
-
-        Transaction entity = new Transaction(10.0, LocalDateTime.now().withNano(0),
-                "Test Transaction Description", category ,
-                payment_method, vendor_os, Stream.of(tag1, tag2).collect(Collectors.toSet()));
-        entity.setId(1);
-
-        return entity;
-    }
-
-    private static TransactionDTO createTransactionDTO() {
-
-        Category category = new Category("Test Category", Color.BLUE);
-        category.setId(1);
-
-        PaymentMethod payment_method = new PaymentMethod("Test Payment Method", PaymentType.CASH);
-        payment_method.setId(1);
-
-        Vendor vendor_os = new OnlineStore("Test Online Store", "www.test.com");
-        vendor_os.setId(1);
-
-        Tag tag1 = new Tag("Test Tag 1", Color.BLUE);
-        tag1.setId(1);
-        Tag tag2 = new Tag("Test Tag 2", Color.RED);
-        tag2.setId(2);
-
-        return new TransactionDTO(10.0, LocalDateTime.now().withNano(0),
-                "Test Transaction Description", category, payment_method, vendor_os,
-                Stream.of(tag1, tag2).collect(Collectors.toSet()));
-    }
-
     private RequestTransactionDTO createRequestTransactionDTO() {
 
-        return new RequestTransactionDTO(10.0, LocalDateTime.now().withNano(0),
-                "Test Transaction Description", 1, 1, 1,
-                Stream.of(1, 2).collect(Collectors.toSet()));
+        return new RequestTransactionDTO(AMOUNT, DATE,
+                DESCRIPTION, CATEGORY.getId(), PAYMENT_METHOD.getId(), VENDOR.getId(),
+                Stream.of(TAG1.getId(), TAG2.getId()).collect(Collectors.toSet()));
     }
 
     private static Transaction convertRequestToEntity(RequestTransactionDTO requestDTO) {
