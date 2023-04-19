@@ -476,6 +476,21 @@ class VendorServiceImplTest {
 
     }
 
+    @Test
+    void patchVendorById_IncorrectType() {
+
+        PhysicalStore passedEntity = new PhysicalStore("Test Update", "New Address");
+
+        OnlineStore originalEntity = createOnlineStore();
+
+
+        when(vendorRepository.findById(originalEntity.getId())).thenReturn(Optional.of(originalEntity));
+
+        assertThrows(IncorrectVendorTypeException.class,
+                () -> vendorService.patchVendorById(originalEntity.getId(), passedEntity));
+
+    }
+
 
     // -------------- DELETE ----------------------------
     @Test
@@ -527,7 +542,7 @@ class VendorServiceImplTest {
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), transactions.size());
 
-        Page<Transaction> pagedTransactions = new PageImpl<Transaction>(
+        Page<Transaction> pagedTransactions = new PageImpl<>(
                 transactions.subList(start, end), pageable, transactions.size());
 
         when(vendorRepository.findById(physicalStore.getId())).thenReturn(Optional.of(physicalStore));
