@@ -13,12 +13,4 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class DefaultVendorDTO extends VendorDTO {
-
-    public DefaultVendorDTO(Integer id) {
-        super.setId(id);
-    }
-
-    public DefaultVendorDTO(String name) {
-        this.setName(name);
-    }
 }
