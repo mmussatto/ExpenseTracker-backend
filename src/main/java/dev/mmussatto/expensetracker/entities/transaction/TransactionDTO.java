@@ -17,6 +17,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -56,7 +57,7 @@ public class TransactionDTO {
     private Vendor vendor;
 
     @NotNull(message = "tags must not be null",  groups = allFieldsValidation.class)
-    private Set<Tag> tags;
+    private Set<Tag> tags = new HashSet<>();
 
     public TransactionDTO(Double amount, LocalDateTime date, String description, Category category,
                        PaymentMethod paymentMethod, Vendor vendor, Set<Tag> tags) {
