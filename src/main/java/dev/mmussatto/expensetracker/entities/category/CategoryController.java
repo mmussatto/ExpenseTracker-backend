@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,16 +41,25 @@ public class CategoryController {
 
     @Operation(summary = "Get all categories")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Found the categories", useReturnTypeSchema = true)
+            @ApiResponse(responseCode = "200", description = "Found the categories", useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "404", description = "Category not found", content = @Content)
     })
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<CategoryDTO> getAllCategories () {
+    public List<CategoryDTO> getAllCategories (@RequestParam(value = "name", required = false) String name) {
 
-        return categoryService.getAllCategories()
-                .stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+        List<CategoryDTO> returnList = new ArrayList<>();
+
+        if (name != null)
+            returnList.add(convertToDTO(categoryService.getCategoryByName(name)));
+        else {
+            returnList.addAll(categoryService.getAllCategories()
+                    .stream()
+                    .map(this::convertToDTO)
+                    .collect(Collectors.toList()));
+        }
+
+        return  returnList;
     }
 
 
@@ -63,19 +73,6 @@ public class CategoryController {
     @ResponseStatus(HttpStatus.OK)
     public CategoryDTO getCategoryById (@PathVariable Integer id) {
         return convertToDTO(categoryService.getCategoryById(id));
-    }
-
-
-    @Operation(summary = "Get a category by its name")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Found the category", useReturnTypeSchema = true),
-            @ApiResponse(responseCode = "400", description = "Invalid name supplied", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Category not found", content = @Content)
-    })
-    @GetMapping("/name/{name}")
-    @ResponseStatus(HttpStatus.OK)
-    public CategoryDTO getCategoryByName (@PathVariable final String name) {
-        return convertToDTO(categoryService.getCategoryByName(name));
     }
 
 

@@ -29,13 +29,13 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public Category getCategoryById(Integer id) {
         return categoryRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Category " + id + " not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category with id '" + id + "' not found!"));
     }
 
     @Override
     public Category getCategoryByName(String name) {
         return categoryRepository.findByName(name)
-                .orElseThrow(() -> new ResourceNotFoundException("Category " + name + " not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category with name '" + name + "' not found!"));
     }
 
     @Override

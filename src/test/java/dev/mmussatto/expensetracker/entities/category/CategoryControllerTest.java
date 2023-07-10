@@ -140,14 +140,16 @@ class CategoryControllerTest {
         when(categoryMapper.convertToDTO(savedEntity)).thenReturn(returnedDTO);
 
 
-        mockMvc.perform(get("/api/categories/name/{name}", returnedDTO.getName())
-                        .contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/api/categories")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("name", savedEntity.getName()))
                 .andExpect(status().isOk())
                 .andExpect(result -> {
                     String retString = result.getResponse().getContentAsString();
-                    CategoryDTO objFromJson = objectMapper.readValue(retString, CategoryDTO.class);
+                    List objFromJson = objectMapper.readValue(retString, List.class);
+                    CategoryDTO categoryDTO = objectMapper.readValue(objectMapper.writeValueAsString(objFromJson.get(0)), CategoryDTO.class);
                     returnedDTO.setPath("/api/categories/" + returnedDTO.getId()); //path is set inside controller
-                    assertEquals(returnedDTO, objFromJson);
+                    assertTrue(returnedDTO.equals(categoryDTO));
                 });
     }
 
@@ -158,8 +160,9 @@ class CategoryControllerTest {
 
         when(categoryService.getCategoryByName(notFoundName)).thenThrow(ResourceNotFoundException.class);
 
-        mockMvc.perform(get("/api/categories/name/{name}", notFoundName)
-                        .contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/api/categories", notFoundName)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("name", notFoundName))
                 .andExpect(status().isNotFound())
                 .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResourceNotFoundException));
     }
