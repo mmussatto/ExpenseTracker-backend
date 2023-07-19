@@ -71,10 +71,13 @@ public class DataLoader implements CommandLineRunner {
         Category c1 = new Category("Recreation", Color.BLUE);
         Category c2 = new Category("Games", Color.GREEN);
         Category c3 = new Category("Food", Color.RED);
+        Category c4 = new Category("School", Color.RED);
 
         categoryRepository.save(c1);
         categoryRepository.save(c2);
         categoryRepository.save(c3);
+        categoryRepository.save(c4);
+
 
     }
 
@@ -94,8 +97,9 @@ public class DataLoader implements CommandLineRunner {
     private void LoadStores() {
         OnlineStore os1 = new OnlineStore("PlaystationStore", "https://store.playstation.com");
         OnlineStore os2 = new OnlineStore("IFood", "https://www.ifood.com.br/");
+        OnlineStore os3 = new OnlineStore("Steam", "https://steam.com");
 
-        onlineStoreStoreRepository.saveAll(Arrays.asList(os1, os2));
+        onlineStoreStoreRepository.saveAll(Arrays.asList(os1, os2, os3));
 
         PhysicalStore ps1 = new PhysicalStore("McDonald's", "Av. Mogi Mirim, 1515");
         PhysicalStore ps2 = new PhysicalStore("Cinemark", "Av. Big Bom, 1616");
@@ -123,6 +127,9 @@ public class DataLoader implements CommandLineRunner {
         Category recreationCategory = categoryRepository.findByName("Recreation")
                 .orElseThrow(() -> new RuntimeException("Expected Category not found"));
 
+        Category foodCategory = categoryRepository.findByName("Food")
+                .orElseThrow(() -> new RuntimeException("Expected Category not found"));
+
         PaymentMethod nubank = paymentMethodRepository.findByName("Nubank")
                 .orElseThrow(() -> new RuntimeException("Expected Payment Method not found"));
 
@@ -132,8 +139,18 @@ public class DataLoader implements CommandLineRunner {
         OnlineStore playstationStore = onlineStoreStoreRepository.findByName("PlaystationStore")
                 .orElseThrow(() -> new RuntimeException("Expected Store not found"));
 
+        OnlineStore steam = onlineStoreStoreRepository.findByName("Steam")
+                .orElseThrow(() -> new RuntimeException("Expected Store not found"));
+
+        OnlineStore ifood = onlineStoreStoreRepository.findByName("IFood")
+                .orElseThrow(() -> new RuntimeException("Expected Store not found"));
+
         PhysicalStore cinemark = physicalStoreStoreRepository.findByName("Cinemark")
                 .orElseThrow(() -> new RuntimeException("Expected Store not found"));
+
+        PhysicalStore mcDonalds = physicalStoreStoreRepository.findByName("McDonald's")
+                .orElseThrow(() -> new RuntimeException("Expected Store not found"));
+
 
         Tag videogamesTag = tagRepository.findByName("Videogames")
                 .orElseThrow(() -> new RuntimeException("Expected Tag not found"));
@@ -147,31 +164,72 @@ public class DataLoader implements CommandLineRunner {
         Set<Tag> tagSet = Stream.of(videogamesTag, happyTag).collect(Collectors.toSet());
 
 
-
-        Transaction t1 = new Transaction(200.00, LocalDateTime.now().withNano(0),
+        //Games
+        Transaction t_games1 = new Transaction(200.00, LocalDateTime.now().withNano(0),
                 "God of War Ragnarok", gamesCategory, nubank, playstationStore, tagSet );
-        nubank.getTransactions().add(t1);
-        gamesCategory.getTransactions().add(t1);
-        tagSet.forEach(tag -> tag.getTransactions().add(t1));
-        playstationStore.getTransactions().add(t1);
 
-        Transaction t2 = new Transaction(10.76, LocalDateTime.of(2023, 4, 24, 8, 30, 30).withNano(0), "Avatar",
-                recreationCategory, debNubank, cinemark, Stream.of(moviesTag).collect(Collectors.toSet()) );
-        debNubank.getTransactions().add(t2);
-        recreationCategory.getTransactions().add(t2);
-        moviesTag.getTransactions().add(t2);
-        cinemark.getTransactions().add(t2);
+        Transaction t_games2 = new Transaction(250.00, LocalDateTime.of(2023, 6, 10, 8, 30, 30).withNano(0),
+                "Satisfactory", gamesCategory, nubank, steam, tagSet );
 
-        Transaction t3 = new Transaction(10.76, LocalDateTime.of(2023, 10, 3, 15, 45, 30).withNano(0), "Top Gun: Maverick",
-                recreationCategory, debNubank, cinemark, Stream.of(moviesTag, happyTag).collect(Collectors.toSet()) );
-        debNubank.getTransactions().add(t3);
-        recreationCategory.getTransactions().add(t3);
-        moviesTag.getTransactions().add(t3);
-        happyTag.getTransactions().add(t3);
-        cinemark.getTransactions().add(t3);
+        Transaction t_games3 = new Transaction(19.00, LocalDateTime.now().withNano(0),
+                "Deep Rock Galactic", gamesCategory, debNubank, steam, tagSet );
+
+        Transaction t_games4 = new Transaction(50.00, LocalDateTime.now().withNano(0),
+                "Hades", gamesCategory, nubank, steam, tagSet );
+
+        Transaction t_games5 = new Transaction(200.00, LocalDateTime.of(2012, 4, 24, 8, 30, 30).withNano(0),
+                "COD: Black Ops II", gamesCategory, nubank, playstationStore, tagSet );
+
+        Transaction t_games6 = new Transaction(300.00, LocalDateTime.now().withNano(0),
+                "Borderlands 3", gamesCategory, nubank, playstationStore, Stream.of(videogamesTag).collect(Collectors.toSet()) );
+
+        Transaction t_games7 = new Transaction(45.00, LocalDateTime.of(2023, 5, 15, 8, 30, 30).withNano(0),
+                "Inscryption", gamesCategory, debNubank, steam, tagSet );
+
+        Transaction t_games8 = new Transaction(4.00, LocalDateTime.now().withNano(0),
+                "FTL: Faster than Light", gamesCategory, nubank, steam, tagSet );
+
+        Transaction t_games9 = new Transaction(100.00, LocalDateTime.of(2021, 4, 24, 8, 30, 30).withNano(0),
+                "Civilization VI", gamesCategory, nubank, steam, tagSet );
 
 
-        transactionRepository.saveAll(Arrays.asList(t1, t2, t3));
+
+        //Movies
+        Transaction t_movies1 = new Transaction(10.76, LocalDateTime.of(2023, 4, 24, 8, 30, 30).withNano(0),
+                "Avatar", recreationCategory, debNubank, cinemark, Stream.of(moviesTag).collect(Collectors.toSet()) );
+
+        Transaction t_movies2 = new Transaction(13.00, LocalDateTime.of(2023, 10, 3, 15, 45, 30).withNano(0),
+                "Top Gun: Maverick", recreationCategory, debNubank, cinemark, Stream.of(moviesTag, happyTag).collect(Collectors.toSet()) );
+
+        Transaction t_movies3 = new Transaction(20.00, LocalDateTime.of(2023, 7, 20, 15, 45, 30).withNano(0),
+                "Barbie", recreationCategory, debNubank, cinemark, Stream.of(moviesTag, happyTag).collect(Collectors.toSet()) );
+
+        Transaction t_movies4 = new Transaction(20.00, LocalDateTime.of(2023, 7, 20, 15, 45, 30).withNano(0),
+                "Oppenheimer", recreationCategory, nubank, cinemark, Stream.of(moviesTag).collect(Collectors.toSet()) );
+
+        Transaction t_movies5 = new Transaction(45.00, LocalDateTime.of(2023, 7, 15, 15, 45, 30).withNano(0),
+                "Spider-man Into the Spiderverse", recreationCategory, debNubank, cinemark, Stream.of(moviesTag, happyTag).collect(Collectors.toSet()) );
+
+        Transaction t_movies6 = new Transaction(10.76, LocalDateTime.of(2004, 12, 10, 15, 45, 30).withNano(0),
+                "The Incredibles", recreationCategory, debNubank, cinemark, Stream.of(moviesTag, happyTag).collect(Collectors.toSet()) );
+
+
+        //Food
+        Transaction t_food1 = new Transaction(60.00, LocalDateTime.now().withNano(0),
+                "Big Mac", foodCategory, debNubank, mcDonalds , Stream.of(happyTag).collect(Collectors.toSet()) );
+
+        Transaction t_food2 = new Transaction(60.00, LocalDateTime.of(2023, 4, 24, 8, 30, 30).withNano(0),
+                "Big Mac", foodCategory, nubank, mcDonalds , Stream.of(happyTag).collect(Collectors.toSet()) );
+
+        Transaction t_food3 = new Transaction(60.00, LocalDateTime.now().withNano(0),
+                "El Cardal", foodCategory, nubank, ifood , Stream.of(happyTag).collect(Collectors.toSet()) );
+
+        Transaction t_food4 = new Transaction(60.00, LocalDateTime.now().withNano(0),
+                "Burger King", foodCategory, debNubank, ifood, Stream.of(happyTag).collect(Collectors.toSet()) );
+
+
+        transactionRepository.saveAll(Arrays.asList(t_games1, t_games2, t_games3, t_games4, t_games5, t_games6, t_games7, t_games8, t_games9,
+                t_movies1, t_movies2, t_movies3, t_movies4, t_movies5, t_movies6, t_food1, t_food2, t_food3, t_food4));
 
     }
 }
